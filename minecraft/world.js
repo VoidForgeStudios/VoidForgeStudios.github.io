@@ -11,10 +11,6 @@ export function key(x, y, z) {
   return `${x},${y},${z}`;
 }
 
-/* =========================================================
-   BLOCK ACCESS
-   ========================================================= */
-
 export function getBlock(x, y, z) {
   if (y < 0 || y >= WORLD_HEIGHT) return undefined;
 
@@ -56,10 +52,6 @@ export function setBlock(x, y, z, type) {
     chunk.delete(blockKey);
   }
 }
-
-/* =========================================================
-   WORLD GENERATION
-   ========================================================= */
 
 function noise(x, z) {
   const n =
@@ -111,19 +103,16 @@ export function generateWorld() {
         setBlock(x, y, z, type);
       }
 
-      // Trees
       if (
         noise(x * 3, z * 7) > 0.96 &&
         h < 10 &&
         Math.abs(x) > 3 &&
         Math.abs(z) > 3
       ) {
-        // Trunk
         for (let y = h + 1; y < h + 5; y++) {
           setBlock(x, y, z, "wood");
         }
 
-        // Leaves
         for (let dx = -1; dx <= 1; dx++) {
           for (let dz = -1; dz <= 1; dz++) {
             for (let dy = 4; dy <= 5; dy++) {
@@ -143,28 +132,7 @@ export function generateWorld() {
   }
 }
 
-/* =========================================================
-   VOXEL FACES
-   =========================================================
-
-   IMPORTANT:
-
-   Each face is wound counter-clockwise when viewed
-   from OUTSIDE the block.
-
-   The resulting cross product therefore points in
-   the direction specified by "dir".
-
-   +X = right
-   -X = left
-   +Y = top
-   -Y = bottom
-   +Z = front
-   -Z = back
-   ========================================================= */
-
 const FACES = [
-  // +X / RIGHT
   {
     dir: [1, 0, 0],
     corners: [
@@ -174,8 +142,6 @@ const FACES = [
       [1, 0, 1]
     ]
   },
-
-  // -X / LEFT
   {
     dir: [-1, 0, 0],
     corners: [
@@ -185,8 +151,6 @@ const FACES = [
       [0, 1, 0]
     ]
   },
-
-  // +Y / TOP
   {
     dir: [0, 1, 0],
     corners: [
@@ -196,8 +160,6 @@ const FACES = [
       [1, 1, 0]
     ]
   },
-
-  // -Y / BOTTOM
   {
     dir: [0, -1, 0],
     corners: [
@@ -207,8 +169,6 @@ const FACES = [
       [0, 0, 1]
     ]
   },
-
-  // +Z / FRONT
   {
     dir: [0, 0, 1],
     corners: [
@@ -218,8 +178,6 @@ const FACES = [
       [0, 1, 1]
     ]
   },
-
-  // -Z / BACK
   {
     dir: [0, 0, -1],
     corners: [
@@ -231,10 +189,6 @@ const FACES = [
   }
 ];
 
-/* =========================================================
-   FACE COLOR
-   ========================================================= */
-
 function getFaceColor(type, direction) {
   const block = BLOCKS[type];
 
@@ -242,7 +196,6 @@ function getFaceColor(type, direction) {
     return 0xffffff;
   }
 
-  // Top
   if (
     direction[1] === 1 &&
     block.top !== undefined
@@ -250,7 +203,6 @@ function getFaceColor(type, direction) {
     return block.top;
   }
 
-  // Bottom
   if (
     direction[1] === -1 &&
     block.bottom !== undefined
@@ -258,13 +210,8 @@ function getFaceColor(type, direction) {
     return block.bottom;
   }
 
-  // Sides
   return block.color;
 }
-
-/* =========================================================
-   BUILD CHUNK
-   ========================================================= */
 
 function buildChunkMesh(
   scene,
@@ -300,7 +247,6 @@ function buildChunkMesh(
       const nz =
         z + face.dir[2];
 
-      // Neighbor exists -> face is hidden.
       if (getBlock(nx, ny, nz)) {
         continue;
       }
@@ -339,10 +285,6 @@ function buildChunkMesh(
     }
   }
 
-  /* =======================================================
-     CREATE MESHES
-     ======================================================= */
-
   for (const group of materialGroups.values()) {
     const positions = [];
     const normals = [];
@@ -351,7 +293,6 @@ function buildChunkMesh(
     let vertexOffset = 0;
 
     for (const face of group.faces) {
-
       for (const vertex of face.vertices) {
         positions.push(
           vertex[0],
@@ -366,12 +307,6 @@ function buildChunkMesh(
         );
       }
 
-      /*
-       * Two triangles per quad.
-       *
-       * Because FACES is correctly wound,
-       * these triangles face outward.
-       */
       indices.push(
         vertexOffset,
         vertexOffset + 1,
@@ -411,8 +346,6 @@ function buildChunkMesh(
     const material =
       new THREE.MeshLambertMaterial({
         color: group.color,
-
-        // Only correctly-wound outside faces.
         side: THREE.FrontSide
       });
 
@@ -434,16 +367,9 @@ function buildChunkMesh(
   }
 }
 
-/* =========================================================
-   BUILD ENTIRE WORLD
-   ========================================================= */
-
 export function buildMeshes(scene) {
-
-  // Remove old block meshes.
   for (const child of [...scene.children]) {
     if (child.userData.blockMesh) {
-
       if (child.geometry) {
         child.geometry.dispose();
       }
@@ -456,7 +382,6 @@ export function buildMeshes(scene) {
     }
   }
 
-  // Rebuild all chunks.
   for (const [chunkKey, chunkBlocks] of chunks) {
     const [cx, cz] =
       chunkKey.split(",").map(Number);
