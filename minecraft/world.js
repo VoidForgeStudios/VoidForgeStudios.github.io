@@ -135,24 +135,27 @@ export function generateWorld() {
 // Corrected winding order for outward-facing normals and standard front-face culling
 const FACES = [
   {
+    // Right Face (X = 1)
     dir: [1, 0, 0],
     corners: [
-      [1, 0, 1],
-      [1, 1, 1],
+      [1, 0, 0],
       [1, 1, 0],
-      [1, 0, 0]
+      [1, 1, 1],
+      [1, 0, 1]
     ]
   },
   {
+    // Left Face (X = -1)
     dir: [-1, 0, 0],
     corners: [
-      [0, 0, 0],
-      [0, 1, 0],
+      [0, 0, 1],
       [0, 1, 1],
-      [0, 0, 1]
+      [0, 1, 0],
+      [0, 0, 0]
     ]
   },
   {
+    // Top Face (Y = 1)
     dir: [0, 1, 0],
     corners: [
       [0, 1, 1],
@@ -162,6 +165,7 @@ const FACES = [
     ]
   },
   {
+    // Bottom Face (Y = -1)
     dir: [0, -1, 0],
     corners: [
       [0, 0, 0],
@@ -171,6 +175,7 @@ const FACES = [
     ]
   },
   {
+    // Front/Back Face (Z = 1)
     dir: [0, 0, 1],
     corners: [
       [0, 0, 1],
@@ -180,6 +185,7 @@ const FACES = [
     ]
   },
   {
+    // Front/Back Face (Z = -1)
     dir: [0, 0, -1],
     corners: [
       [1, 0, 0],
