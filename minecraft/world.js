@@ -175,7 +175,7 @@ const FACES = [
     ]
   },
   {
-    // Front/Back Face (Z = 1)
+    // Front Face (Z = 1)
     dir: [0, 0, 1],
     corners: [
       [0, 0, 1],
@@ -185,13 +185,13 @@ const FACES = [
     ]
   },
   {
-    // Front/Back Face (Z = -1)
+    // Back Face (Z = -1)
     dir: [0, 0, -1],
     corners: [
       [1, 0, 0],
-      [1, 1, 0],
+      [0, 0, 0],
       [0, 1, 0],
-      [0, 0, 0]
+      [1, 1, 0]
     ]
   }
 ];
