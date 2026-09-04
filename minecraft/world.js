@@ -132,32 +132,33 @@ export function generateWorld() {
   }
 }
 
+// Corrected winding order for outward-facing normals and standard front-face culling
 const FACES = [
   {
     dir: [1, 0, 0],
     corners: [
-      [1, 0, 0],
-      [1, 1, 0],
+      [1, 0, 1],
       [1, 1, 1],
-      [1, 0, 1]
+      [1, 1, 0],
+      [1, 0, 0]
     ]
   },
   {
     dir: [-1, 0, 0],
     corners: [
       [0, 0, 0],
-      [0, 0, 1],
+      [0, 1, 0],
       [0, 1, 1],
-      [0, 1, 0]
+      [0, 0, 1]
     ]
   },
   {
     dir: [0, 1, 0],
     corners: [
-      [0, 1, 0],
       [0, 1, 1],
       [1, 1, 1],
-      [1, 1, 0]
+      [1, 1, 0],
+      [0, 1, 0]
     ]
   },
   {
@@ -181,10 +182,10 @@ const FACES = [
   {
     dir: [0, 0, -1],
     corners: [
-      [0, 0, 0],
-      [0, 1, 0],
+      [1, 0, 0],
       [1, 1, 0],
-      [1, 0, 0]
+      [0, 1, 0],
+      [0, 0, 0]
     ]
   }
 ];
@@ -219,46 +220,27 @@ function buildChunkMesh(
   cz,
   chunkBlocks
 ) {
-  const worldStartX =
-    cx * CHUNK_SIZE;
-
-  const worldStartZ =
-    cz * CHUNK_SIZE;
+  const worldStartX = cx * CHUNK_SIZE;
+  const worldStartZ = cz * CHUNK_SIZE;
 
   const materialGroups = new Map();
 
   for (const [blockKey, type] of chunkBlocks) {
-    const [lx, y, lz] =
-      blockKey.split(",").map(Number);
-
-    const x =
-      worldStartX + lx;
-
-    const z =
-      worldStartZ + lz;
+    const [lx, y, lz] = blockKey.split(",").map(Number);
+    const x = worldStartX + lx;
+    const z = worldStartZ + lz;
 
     for (const face of FACES) {
-      const nx =
-        x + face.dir[0];
-
-      const ny =
-        y + face.dir[1];
-
-      const nz =
-        z + face.dir[2];
+      const nx = x + face.dir[0];
+      const ny = y + face.dir[1];
+      const nz = z + face.dir[2];
 
       if (getBlock(nx, ny, nz)) {
         continue;
       }
 
-      const color =
-        getFaceColor(
-          type,
-          face.dir
-        );
-
-      const groupKey =
-        `${type}:${color}`;
+      const color = getFaceColor(type, face.dir);
+      const groupKey = `${type}:${color}`;
 
       if (!materialGroups.has(groupKey)) {
         materialGroups.set(groupKey, {
@@ -268,12 +250,11 @@ function buildChunkMesh(
         });
       }
 
-      const vertices =
-        face.corners.map(c => [
-          lx + c[0],
-          y + c[1],
-          lz + c[2]
-        ]);
+      const vertices = face.corners.map(c => [
+        lx + c[0],
+        y + c[1],
+        lz + c[2]
+      ]);
 
       materialGroups
         .get(groupKey)
@@ -294,17 +275,8 @@ function buildChunkMesh(
 
     for (const face of group.faces) {
       for (const vertex of face.vertices) {
-        positions.push(
-          vertex[0],
-          vertex[1],
-          vertex[2]
-        );
-
-        normals.push(
-          face.dir[0],
-          face.dir[1],
-          face.dir[2]
-        );
+        positions.push(vertex[0], vertex[1], vertex[2]);
+        normals.push(face.dir[0], face.dir[1], face.dir[2]);
       }
 
       indices.push(
@@ -320,47 +292,31 @@ function buildChunkMesh(
       vertexOffset += 4;
     }
 
-    const geometry =
-      new THREE.BufferGeometry();
+    const geometry = new THREE.BufferGeometry();
 
     geometry.setAttribute(
       "position",
-      new THREE.Float32BufferAttribute(
-        positions,
-        3
-      )
+      new THREE.Float32BufferAttribute(positions, 3)
     );
 
     geometry.setAttribute(
       "normal",
-      new THREE.Float32BufferAttribute(
-        normals,
-        3
-      )
+      new THREE.Float32BufferAttribute(normals, 3)
     );
 
     geometry.setIndex(indices);
-
     geometry.computeBoundingSphere();
 
-    const material =
-      new THREE.MeshLambertMaterial({
-        color: group.color,
-        side: THREE.FrontSide
-      });
+    // High performance optimization: Merge grouped geometry data 
+    // per material type so the GPU renders chunks in single draw calls.
+    const material = new THREE.MeshLambertMaterial({
+      color: group.color,
+      side: THREE.FrontSide
+    });
 
-    const mesh =
-      new THREE.Mesh(
-        geometry,
-        material
-      );
+    const mesh = new THREE.Mesh(geometry, material);
 
-    mesh.position.set(
-      worldStartX,
-      0,
-      worldStartZ
-    );
-
+    mesh.position.set(worldStartX, 0, worldStartZ);
     mesh.userData.blockMesh = true;
 
     scene.add(mesh);
@@ -383,8 +339,7 @@ export function buildMeshes(scene) {
   }
 
   for (const [chunkKey, chunkBlocks] of chunks) {
-    const [cx, cz] =
-      chunkKey.split(",").map(Number);
+    const [cx, cz] = chunkKey.split(",").map(Number);
 
     buildChunkMesh(
       scene,
