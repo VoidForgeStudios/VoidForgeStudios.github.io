@@ -6,8 +6,6 @@ export const WORLD_HEIGHT = 24;
 export const CHUNK_SIZE = 16;
 
 export const chunks = new Map();
-// Key: "cx,cz"
-// Value: Map of local block coordinates -> block type
 
 export function key(x, y, z) {
   return `${x},${y},${z}`;
@@ -83,7 +81,9 @@ function heightAt(x, z) {
     1,
     Math.min(
       12,
-      Math.floor(7 + a + b + noise(x, z) * 1.4)
+      Math.floor(
+        7 + a + b + noise(x, z) * 1.4
+      )
     )
   );
 }
@@ -97,7 +97,6 @@ export function generateWorld() {
     for (let z = -half; z < half; z++) {
       const h = heightAt(x, z);
 
-      // Terrain
       for (let y = 0; y <= h; y++) {
         let type;
 
@@ -129,8 +128,6 @@ export function generateWorld() {
           for (let dz = -1; dz <= 1; dz++) {
             for (let dy = 4; dy <= 5; dy++) {
               if (Math.abs(dx) + Math.abs(dz) < 3) {
-                // Use grass for leaves because your current
-                // blocks.js does not define a "leaves" block.
                 setBlock(
                   x + dx,
                   h + dy,
@@ -147,35 +144,35 @@ export function generateWorld() {
 }
 
 /* =========================================================
-   FACE DEFINITIONS
+   VOXEL FACES
    =========================================================
 
-   Every face uses counter-clockwise winding when viewed
+   IMPORTANT:
+
+   Each face is wound counter-clockwise when viewed
    from OUTSIDE the block.
 
-   Coordinates are local block coordinates:
+   The resulting cross product therefore points in
+   the direction specified by "dir".
 
-       y=1
-        +-------+
-       /       /|
-      +-------+ |
-      |       | |
-      |       | +
-      |       |/
-      +-------+
-       y=0
-
+   +X = right
+   -X = left
+   +Y = top
+   -Y = bottom
+   +Z = front
+   -Z = back
    ========================================================= */
 
 const FACES = [
+
   // +X
   {
     dir: [1, 0, 0],
     corners: [
-      [1, 0, 1],
-      [1, 1, 1],
+      [1, 0, 0],
       [1, 1, 0],
-      [1, 0, 0]
+      [1, 1, 1],
+      [1, 0, 1]
     ]
   },
 
@@ -183,10 +180,10 @@ const FACES = [
   {
     dir: [-1, 0, 0],
     corners: [
-      [0, 0, 0],
-      [0, 1, 0],
+      [0, 0, 1],
       [0, 1, 1],
-      [0, 0, 1]
+      [0, 1, 0],
+      [0, 0, 0]
     ]
   },
 
@@ -194,10 +191,10 @@ const FACES = [
   {
     dir: [0, 1, 0],
     corners: [
-      [0, 1, 1],
-      [1, 1, 1],
+      [0, 1, 0],
       [1, 1, 0],
-      [0, 1, 0]
+      [1, 1, 1],
+      [0, 1, 1]
     ]
   },
 
@@ -205,32 +202,32 @@ const FACES = [
   {
     dir: [0, -1, 0],
     corners: [
-      [0, 0, 0],
-      [1, 0, 0],
+      [0, 0, 1],
       [1, 0, 1],
-      [0, 0, 1]
+      [1, 0, 0],
+      [0, 0, 0]
     ]
   },
 
-  // +Z
+  // +Z / FRONT
   {
     dir: [0, 0, 1],
     corners: [
       [0, 0, 1],
-      [0, 1, 1],
+      [1, 0, 1],
       [1, 1, 1],
-      [1, 0, 1]
+      [0, 1, 1]
     ]
   },
 
-  // -Z
+  // -Z / BACK
   {
     dir: [0, 0, -1],
     corners: [
       [1, 0, 0],
-      [1, 1, 0],
+      [0, 0, 0],
       [0, 1, 0],
-      [0, 0, 0]
+      [1, 1, 0]
     ]
   }
 ];
@@ -239,7 +236,7 @@ const FACES = [
    FACE COLOR
    ========================================================= */
 
-function getFaceColor(type, dir) {
+function getFaceColor(type, direction) {
   const block = BLOCKS[type];
 
   if (!block) {
@@ -247,12 +244,18 @@ function getFaceColor(type, dir) {
   }
 
   // Top
-  if (dir[1] === 1 && block.top !== undefined) {
+  if (
+    direction[1] === 1 &&
+    block.top !== undefined
+  ) {
     return block.top;
   }
 
   // Bottom
-  if (dir[1] === -1 && block.bottom !== undefined) {
+  if (
+    direction[1] === -1 &&
+    block.bottom !== undefined
+  ) {
     return block.bottom;
   }
 
@@ -261,47 +264,56 @@ function getFaceColor(type, dir) {
 }
 
 /* =========================================================
-   BUILD ONE CHUNK
+   BUILD CHUNK
    ========================================================= */
 
-function buildChunkMesh(scene, cx, cz, chunkBlocks) {
-  const worldStartX = cx * CHUNK_SIZE;
-  const worldStartZ = cz * CHUNK_SIZE;
+function buildChunkMesh(
+  scene,
+  cx,
+  cz,
+  chunkBlocks
+) {
+  const worldStartX =
+    cx * CHUNK_SIZE;
 
-  /*
-   * Group faces by block type AND face color.
-   *
-   * This lets grass have:
-   * - green top
-   * - brown sides
-   * - brown bottom
-   */
+  const worldStartZ =
+    cz * CHUNK_SIZE;
 
   const materialGroups = new Map();
 
   for (const [blockKey, type] of chunkBlocks) {
-    const parts = blockKey.split(",").map(Number);
+    const [lx, y, lz] =
+      blockKey.split(",").map(Number);
 
-    const lx = parts[0];
-    const y = parts[1];
-    const lz = parts[2];
+    const x =
+      worldStartX + lx;
 
-    const x = worldStartX + lx;
-    const z = worldStartZ + lz;
+    const z =
+      worldStartZ + lz;
 
     for (const face of FACES) {
-      const nx = x + face.dir[0];
-      const ny = y + face.dir[1];
-      const nz = z + face.dir[2];
+      const nx =
+        x + face.dir[0];
 
-      // Don't render faces touching another block.
+      const ny =
+        y + face.dir[1];
+
+      const nz =
+        z + face.dir[2];
+
+      // Neighbor exists -> face is hidden.
       if (getBlock(nx, ny, nz)) {
         continue;
       }
 
-      const color = getFaceColor(type, face.dir);
+      const color =
+        getFaceColor(
+          type,
+          face.dir
+        );
 
-      const groupKey = `${type}:${color}`;
+      const groupKey =
+        `${type}:${color}`;
 
       if (!materialGroups.has(groupKey)) {
         materialGroups.set(groupKey, {
@@ -311,25 +323,27 @@ function buildChunkMesh(scene, cx, cz, chunkBlocks) {
         });
       }
 
-      /*
-       * Store the local chunk coordinates.
-       */
-      const vertices = face.corners.map(c => [
-        lx + c[0],
-        y + c[1],
-        lz + c[2]
-      ]);
+      const vertices =
+        face.corners.map(c => [
+          lx + c[0],
+          y + c[1],
+          lz + c[2]
+        ]);
 
-      materialGroups.get(groupKey).faces.push({
-        vertices,
-        dir: face.dir
-      });
+      materialGroups
+        .get(groupKey)
+        .faces
+        .push({
+          vertices,
+          dir: face.dir
+        });
     }
   }
 
-  /*
-   * Create one mesh for each material group.
-   */
+  /* =======================================================
+     CREATE MESHES
+     ======================================================= */
+
   for (const group of materialGroups.values()) {
     const positions = [];
     const normals = [];
@@ -338,9 +352,7 @@ function buildChunkMesh(scene, cx, cz, chunkBlocks) {
     let vertexOffset = 0;
 
     for (const face of group.faces) {
-      /*
-       * Add vertices.
-       */
+
       for (const vertex of face.vertices) {
         positions.push(
           vertex[0],
@@ -356,7 +368,10 @@ function buildChunkMesh(scene, cx, cz, chunkBlocks) {
       }
 
       /*
-       * Correct winding.
+       * Two triangles per quad.
+       *
+       * Because FACES is correctly wound,
+       * these triangles face outward.
        */
       indices.push(
         vertexOffset,
@@ -371,7 +386,8 @@ function buildChunkMesh(scene, cx, cz, chunkBlocks) {
       vertexOffset += 4;
     }
 
-    const geometry = new THREE.BufferGeometry();
+    const geometry =
+      new THREE.BufferGeometry();
 
     geometry.setAttribute(
       "position",
@@ -396,13 +412,16 @@ function buildChunkMesh(scene, cx, cz, chunkBlocks) {
     const material =
       new THREE.MeshLambertMaterial({
         color: group.color,
+
+        // Only correctly-wound outside faces.
         side: THREE.FrontSide
       });
 
-    const mesh = new THREE.Mesh(
-      geometry,
-      material
-    );
+    const mesh =
+      new THREE.Mesh(
+        geometry,
+        material
+      );
 
     mesh.position.set(
       worldStartX,
@@ -411,32 +430,34 @@ function buildChunkMesh(scene, cx, cz, chunkBlocks) {
     );
 
     mesh.userData.blockMesh = true;
-    mesh.userData.chunkX = cx;
-    mesh.userData.chunkZ = cz;
 
     scene.add(mesh);
   }
 }
 
 /* =========================================================
-   BUILD ALL CHUNKS
+   BUILD ENTIRE WORLD
    ========================================================= */
 
 export function buildMeshes(scene) {
-  /*
-   * Remove old block meshes.
-   */
+
+  // Remove old block meshes.
   for (const child of [...scene.children]) {
     if (child.userData.blockMesh) {
-      child.geometry?.dispose();
-      child.material?.dispose();
+
+      if (child.geometry) {
+        child.geometry.dispose();
+      }
+
+      if (child.material) {
+        child.material.dispose();
+      }
+
       scene.remove(child);
     }
   }
 
-  /*
-   * Build every chunk.
-   */
+  // Rebuild all chunks.
   for (const [chunkKey, chunkBlocks] of chunks) {
     const [cx, cz] =
       chunkKey.split(",").map(Number);
