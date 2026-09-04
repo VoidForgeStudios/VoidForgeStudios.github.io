@@ -39,8 +39,12 @@ export class Player {
     for (let x = minX; x <= maxX; x++) {
       for (let y = minY; y <= maxY; y++) {
         for (let z = minZ; z <= maxZ; z++) {
-          if (y < 0) return true; // World floor
-          if (getBlock(x, y, z)) return true;
+          if (y < 0) return true;
+          const block = getBlock(x, y, z);
+          if (block) {
+            console.log("Found block at:", x, y, z, block); // Check F12 console
+            return true;
+          }
         }
       }
     }
