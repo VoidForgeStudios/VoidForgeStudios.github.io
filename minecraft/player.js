@@ -5,14 +5,14 @@ export class Player {
   constructor(camera, dom) {
     this.camera = camera;
     this.dom = dom;
-    this.position = new THREE.Vector3(0, 15, 0);
+    this.position = new THREE.Vector3(0.5, 20, 0.5); // Spawn safely above ground, centered in block
     this.velocity = new THREE.Vector3();
     this.yaw = 0;
     this.pitch = 0;
     this.onGround = false;
     this.keys = {};
 
-    // Player dimensions (bounding box for collisions)
+    // Player dimensions
     this.radius = 0.3;
     this.height = 1.6;
 
@@ -27,19 +27,20 @@ export class Player {
     });
   }
 
-  // Check if a bounding box collides with any solid blocks
+  // Check collision with a small margin (epsilon) to avoid getting stuck
   checkCollision(pos) {
-    const minX = Math.floor(pos.x - this.radius);
-    const maxX = Math.floor(pos.x + this.radius);
-    const minY = Math.floor(pos.y);
-    const maxY = Math.floor(pos.y + this.height);
-    const minZ = Math.floor(pos.z - this.radius);
-    const maxZ = Math.floor(pos.z + this.radius);
+    const eps = 0.001;
+    const minX = Math.floor(pos.x - this.radius + eps);
+    const maxX = Math.floor(pos.x + this.radius - eps);
+    const minY = Math.floor(pos.y + eps);
+    const maxY = Math.floor(pos.y + this.height - eps);
+    const minZ = Math.floor(pos.z - this.radius + eps);
+    const maxZ = Math.floor(pos.z + this.radius - eps);
 
     for (let x = minX; x <= maxX; x++) {
       for (let y = minY; y <= maxY; y++) {
         for (let z = minZ; z <= maxZ; z++) {
-          if (y < 0) return true; // Treat world bottom as solid
+          if (y < 0) return true; // World floor
           if (getBlock(x, y, z)) return true;
         }
       }
@@ -81,7 +82,7 @@ export class Player {
       this.velocity.z = 0;
     }
 
-    // 3. Move Y (Vertical / Gravity / Jumping)
+    // 3. Move Y
     this.position.y += this.velocity.y * dt;
     this.onGround = false;
     if (this.checkCollision(this.position)) {
