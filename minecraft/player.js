@@ -5,7 +5,7 @@ export class Player {
   constructor(camera, dom) {
     this.camera = camera;
     this.dom = dom;
-    this.position = new THREE.Vector3(0.5, 20, 0.5); // Spawn safely above ground, centered in block
+    this.position = new THREE.Vector3(0.5, 15, 0.5); // Centered in block
     this.velocity = new THREE.Vector3();
     this.yaw = 0;
     this.pitch = 0;
@@ -27,7 +27,6 @@ export class Player {
     });
   }
 
-  // Check collision with a small margin (epsilon) to avoid getting stuck
   checkCollision(pos) {
     const eps = 0.001;
     const minX = Math.floor(pos.x - this.radius + eps);
@@ -49,6 +48,9 @@ export class Player {
   }
 
   update(dt) {
+    // Cap dt to prevent massive jumps during lag spikes
+    dt = Math.min(dt, 0.1);
+
     const speed = this.keys.ShiftLeft ? 7 : 5;
     const dir = new THREE.Vector3(
       (this.keys.KeyD ? 1 : 0) - (this.keys.KeyA ? 1 : 0), 0,
