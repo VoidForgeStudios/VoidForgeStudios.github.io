@@ -96,38 +96,34 @@
   }
 
   function renderGames() {
-    /*
-     * If your HTML already renders the game cards,
-     * this function does nothing.
-     *
-     * It also supports a container with id="gameGrid".
-     */
-    const grid = $("#gameGrid");
+    const root = $("#viewRoot");
+    if (!root) return;
 
-    if (!grid || !games.length) return;
+    const query = $("#gameSearch")?.value.trim().toLowerCase() || "";
+    const visibleGames = games.filter(game =>
+      [game.name, game.subtitle, game.description, ...(game.tags || [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    );
 
-    grid.innerHTML = "";
+    root.innerHTML = `
+      <section class="library-view">
+        <div class="view-heading">
+          <div><p class="eyebrow">VOIDFORGE LIBRARY</p><h1>Your games</h1><p class="view-subtitle">${games.length} browser game${games.length === 1 ? "" : "s"} ready to play.</p></div>
+          <button class="primary-button" id="refreshGames" type="button">↻ Refresh library</button>
+        </div>
+        <div class="game-grid" id="gameGrid">
+          ${visibleGames.length ? visibleGames.map((game, index) => `
+            <article class="game-card">
+              <div class="game-art"><span>${escapeHtml((game.name || "G").slice(0, 1))}</span><b>${escapeHtml(game.status || "Available")}</b></div>
+              <div class="game-card-body"><p class="eyebrow">${escapeHtml(game.platform || "Browser")} · ${escapeHtml(game.version || "")}</p><h2>${escapeHtml(game.name || `Game ${index + 1}`)}</h2><p>${escapeHtml(game.description || "Ready to launch.")}</p><div class="tag-row">${(game.tags || []).map(tag => `<span>${escapeHtml(tag)}</span>`).join("")}</div><button class="play-button" type="button" data-game-index="${games.indexOf(game)}">Play now <span>→</span></button></div>
+            </article>`).join("") : `<div class="empty-state"><h2>No games found</h2><p>Try a different search.</p></div>`}
+        </div>
+      </section>`;
 
-    games.forEach((game, index) => {
-      const card = document.createElement("button");
-
-      card.type = "button";
-      card.className = "game-card";
-      card.dataset.gameIndex = index;
-
-      card.innerHTML = `
-        <strong>${escapeHtml(game.name || `Game ${index + 1}`)}</strong>
-        ${game.description
-          ? `<span>${escapeHtml(game.description)}</span>`
-          : ""}
-      `;
-
-      card.addEventListener("click", () => {
-        launchGame(game);
-      });
-
-      grid.appendChild(card);
-    });
+    $$("[data-game-index]").forEach(button => button.addEventListener("click", () => launchGame(games[Number(button.dataset.gameIndex)])));
+    $("#refreshGames")?.addEventListener("click", loadGames);
   }
 
   function escapeHtml(value) {
@@ -254,6 +250,29 @@
     });
   }
 
+  function setupLauncher() {
+    const navItems = $$("[data-view]");
+    navItems.forEach(item => item.addEventListener("click", () => {
+      navItems.forEach(nav => nav.classList.toggle("is-active", nav.dataset.view === item.dataset.view));
+      if (item.dataset.view === "library" || item.dataset.view === "discover") renderGames();
+      else if (item.dataset.view === "updates") renderSimpleView("Updates", "Your library is up to date.");
+      else if (item.dataset.view === "about") renderSimpleView("About VoidForge", "A small collection of browser games, built for the open web.");
+      else renderSimpleView("Settings", "Launcher settings are ready for your next session.");
+    }));
+    $("#gameSearch")?.addEventListener("input", renderGames);
+    $("#fullscreenLauncher")?.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.());
+    $("#mobileMenu")?.addEventListener("click", () => document.body.classList.toggle("nav-open"));
+    setText($("#connectionStatus"), navigator.onLine ? "Online" : "Offline mode");
+    window.addEventListener("online", () => setText($("#connectionStatus"), "Online"));
+    window.addEventListener("offline", () => setText($("#connectionStatus"), "Offline mode"));
+  }
+
+  function renderSimpleView(title, subtitle) {
+    const root = $("#viewRoot");
+    if (!root) return;
+    root.innerHTML = `<section class="library-view simple-view"><p class="eyebrow">VOIDFORGE STUDIOS</p><h1>${escapeHtml(title)}</h1><p class="view-subtitle">${escapeHtml(subtitle)}</p></section>`;
+  }
+
   /* -------------------------
      Existing launcher support
      ------------------------- */
@@ -284,6 +303,7 @@
      ------------------------- */
 
   setupGameWindow();
+  setupLauncher();
   loadGames();
 
 })();
