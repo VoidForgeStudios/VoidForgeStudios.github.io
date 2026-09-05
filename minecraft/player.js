@@ -15,8 +15,8 @@ export class Player {
 
     this.yaw = 0;
     this.pitch = 0;
-    this.onGround = false;
 
+    this.onGround = false;
     this.keys = {};
 
     // =========================
@@ -59,11 +59,8 @@ export class Player {
     // =========================
 
     this.createMobileControls();
-
     this.setupKeyboard();
-
     this.setupMouse();
-
     this.setupTouchLook();
 
     this.createHealthUI();
@@ -100,7 +97,6 @@ export class Player {
         return;
 
       this.yaw -= e.movementX * 0.0025;
-
       this.pitch -= e.movementY * 0.0025;
 
       this.pitch = Math.max(
@@ -127,7 +123,6 @@ export class Player {
         z-index: 9999;
 
         user-select: none;
-
         touch-action: none;
       }
 
@@ -211,7 +206,6 @@ export class Player {
 
       .mobileButton:active {
         background: rgba(255,255,255,0.3);
-
         transform: scale(0.94);
       }
 
@@ -230,7 +224,8 @@ export class Player {
 
     document.head.appendChild(style);
 
-    const controls = document.createElement("div");
+    const controls =
+      document.createElement("div");
 
     controls.id = "mobileControls";
 
@@ -251,7 +246,6 @@ export class Player {
     document.body.appendChild(controls);
 
     this.setupJoystick();
-
     this.setupButtons();
   }
 
@@ -285,7 +279,6 @@ export class Player {
 
       if (distance > radius) {
         x = (x / distance) * radius;
-
         y = (y / distance) * radius;
       }
 
@@ -347,7 +340,6 @@ export class Player {
           this.mobile.moveId = null;
 
           this.mobile.moveX = 0;
-
           this.mobile.moveZ = 0;
 
           stick.style.transform =
@@ -452,7 +444,8 @@ export class Player {
 
         for (const touch of e.changedTouches) {
 
-          const target = touch.target;
+          const target =
+            touch.target;
 
           if (
             target.closest("#joystick") ||
@@ -461,7 +454,9 @@ export class Player {
             continue;
           }
 
-          if (this.mobile.lookId === null) {
+          if (
+            this.mobile.lookId === null
+          ) {
             this.mobile.lookId =
               touch.identifier;
 
@@ -527,6 +522,7 @@ export class Player {
 
     const stopLook = e => {
       for (const touch of e.changedTouches) {
+
         if (
           touch.identifier ===
           this.mobile.lookId
@@ -560,50 +556,84 @@ export class Player {
         position: fixed;
 
         left: 50%;
-        bottom: 25px;
+
+        /*
+         * Hotbar is normally near the bottom.
+         * Hearts sit directly above it.
+         */
+        bottom: 78px;
 
         transform:
           translateX(-50%);
 
         display: flex;
 
-        gap: 2px;
+        align-items: center;
+        justify-content: center;
 
-        z-index: 10000;
+        gap: 1px;
+
+        width: max-content;
+
+        height: 30px;
+
+        z-index: 10001;
 
         pointer-events: none;
 
         user-select: none;
+      }
 
-        font-size: 28px;
+      .heart {
+        width: 28px;
+        height: 28px;
 
-        line-height: 1;
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        margin: 0;
+        padding: 0;
+
+        font-family: Arial, sans-serif;
+
+        font-size: 27px;
+
+        line-height: 28px;
+
+        text-align: center;
+
+        box-sizing: border-box;
 
         text-shadow:
           2px 2px 0 #000,
           -1px -1px 0 #000;
       }
 
-      .heart {
-        width: 28px;
-
-        text-align: center;
-
-        display: inline-block;
-
-        transition:
-          opacity 0.15s;
-      }
-
+      /*
+       * Mobile
+       */
       @media (max-width: 799px) {
-        #healthHUD {
-          bottom: 165px;
 
-          font-size: 23px;
+        #healthHUD {
+          /*
+           * Mobile hotbar position
+           */
+          bottom: 145px;
+
+          height: 25px;
+
+          gap: 0;
         }
 
         .heart {
           width: 23px;
+          height: 23px;
+
+          font-size: 22px;
+
+          line-height: 23px;
         }
       }
     `;
@@ -616,6 +646,7 @@ export class Player {
     hud.id = "healthHUD";
 
     for (let i = 0; i < 10; i++) {
+
       const heart =
         document.createElement("span");
 
@@ -676,7 +707,7 @@ export class Player {
 
           heart.textContent = "♡";
 
-          heart.style.opacity = "0.5";
+          heart.style.opacity = "0.45";
         }
       }
     );
@@ -708,7 +739,6 @@ export class Player {
 
     this.updateHealthUI();
 
-    // Damage protection
     this.invulnerable = true;
 
     setTimeout(() => {
@@ -716,7 +746,8 @@ export class Player {
     }, 500);
 
     console.log(
-      `Player took ${amount} damage. Health: ${this.health}/${this.maxHealth}`
+      `Player took ${amount} damage. ` +
+      `Health: ${this.health}/${this.maxHealth}`
     );
 
     if (this.health <= 0) {
@@ -747,7 +778,8 @@ export class Player {
     this.updateHealthUI();
 
     console.log(
-      `Player healed. Health: ${this.health}/${this.maxHealth}`
+      `Player healed. ` +
+      `Health: ${this.health}/${this.maxHealth}`
     );
   }
 
@@ -806,8 +838,10 @@ export class Player {
 
     console.log("Player died");
 
-    // Optional death event
-    if (typeof this.onDeath === "function") {
+    if (
+      typeof this.onDeath ===
+      "function"
+    ) {
       this.onDeath();
     }
   }
@@ -816,7 +850,11 @@ export class Player {
   // RESPAWN
   // ============================================================
 
-  respawn(x = 0.5, y = 15, z = 0.5) {
+  respawn(
+    x = 0.5,
+    y = 15,
+    z = 0.5
+  ) {
     this.position.set(
       x,
       y,
@@ -901,11 +939,13 @@ export class Player {
       x <= maxX;
       x++
     ) {
+
       for (
         let y = minY;
         y <= maxY;
         y++
       ) {
+
         for (
           let z = minZ;
           z <= maxZ;
@@ -937,7 +977,7 @@ export class Player {
 
   update(dt) {
 
-    // Don't move after death
+    // Dead players don't move
     if (this.dead) {
 
       this.velocity.set(
@@ -978,13 +1018,12 @@ export class Player {
       (this.keys.KeyS ? 1 : 0) -
       (this.keys.KeyW ? 1 : 0);
 
-    // Mobile joystick overrides
-    // keyboard when joystick is active
-
+    // Mobile joystick
     if (
       this.mobile.moveX !== 0 ||
       this.mobile.moveZ !== 0
     ) {
+
       moveX =
         this.mobile.moveX;
 
@@ -1003,7 +1042,9 @@ export class Player {
         moveZ
       );
 
-    if (dir.lengthSq() > 0) {
+    if (
+      dir.lengthSq() > 0
+    ) {
 
       dir
         .normalize()
