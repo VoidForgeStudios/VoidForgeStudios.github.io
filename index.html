@@ -12,9 +12,14 @@
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
+
   <div class="app-shell" id="appShell">
     <aside class="sidebar" aria-label="Launcher navigation">
-      <a class="brand" href="#library" aria-label="VoidForge Studios home"><img src="assets/voidforge-mark.svg" alt=""><span><strong>VoidForge</strong><small>STUDIOS · WEB LAUNCHER</small></span></a>
+      <a class="brand" href="#library" aria-label="VoidForge Studios home">
+        <img src="assets/voidforge-mark.svg" alt="">
+        <span><strong>VoidForge</strong><small>STUDIOS · WEB LAUNCHER</small></span>
+      </a>
+
       <nav class="nav-list" aria-label="Primary">
         <button class="nav-item is-active" data-view="library"><span aria-hidden="true">▦</span> Library</button>
         <button class="nav-item" data-view="discover"><span aria-hidden="true">◇</span> Discover</button>
@@ -22,29 +27,85 @@
         <button class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> Settings</button>
         <button class="nav-item" data-view="about"><span aria-hidden="true">ⓘ</span> About</button>
       </nav>
-      <div class="sidebar-footer"><div class="connection"><i></i><span><b id="connectionStatus">Checking connection</b><small>GitHub Pages web edition</small></span></div><a class="support-link" href="https://github.com/VoidForgeStudios/VoidForgeStudios.github.io" target="_blank" rel="noopener noreferrer">↗ Project support</a></div>
+
+      <div class="sidebar-footer">
+        <div class="connection">
+          <i></i>
+          <span><b id="connectionStatus">Checking connection</b><small>GitHub Pages web edition</small></span>
+        </div>
+        <a class="support-link" href="https://github.com/VoidForgeStudios/VoidForgeStudios.github.io" target="_blank" rel="noopener noreferrer">↗ Project support</a>
+      </div>
     </aside>
 
     <main id="main-content" class="main-content" tabindex="-1">
       <header class="topbar">
         <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
-        <label class="search-box"><span aria-hidden="true">⌕</span><input id="gameSearch" type="search" autocomplete="off" placeholder="Search your library" aria-label="Search games"><kbd>/</kbd></label>
-        <div class="top-actions"><button class="icon-button" id="fullscreenLauncher" aria-label="Toggle launcher fullscreen" title="Fullscreen">⛶</button><button class="profile-button" data-view="settings" aria-label="Open settings"><span>VF</span><b>Player</b><small>Web edition</small></button></div>
+
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <input id="gameSearch" type="search" autocomplete="off" placeholder="Search your library" aria-label="Search games">
+          <kbd>/</kbd>
+        </label>
+
+        <div class="top-actions">
+          <button class="icon-button" id="fullscreenLauncher" aria-label="Toggle launcher fullscreen" title="Fullscreen">⛶</button>
+          <button class="profile-button" data-view="settings" aria-label="Open settings">
+            <span>VF</span><b>Player</b><small>Web edition</small>
+          </button>
+        </div>
       </header>
+
       <div id="viewRoot"></div>
     </main>
   </div>
 
   <nav class="mobile-nav" aria-label="Mobile navigation">
-    <button class="nav-item is-active" data-view="library">▦<span>Library</span></button><button class="nav-item" data-view="discover">◇<span>Discover</span></button><button class="nav-item" data-view="updates">↻<span>Updates</span></button><button class="nav-item" data-view="settings">⚙<span>Settings</span></button>
+    <button class="nav-item is-active" data-view="library">▦<span>Library</span></button>
+    <button class="nav-item" data-view="discover">◇<span>Discover</span></button>
+    <button class="nav-item" data-view="updates">↻<span>Updates</span></button>
+    <button class="nav-item" data-view="settings">⚙<span>Settings</span></button>
   </nav>
 
   <div class="dialog-backdrop" id="dialogBackdrop" hidden></div>
+
   <section class="game-view" id="gameView" aria-label="Game player" hidden>
-    <header class="game-toolbar"><div><span class="live-indicator"></span><strong id="playingGameTitle">Loading game</strong><small id="gameLoadStatus">Checking game files…</small></div><div><button class="toolbar-button" id="gameInfo">Game info</button><button class="toolbar-button" id="reloadGame">↻ Reload</button><button class="toolbar-button" id="gameFullscreen">⛶ Fullscreen</button><button class="toolbar-button danger" id="exitGame">Exit game <kbd>Esc</kbd></button></div></header>
-    <div class="game-stage"><div class="loading-panel" id="gameLoader"><div class="loader-orbit"></div><p class="eyebrow">VoidForge launching</p><h2 id="loadingStep">Checking game</h2><p id="loadingDetail">Verifying the browser entry point.</p><div class="indeterminate"><i></i></div></div><div class="game-error" id="gameError" hidden></div><iframe id="gameFrame" title="VoidForge game" allow="fullscreen; gamepad; autoplay; pointer-lock" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <header class="game-toolbar">
+      <div>
+        <span class="live-indicator"></span>
+        <strong id="gameTitle">Loading game</strong>
+        <small id="gameStatus">Checking game files…</small>
+      </div>
+
+      <div>
+        <button class="toolbar-button" id="gameInfo">Game info</button>
+        <button class="toolbar-button" id="reloadGame">↻ Reload</button>
+        <button class="toolbar-button" id="gameFullscreen">⛶ Fullscreen</button>
+        <button class="toolbar-button danger" id="gameClose">Exit game <kbd>Esc</kbd></button>
+      </div>
+    </header>
+
+    <div class="game-stage">
+      <div class="loading-panel" id="gameLoader">
+        <div class="loader-orbit"></div>
+        <p class="eyebrow">VoidForge launching</p>
+        <h2 id="loadingStep">Checking game</h2>
+        <p id="loadingDetail">Verifying the browser entry point.</p>
+        <div class="indeterminate"><i></i></div>
+      </div>
+
+      <div class="game-error" id="gameError" hidden></div>
+
+      <iframe
+        id="gameFrame"
+        title="VoidForge game"
+        allow="fullscreen; gamepad; autoplay; pointer-lock"
+        referrerpolicy="strict-origin-when-cross-origin">
+      </iframe>
+    </div>
   </section>
+
   <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
   <script type="module" src="assets/launcher.js"></script>
 </body>
 </html>
