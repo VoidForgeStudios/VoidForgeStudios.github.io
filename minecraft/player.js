@@ -6,9 +6,9 @@ export class Player {
     this.camera = camera;
     this.dom = dom;
 
-    // =========================
-    // POSITION
-    // =========================
+    // ============================================================
+    // POSITION / PHYSICS
+    // ============================================================
 
     this.position = new THREE.Vector3(0.5, 15, 0.5);
     this.velocity = new THREE.Vector3();
@@ -17,18 +17,69 @@ export class Player {
     this.pitch = 0;
 
     this.onGround = false;
+    this.wasOnGround = false;
+
     this.keys = {};
 
-    // =========================
+    // ============================================================
     // PLAYER DIMENSIONS
-    // =========================
+    // ============================================================
 
-    this.radius = 0.3;
-    this.height = 1.6;
+    this.radius = 0.30;
 
-    // =========================
+    this.standHeight = 1.60;
+    this.crouchHeight = 1.15;
+
+    this.height = this.standHeight;
+
+    this.crouching = false;
+
+    // ============================================================
+    // MOVEMENT
+    // ============================================================
+
+    this.walkSpeed = 5;
+    this.sprintSpeed = 7;
+
+    this.acceleration = 35;
+    this.airAcceleration = 12;
+
+    this.friction = 28;
+    this.airFriction = 2;
+
+    this.jumpVelocity = 8.5;
+
+    // ============================================================
+    // GRAVITY
+    // ============================================================
+
+    this.gravity = 25;
+
+    // ============================================================
+    // WATER
+    // ============================================================
+
+    this.inWater = false;
+    this.waterSurface = false;
+
+    this.waterGravity = 8;
+    this.waterAcceleration = 12;
+    this.waterSpeed = 3.2;
+    this.waterJumpVelocity = 5.5;
+
+    // ============================================================
+    // FALL DAMAGE
+    // ============================================================
+
+    this.fallStartY = 0;
+    this.fallDistance = 0;
+
+    this.fallDamageStart = 3;
+    this.fallDamageMultiplier = 2;
+
+    // ============================================================
     // HEALTH
-    // =========================
+    // ============================================================
 
     this.maxHealth = 20;
     this.health = 20;
@@ -36,9 +87,39 @@ export class Player {
     this.dead = false;
     this.invulnerable = false;
 
-    // =========================
+    // ============================================================
+    // SPRINT / STAMINA
+    // ============================================================
+
+    this.maxStamina = 100;
+    this.stamina = this.maxStamina;
+
+    this.staminaDrain = 22;
+    this.staminaRegen = 18;
+
+    this.canSprint = true;
+    this.isSprinting = false;
+
+    // ============================================================
+    // KNOCKBACK
+    // ============================================================
+
+    this.knockbackVelocity = new THREE.Vector3();
+
+    // ============================================================
+    // HEAD BOB
+    // ============================================================
+
+    this.bobTime = 0;
+    this.bobAmount = 0;
+    this.bobTarget = 0;
+
+    this.cameraBobX = 0;
+    this.cameraBobY = 0;
+
+    // ============================================================
     // MOBILE
-    // =========================
+    // ============================================================
 
     this.mobile = {
       moveX: 0,
@@ -50,13 +131,25 @@ export class Player {
       lastLookX: 0,
       lastLookY: 0,
 
-      jump: false,
-      sprint: false
+      jumpPressed: false,
+      jumpHeld: false,
+
+      sprintPressed: false,
+      sprintHeld: false,
+
+      crouchPressed: false,
+      crouchHeld: false
     };
 
-    // =========================
+    // ============================================================
+    // INPUT
+    // ============================================================
+
+    this.jumpRequested = false;
+
+    // ============================================================
     // SETUP
-    // =========================
+    // ============================================================
 
     this.createMobileControls();
     this.setupKeyboard();
@@ -64,6 +157,11 @@ export class Player {
     this.setupTouchLook();
 
     this.createHealthUI();
+    this.createStaminaUI();
+    this.createDamageEffects();
+
+    // Make sure camera starts correctly.
+    this.updateCamera(0);
   }
 
   // ============================================================
@@ -73,6 +171,14 @@ export class Player {
   setupKeyboard() {
     window.addEventListener("keydown", e => {
       this.keys[e.code] = true;
+
+      // Jump only when key is initially pressed.
+      if (
+        e.code === "Space" &&
+        !e.repeat
+      ) {
+        this.jumpRequested = true;
+      }
     });
 
     window.addEventListener("keyup", e => {
@@ -81,27 +187,44 @@ export class Player {
 
     window.addEventListener("blur", () => {
       this.keys = {};
+
+      this.mobile.jumpHeld = false;
+      this.mobile.sprintHeld = false;
+      this.mobile.crouchHeld = false;
+
+      this.mobile.moveX = 0;
+      this.mobile.moveZ = 0;
+
+      this.jumpRequested = false;
     });
   }
 
   // ============================================================
-  // MOUSE
+  // MOUSE LOOK
   // ============================================================
 
   setupMouse() {
     this.dom.addEventListener("mousemove", e => {
-      if (document.pointerLockElement !== this.dom)
+      if (
+        document.pointerLockElement !==
+        this.dom
+      ) {
         return;
+      }
 
       if (this.dead)
         return;
 
-      this.yaw -= e.movementX * 0.0025;
-      this.pitch -= e.movementY * 0.0025;
+      this.yaw -=
+        e.movementX * 0.0025;
 
-      this.pitch = Math.max(
+      this.pitch -=
+        e.movementY * 0.0025;
+
+      this.pitch = THREE.MathUtils.clamp(
+        this.pitch,
         -1.5,
-        Math.min(1.5, this.pitch)
+        1.5
       );
     });
   }
@@ -111,7 +234,8 @@ export class Player {
   // ============================================================
 
   createMobileControls() {
-    const style = document.createElement("style");
+    const style =
+      document.createElement("style");
 
     style.textContent = `
       #mobileControls {
@@ -137,9 +261,11 @@ export class Player {
 
         border-radius: 50%;
 
-        background: rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.10);
 
-        border: 2px solid rgba(255,255,255,0.3);
+        border:
+          2px solid
+          rgba(255,255,255,0.30);
 
         pointer-events: auto;
 
@@ -157,11 +283,17 @@ export class Player {
 
         border-radius: 50%;
 
-        background: rgba(255,255,255,0.35);
+        background:
+          rgba(255,255,255,0.35);
 
-        border: 2px solid rgba(255,255,255,0.5);
+        border:
+          2px solid
+          rgba(255,255,255,0.5);
 
         pointer-events: none;
+
+        transition:
+          transform 0.04s linear;
       }
 
       .mobileButton {
@@ -172,9 +304,12 @@ export class Player {
 
         border-radius: 50%;
 
-        background: rgba(255,255,255,0.15);
+        background:
+          rgba(255,255,255,0.13);
 
-        border: 2px solid rgba(255,255,255,0.35);
+        border:
+          2px solid
+          rgba(255,255,255,0.35);
 
         color: white;
 
@@ -189,7 +324,22 @@ export class Player {
 
         touch-action: none;
 
-        -webkit-tap-highlight-color: transparent;
+        -webkit-tap-highlight-color:
+          transparent;
+
+        box-sizing: border-box;
+
+        transition:
+          transform 0.08s,
+          background 0.08s;
+      }
+
+      .mobileButton:active {
+        background:
+          rgba(255,255,255,0.32);
+
+        transform:
+          scale(0.92);
       }
 
       #jumpButton {
@@ -204,20 +354,88 @@ export class Player {
         font-size: 20px;
       }
 
-      .mobileButton:active {
-        background: rgba(255,255,255,0.3);
-        transform: scale(0.94);
+      #crouchButton {
+        right: 30px;
+        bottom: 30px;
+
+        font-size: 20px;
       }
 
-      @media (min-width: 800px) {
-        #mobileControls {
-          display: none;
-        }
+      #staminaHUD {
+        position: fixed;
+
+        left: 50%;
+        transform: translateX(-50%);
+
+        bottom: 58px;
+
+        width: 220px;
+        height: 8px;
+
+        background: rgba(0,0,0,0.45);
+
+        border:
+          1px solid
+          rgba(255,255,255,0.25);
+
+        border-radius: 5px;
+
+        overflow: hidden;
+
+        z-index: 10001;
+
+        pointer-events: none;
+      }
+
+      #staminaFill {
+        width: 100%;
+        height: 100%;
+
+        background:
+          linear-gradient(
+            90deg,
+            #36d65c,
+            #9cff3b
+          );
+
+        transform-origin: left center;
+      }
+
+      #damageOverlay {
+        position: fixed;
+        inset: 0;
+
+        background:
+          radial-gradient(
+            circle,
+            transparent 35%,
+            rgba(255,0,0,0.65)
+          );
+
+        opacity: 0;
+
+        z-index: 10000;
+
+        pointer-events: none;
+
+        transition:
+          opacity 0.08s ease-out;
       }
 
       @media (max-width: 799px) {
         #mobileControls {
           display: block;
+        }
+
+        #staminaHUD {
+          bottom: 126px;
+          width: 170px;
+        }
+      }
+
+      @media (min-width: 800px) {
+        #mobileControls {
+          display: none;
         }
       }
     `;
@@ -234,12 +452,25 @@ export class Player {
         <div id="stick"></div>
       </div>
 
-      <div id="jumpButton" class="mobileButton">
+      <div
+        id="jumpButton"
+        class="mobileButton"
+      >
         ↑
       </div>
 
-      <div id="sprintButton" class="mobileButton">
+      <div
+        id="sprintButton"
+        class="mobileButton"
+      >
         ⚡
+      </div>
+
+      <div
+        id="crouchButton"
+        class="mobileButton"
+      >
+        ▼
       </div>
     `;
 
@@ -255,10 +486,14 @@ export class Player {
 
   setupJoystick() {
     const joystick =
-      document.getElementById("joystick");
+      document.getElementById(
+        "joystick"
+      );
 
     const stick =
-      document.getElementById("stick");
+      document.getElementById(
+        "stick"
+      );
 
     const radius = 45;
 
@@ -268,28 +503,48 @@ export class Player {
 
       let x =
         touch.clientX -
-        (rect.left + rect.width / 2);
+        (rect.left +
+          rect.width / 2);
 
       let y =
         touch.clientY -
-        (rect.top + rect.height / 2);
+        (rect.top +
+          rect.height / 2);
 
       const distance =
-        Math.sqrt(x * x + y * y);
+        Math.sqrt(
+          x * x +
+          y * y
+        );
 
-      if (distance > radius) {
-        x = (x / distance) * radius;
-        y = (y / distance) * radius;
+      if (
+        distance > radius
+      ) {
+        x =
+          (x / distance) *
+          radius;
+
+        y =
+          (y / distance) *
+          radius;
       }
 
       stick.style.transform =
         `translate(${x}px, ${y}px)`;
 
       this.mobile.moveX =
-        x / radius;
+        THREE.MathUtils.clamp(
+          x / radius,
+          -1,
+          1
+        );
 
       this.mobile.moveZ =
-        y / radius;
+        THREE.MathUtils.clamp(
+          y / radius,
+          -1,
+          1
+        );
     };
 
     joystick.addEventListener(
@@ -319,7 +574,10 @@ export class Player {
         if (this.dead)
           return;
 
-        for (const touch of e.changedTouches) {
+        for (
+          const touch of
+          e.changedTouches
+        ) {
           if (
             touch.identifier ===
             this.mobile.moveId
@@ -332,12 +590,16 @@ export class Player {
     );
 
     const stop = e => {
-      for (const touch of e.changedTouches) {
+      for (
+        const touch of
+        e.changedTouches
+      ) {
         if (
           touch.identifier ===
           this.mobile.moveId
         ) {
-          this.mobile.moveId = null;
+          this.mobile.moveId =
+            null;
 
           this.mobile.moveX = 0;
           this.mobile.moveZ = 0;
@@ -365,10 +627,23 @@ export class Player {
 
   setupButtons() {
     const jump =
-      document.getElementById("jumpButton");
+      document.getElementById(
+        "jumpButton"
+      );
 
     const sprint =
-      document.getElementById("sprintButton");
+      document.getElementById(
+        "sprintButton"
+      );
+
+    const crouch =
+      document.getElementById(
+        "crouchButton"
+      );
+
+    // ----------------------------------------------------------
+    // JUMP
+    // ----------------------------------------------------------
 
     jump.addEventListener(
       "touchstart",
@@ -378,7 +653,16 @@ export class Player {
         if (this.dead)
           return;
 
-        this.mobile.jump = true;
+        // Only request jump once.
+        if (
+          !this.mobile.jumpHeld
+        ) {
+          this.jumpRequested =
+            true;
+        }
+
+        this.mobile.jumpHeld =
+          true;
       },
       { passive: false }
     );
@@ -388,7 +672,8 @@ export class Player {
       e => {
         e.preventDefault();
 
-        this.mobile.jump = false;
+        this.mobile.jumpHeld =
+          false;
       },
       { passive: false }
     );
@@ -396,10 +681,15 @@ export class Player {
     jump.addEventListener(
       "touchcancel",
       () => {
-        this.mobile.jump = false;
+        this.mobile.jumpHeld =
+          false;
       }
     );
 
+    // ----------------------------------------------------------
+    // SPRINT
+    // ----------------------------------------------------------
+
     sprint.addEventListener(
       "touchstart",
       e => {
@@ -408,7 +698,8 @@ export class Player {
         if (this.dead)
           return;
 
-        this.mobile.sprint = true;
+        this.mobile.sprintHeld =
+          true;
       },
       { passive: false }
     );
@@ -418,7 +709,8 @@ export class Player {
       e => {
         e.preventDefault();
 
-        this.mobile.sprint = false;
+        this.mobile.sprintHeld =
+          false;
       },
       { passive: false }
     );
@@ -426,13 +718,51 @@ export class Player {
     sprint.addEventListener(
       "touchcancel",
       () => {
-        this.mobile.sprint = false;
+        this.mobile.sprintHeld =
+          false;
+      }
+    );
+
+    // ----------------------------------------------------------
+    // CROUCH
+    // ----------------------------------------------------------
+
+    crouch.addEventListener(
+      "touchstart",
+      e => {
+        e.preventDefault();
+
+        if (this.dead)
+          return;
+
+        this.mobile.crouchHeld =
+          true;
+      },
+      { passive: false }
+    );
+
+    crouch.addEventListener(
+      "touchend",
+      e => {
+        e.preventDefault();
+
+        this.mobile.crouchHeld =
+          false;
+      },
+      { passive: false }
+    );
+
+    crouch.addEventListener(
+      "touchcancel",
+      () => {
+        this.mobile.crouchHeld =
+          false;
       }
     );
   }
 
   // ============================================================
-  // MOBILE CAMERA LOOK
+  // TOUCH CAMERA
   // ============================================================
 
   setupTouchLook() {
@@ -442,20 +772,27 @@ export class Player {
         if (this.dead)
           return;
 
-        for (const touch of e.changedTouches) {
-
+        for (
+          const touch of
+          e.changedTouches
+        ) {
           const target =
             touch.target;
 
           if (
-            target.closest("#joystick") ||
-            target.closest(".mobileButton")
+            target.closest(
+              "#joystick"
+            ) ||
+            target.closest(
+              ".mobileButton"
+            )
           ) {
             continue;
           }
 
           if (
-            this.mobile.lookId === null
+            this.mobile.lookId ===
+            null
           ) {
             this.mobile.lookId =
               touch.identifier;
@@ -479,8 +816,10 @@ export class Player {
         if (this.dead)
           return;
 
-        for (const touch of e.changedTouches) {
-
+        for (
+          const touch of
+          e.changedTouches
+        ) {
           if (
             touch.identifier !==
             this.mobile.lookId
@@ -496,19 +835,19 @@ export class Player {
             touch.clientY -
             this.mobile.lastLookY;
 
+          // Improved touch sensitivity.
           this.yaw -=
-            dx * 0.005;
+            dx * 0.0038;
 
           this.pitch -=
-            dy * 0.005;
+            dy * 0.0038;
 
-          this.pitch = Math.max(
-            -1.5,
-            Math.min(
-              1.5,
-              this.pitch
-            )
-          );
+          this.pitch =
+            THREE.MathUtils.clamp(
+              this.pitch,
+              -1.5,
+              1.5
+            );
 
           this.mobile.lastLookX =
             touch.clientX;
@@ -521,13 +860,16 @@ export class Player {
     );
 
     const stopLook = e => {
-      for (const touch of e.changedTouches) {
-
+      for (
+        const touch of
+        e.changedTouches
+      ) {
         if (
           touch.identifier ===
           this.mobile.lookId
         ) {
-          this.mobile.lookId = null;
+          this.mobile.lookId =
+            null;
         }
       }
     };
@@ -544,23 +886,20 @@ export class Player {
   }
 
   // ============================================================
-  // HEALTH HUD
+  // HEALTH UI
   // ============================================================
 
   createHealthUI() {
     const style =
-      document.createElement("style");
+      document.createElement(
+        "style"
+      );
 
     style.textContent = `
       #healthHUD {
         position: fixed;
 
         left: 50%;
-
-        /*
-         * Hotbar is normally near the bottom.
-         * Hearts sit directly above it.
-         */
         bottom: 78px;
 
         transform:
@@ -593,9 +932,6 @@ export class Player {
         align-items: center;
         justify-content: center;
 
-        margin: 0;
-        padding: 0;
-
         font-family: Arial, sans-serif;
 
         font-size: 27px;
@@ -609,22 +945,24 @@ export class Player {
         text-shadow:
           2px 2px 0 #000,
           -1px -1px 0 #000;
+
+        transition:
+          transform 0.12s,
+          opacity 0.12s;
       }
 
-      /*
-       * Mobile
-       */
+      .heart.hit {
+        transform:
+          scale(1.35);
+
+        filter:
+          brightness(1.5);
+      }
+
       @media (max-width: 799px) {
-
         #healthHUD {
-          /*
-           * Mobile hotbar position
-           */
           bottom: 145px;
-
           height: 25px;
-
-          gap: 0;
         }
 
         .heart {
@@ -632,7 +970,6 @@ export class Player {
           height: 23px;
 
           font-size: 22px;
-
           line-height: 23px;
         }
       }
@@ -641,16 +978,24 @@ export class Player {
     document.head.appendChild(style);
 
     const hud =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     hud.id = "healthHUD";
 
-    for (let i = 0; i < 10; i++) {
-
+    for (
+      let i = 0;
+      i < 10;
+      i++
+    ) {
       const heart =
-        document.createElement("span");
+        document.createElement(
+          "span"
+        );
 
-      heart.className = "heart";
+      heart.className =
+        "heart";
 
       heart.textContent = "♥";
 
@@ -665,7 +1010,190 @@ export class Player {
   }
 
   // ============================================================
-  // UPDATE HEARTS
+  // STAMINA UI
+  // ============================================================
+
+  createStaminaUI() {
+    const hud =
+      document.createElement(
+        "div"
+      );
+
+    hud.id = "staminaHUD";
+
+    hud.innerHTML = `
+      <div id="staminaFill"></div>
+    `;
+
+    document.body.appendChild(hud);
+
+    this.staminaHUD = hud;
+
+    this.staminaFill =
+      document.getElementById(
+        "staminaFill"
+      );
+
+    this.updateStaminaUI();
+  }
+
+  updateStaminaUI() {
+    if (!this.staminaFill)
+      return;
+
+    const percent =
+      THREE.MathUtils.clamp(
+        this.stamina /
+          this.maxStamina,
+        0,
+        1
+      );
+
+    this.staminaFill.style.width =
+      `${percent * 100}%`;
+
+    if (percent < 0.2) {
+      this.staminaFill.style.background =
+        "#ff3b30";
+    } else if (percent < 0.5) {
+      this.staminaFill.style.background =
+        "#ffd60a";
+    } else {
+      this.staminaFill.style.background =
+        "#42e65a";
+    }
+  }
+
+  // ============================================================
+  // DAMAGE EFFECTS
+  // ============================================================
+
+  createDamageEffects() {
+    const overlay =
+      document.createElement(
+        "div"
+      );
+
+    overlay.id =
+      "damageOverlay";
+
+    document.body.appendChild(
+      overlay
+    );
+
+    this.damageOverlay =
+      overlay;
+
+    // Simple generated hurt sound.
+    // No external audio file required.
+    this.audioContext = null;
+  }
+
+  playHurtSound() {
+    try {
+      if (!this.audioContext) {
+        this.audioContext =
+          new (
+            window.AudioContext ||
+            window.webkitAudioContext
+          )();
+      }
+
+      const ctx =
+        this.audioContext;
+
+      const oscillator =
+        ctx.createOscillator();
+
+      const gain =
+        ctx.createGain();
+
+      oscillator.type =
+        "sawtooth";
+
+      oscillator.frequency
+        .setValueAtTime(
+          120,
+          ctx.currentTime
+        );
+
+      oscillator.frequency
+        .exponentialRampToValueAtTime(
+          55,
+          ctx.currentTime + 0.15
+        );
+
+      gain.gain.setValueAtTime(
+        0.12,
+        ctx.currentTime
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        ctx.currentTime + 0.15
+      );
+
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+
+      oscillator.start();
+
+      oscillator.stop(
+        ctx.currentTime + 0.15
+      );
+    } catch (err) {
+      // Audio may be blocked until user interaction.
+    }
+  }
+
+  showDamageEffect() {
+    if (!this.damageOverlay)
+      return;
+
+    this.damageOverlay.style.opacity =
+      "1";
+
+    clearTimeout(
+      this.damageEffectTimer
+    );
+
+    this.damageEffectTimer =
+      setTimeout(() => {
+        this.damageOverlay.style.opacity =
+          "0";
+      }, 120);
+
+    // Heart animation.
+    if (this.healthHUD) {
+      const hearts =
+        this.healthHUD.querySelectorAll(
+          ".heart"
+        );
+
+      hearts.forEach(heart => {
+        heart.classList.remove(
+          "hit"
+        );
+
+        void heart.offsetWidth;
+
+        heart.classList.add(
+          "hit"
+        );
+
+        setTimeout(() => {
+          heart.classList.remove(
+            "hit"
+          );
+        }, 150);
+      });
+    }
+
+    this.playHurtSound();
+  }
+
+  // ============================================================
+  // UPDATE HEALTH
   // ============================================================
 
   updateHealthUI() {
@@ -687,27 +1215,31 @@ export class Player {
 
     hearts.forEach(
       (heart, index) => {
+        if (
+          index <
+          fullHearts
+        ) {
+          heart.textContent =
+            "♥";
 
-        if (index < fullHearts) {
-
-          heart.textContent = "♥";
-
-          heart.style.opacity = "1";
-
+          heart.style.opacity =
+            "1";
         } else if (
-          index === fullHearts &&
+          index ===
+            fullHearts &&
           halfHeart
         ) {
+          heart.textContent =
+            "♥";
 
-          heart.textContent = "♥";
-
-          heart.style.opacity = "0.5";
-
+          heart.style.opacity =
+            "0.5";
         } else {
+          heart.textContent =
+            "♡";
 
-          heart.textContent = "♡";
-
-          heart.style.opacity = "0.45";
+          heart.style.opacity =
+            "0.45";
         }
       }
     );
@@ -717,7 +1249,11 @@ export class Player {
   // DAMAGE
   // ============================================================
 
-  damage(amount) {
+  damage(
+    amount,
+    sourcePosition = null,
+    knockbackStrength = 5
+  ) {
     if (
       this.dead ||
       this.invulnerable
@@ -729,7 +1265,16 @@ export class Player {
       Number(amount) || 0;
 
     amount =
-      Math.max(0, amount);
+      Math.max(
+        0,
+        amount
+      );
+
+    if (
+      amount <= 0
+    ) {
+      return;
+    }
 
     this.health =
       Math.max(
@@ -739,18 +1284,71 @@ export class Player {
 
     this.updateHealthUI();
 
-    this.invulnerable = true;
+    this.showDamageEffect();
 
-    setTimeout(() => {
-      this.invulnerable = false;
-    }, 500);
+    // ----------------------------------------------------------
+    // KNOCKBACK
+    // ----------------------------------------------------------
+
+    if (
+      sourcePosition
+    ) {
+      const direction =
+        new THREE.Vector3()
+          .subVectors(
+            this.position,
+            sourcePosition
+          );
+
+      direction.y = 0;
+
+      if (
+        direction.lengthSq() <
+        0.0001
+      ) {
+        direction.set(
+          0,
+          0,
+          1
+        );
+      }
+
+      direction.normalize();
+
+      this.knockbackVelocity
+        .addScaledVector(
+          direction,
+          knockbackStrength
+        );
+
+      this.knockbackVelocity.y =
+        Math.max(
+          this.knockbackVelocity.y,
+          3
+        );
+    }
+
+    this.invulnerable =
+      true;
+
+    clearTimeout(
+      this.invulnerabilityTimer
+    );
+
+    this.invulnerabilityTimer =
+      setTimeout(() => {
+        this.invulnerable =
+          false;
+      }, 500);
 
     console.log(
       `Player took ${amount} damage. ` +
       `Health: ${this.health}/${this.maxHealth}`
     );
 
-    if (this.health <= 0) {
+    if (
+      this.health <= 0
+    ) {
       this.die();
     }
   }
@@ -767,7 +1365,10 @@ export class Player {
       Number(amount) || 0;
 
     amount =
-      Math.max(0, amount);
+      Math.max(
+        0,
+        amount
+      );
 
     this.health =
       Math.min(
@@ -776,11 +1377,6 @@ export class Player {
       );
 
     this.updateHealthUI();
-
-    console.log(
-      `Player healed. ` +
-      `Health: ${this.health}/${this.maxHealth}`
-    );
   }
 
   // ============================================================
@@ -795,17 +1391,17 @@ export class Player {
       Number(amount) || 0;
 
     this.health =
-      Math.max(
+      THREE.MathUtils.clamp(
+        amount,
         0,
-        Math.min(
-          this.maxHealth,
-          amount
-        )
+        this.maxHealth
       );
 
     this.updateHealthUI();
 
-    if (this.health <= 0) {
+    if (
+      this.health <= 0
+    ) {
       this.die();
     }
   }
@@ -828,15 +1424,24 @@ export class Player {
       0
     );
 
+    this.knockbackVelocity.set(
+      0,
+      0,
+      0
+    );
+
     this.mobile.moveX = 0;
     this.mobile.moveZ = 0;
 
-    this.mobile.jump = false;
-    this.mobile.sprint = false;
+    this.mobile.jumpHeld = false;
+    this.mobile.sprintHeld = false;
+    this.mobile.crouchHeld = false;
 
     this.updateHealthUI();
 
-    console.log("Player died");
+    console.log(
+      "Player died"
+    );
 
     if (
       typeof this.onDeath ===
@@ -867,28 +1472,57 @@ export class Player {
       0
     );
 
+    this.knockbackVelocity.set(
+      0,
+      0,
+      0
+    );
+
     this.health =
       this.maxHealth;
 
+    this.stamina =
+      this.maxStamina;
+
     this.dead = false;
 
-    this.invulnerable = false;
+    this.invulnerable =
+      false;
 
     this.onGround = false;
+
+    this.fallDistance = 0;
+
+    this.crouching = false;
+
+    this.height =
+      this.standHeight;
 
     this.mobile.moveX = 0;
     this.mobile.moveZ = 0;
 
-    this.mobile.jump = false;
-    this.mobile.sprint = false;
+    this.mobile.jumpHeld =
+      false;
+
+    this.mobile.sprintHeld =
+      false;
+
+    this.mobile.crouchHeld =
+      false;
+
+    this.jumpRequested =
+      false;
 
     this.updateHealthUI();
+    this.updateStaminaUI();
 
-    console.log("Player respawned");
+    console.log(
+      "Player respawned"
+    );
   }
 
   // ============================================================
-  // COLLISION
+  // BLOCK COLLISION
   // ============================================================
 
   checkCollision(pos) {
@@ -910,7 +1544,8 @@ export class Player {
 
     const minY =
       Math.floor(
-        pos.y + eps
+        pos.y +
+        eps
       );
 
     const maxY =
@@ -939,19 +1574,16 @@ export class Player {
       x <= maxX;
       x++
     ) {
-
       for (
         let y = minY;
         y <= maxY;
         y++
       ) {
-
         for (
           let z = minZ;
           z <= maxZ;
           z++
         ) {
-
           if (y < 0)
             return true;
 
@@ -962,8 +1594,14 @@ export class Player {
               z
             );
 
-          if (block)
+          if (
+            block &&
+            !this.isWaterBlock(
+              block
+            )
+          ) {
             return true;
+          }
         }
       }
     }
@@ -972,44 +1610,146 @@ export class Player {
   }
 
   // ============================================================
-  // UPDATE
+  // WATER CHECK
   // ============================================================
 
-  update(dt) {
+  isWaterBlock(block) {
+    if (!block)
+      return false;
 
-    // Dead players don't move
-    if (this.dead) {
+    if (
+      block === "water" ||
+      block === "WATER"
+    ) {
+      return true;
+    }
 
-      this.velocity.set(
-        0,
-        0,
-        0
+    if (
+      typeof block ===
+      "object"
+    ) {
+      const type =
+        String(
+          block.type ??
+          block.name ??
+          block.id ??
+          ""
+        ).toLowerCase();
+
+      return (
+        type === "water" ||
+        type.includes("water")
       );
+    }
+
+    return false;
+  }
+
+  isPointInWater(
+    x,
+    y,
+    z
+  ) {
+    const block =
+      getBlock(
+        Math.floor(x),
+        Math.floor(y),
+        Math.floor(z)
+      );
+
+    return this.isWaterBlock(
+      block
+    );
+  }
+
+  updateWaterState() {
+    const feetWater =
+      this.isPointInWater(
+        this.position.x,
+        this.position.y + 0.1,
+        this.position.z
+      );
+
+    const bodyWater =
+      this.isPointInWater(
+        this.position.x,
+        this.position.y +
+          this.height * 0.55,
+        this.position.z
+      );
+
+    const headWater =
+      this.isPointInWater(
+        this.position.x,
+        this.position.y +
+          this.height -
+          0.1,
+        this.position.z
+      );
+
+    this.inWater =
+      feetWater ||
+      bodyWater;
+
+    this.waterSurface =
+      bodyWater &&
+      !headWater;
+  }
+
+  // ============================================================
+  // CROUCH
+  // ============================================================
+
+  updateCrouch() {
+    const wantsCrouch =
+      this.keys.ControlLeft ||
+      this.keys.ControlRight ||
+      this.mobile.crouchHeld;
+
+    if (
+      wantsCrouch &&
+      !this.crouching
+    ) {
+      this.crouching =
+        true;
+
+      this.height =
+        this.crouchHeight;
 
       return;
     }
 
-    // Prevent huge physics jumps
-    dt =
-      Math.min(
-        dt,
-        0.1
-      );
+    if (
+      !wantsCrouch &&
+      this.crouching
+    ) {
+      // Don't stand if there isn't enough
+      // room above the player.
+      const oldHeight =
+        this.height;
 
-    // ========================================================
-    // SPEED
-    // ========================================================
+      this.height =
+        this.standHeight;
 
-    const speed =
-      this.keys.ShiftLeft ||
-      this.mobile.sprint
-        ? 7
-        : 5;
+      if (
+        this.checkCollision(
+          this.position
+        )
+      ) {
+        this.height =
+          oldHeight;
+      } else {
+        this.crouching =
+          false;
+      }
+    }
+  }
 
-    // ========================================================
-    // MOVEMENT INPUT
-    // ========================================================
+  // ============================================================
+  // MOVEMENT INPUT
+  // ============================================================
 
+  getMovementInput() {
     let moveX =
       (this.keys.KeyD ? 1 : 0) -
       (this.keys.KeyA ? 1 : 0);
@@ -1018,12 +1758,10 @@ export class Player {
       (this.keys.KeyS ? 1 : 0) -
       (this.keys.KeyW ? 1 : 0);
 
-    // Mobile joystick
     if (
       this.mobile.moveX !== 0 ||
       this.mobile.moveZ !== 0
     ) {
-
       moveX =
         this.mobile.moveX;
 
@@ -1031,22 +1769,137 @@ export class Player {
         this.mobile.moveZ;
     }
 
-    // ========================================================
-    // DIRECTION
-    // ========================================================
-
-    const dir =
+    const input =
       new THREE.Vector3(
         moveX,
         0,
         moveZ
       );
 
+    // Prevent faster diagonal movement.
     if (
-      dir.lengthSq() > 0
+      input.lengthSq() > 1
     ) {
+      input.normalize();
+    }
 
-      dir
+    return input;
+  }
+
+  // ============================================================
+  // SPRINT
+  // ============================================================
+
+  updateSprint(
+    dt,
+    input
+  ) {
+    const keyboardSprint =
+      this.keys.ShiftLeft ||
+      this.keys.ShiftRight;
+
+    const mobileSprint =
+      this.mobile.sprintHeld;
+
+    const wantsSprint =
+      keyboardSprint ||
+      mobileSprint;
+
+    const moving =
+      input.lengthSq() >
+      0.05;
+
+    this.isSprinting =
+      wantsSprint &&
+      moving &&
+      this.onGround &&
+      !this.crouching &&
+      !this.inWater &&
+      this.stamina > 0;
+
+    if (
+      this.isSprinting
+    ) {
+      this.stamina -=
+        this.staminaDrain *
+        dt;
+
+      if (
+        this.stamina <= 0
+      ) {
+        this.stamina = 0;
+        this.canSprint = false;
+      }
+    } else {
+      this.stamina +=
+        this.staminaRegen *
+        dt;
+
+      if (
+        this.stamina >=
+        this.maxStamina
+      ) {
+        this.stamina =
+          this.maxStamina;
+
+        this.canSprint = true;
+      }
+
+      // Allow sprint again once there is
+      // enough stamina.
+      if (
+        this.stamina > 10
+      ) {
+        this.canSprint = true;
+      }
+    }
+
+    this.stamina =
+      THREE.MathUtils.clamp(
+        this.stamina,
+        0,
+        this.maxStamina
+      );
+
+    this.updateStaminaUI();
+  }
+
+  // ============================================================
+  // HORIZONTAL MOVEMENT
+  // ============================================================
+
+  updateHorizontalMovement(
+    dt,
+    input
+  ) {
+    let speed;
+
+    if (this.inWater) {
+      speed =
+        this.waterSpeed;
+    } else if (
+      this.crouching
+    ) {
+      speed =
+        this.walkSpeed * 0.45;
+    } else if (
+      this.isSprinting
+    ) {
+      speed =
+        this.sprintSpeed;
+    } else {
+      speed =
+        this.walkSpeed;
+    }
+
+    const direction =
+      input.clone();
+
+    if (
+      direction.lengthSq() >
+      0
+    ) {
+      direction
         .normalize()
         .applyAxisAngle(
           new THREE.Vector3(
@@ -1058,117 +1911,477 @@ export class Player {
         );
     }
 
-    // ========================================================
-    // HORIZONTAL VELOCITY
-    // ========================================================
+    const targetX =
+      direction.x * speed;
 
-    this.velocity.x =
-      dir.x * speed;
+    const targetZ =
+      direction.z * speed;
 
-    this.velocity.z =
-      dir.z * speed;
-
-    // ========================================================
-    // GRAVITY
-    // ========================================================
-
-    this.velocity.y -=
-      25 * dt;
-
-    // ========================================================
-    // JUMP
-    // ========================================================
+    const acceleration =
+      this.inWater
+        ? this.waterAcceleration
+        : this.onGround
+          ? this.acceleration
+          : this.airAcceleration;
 
     if (
-      (
-        this.keys.Space ||
-        this.mobile.jump
-      ) &&
-      this.onGround
+      input.lengthSq() > 0
     ) {
+      this.velocity.x =
+        THREE.MathUtils.damp(
+          this.velocity.x,
+          targetX,
+          acceleration,
+          dt
+        );
 
+      this.velocity.z =
+        THREE.MathUtils.damp(
+          this.velocity.z,
+          targetZ,
+          acceleration,
+          dt
+        );
+    } else {
+      const friction =
+        this.inWater
+          ? 5
+          : this.onGround
+            ? this.friction
+            : this.airFriction;
+
+      this.velocity.x =
+        THREE.MathUtils.damp(
+          this.velocity.x,
+          0,
+          friction,
+          dt
+        );
+
+      this.velocity.z =
+        THREE.MathUtils.damp(
+          this.velocity.z,
+          0,
+          friction,
+          dt
+        );
+    }
+  }
+
+  // ============================================================
+  // JUMP
+  // ============================================================
+
+  updateJump() {
+    if (
+      !this.jumpRequested
+    ) {
+      return;
+    }
+
+    this.jumpRequested =
+      false;
+
+    if (this.dead)
+      return;
+
+    if (this.inWater) {
       this.velocity.y =
-        8.5;
+        this.waterJumpVelocity;
+
+      return;
+    }
+
+    if (this.onGround) {
+      this.velocity.y =
+        this.jumpVelocity;
 
       this.onGround =
         false;
+
+      this.fallDistance = 0;
+    }
+  }
+
+  // ============================================================
+  // GRAVITY
+  // ============================================================
+
+  updateVerticalPhysics(dt) {
+    if (this.inWater) {
+      this.velocity.y -=
+        this.waterGravity *
+        dt;
+
+      // Swimming upward when jump is held.
+      if (
+        this.mobile.jumpHeld ||
+        this.keys.Space
+      ) {
+        this.velocity.y =
+          THREE.MathUtils.damp(
+            this.velocity.y,
+            2.5,
+            8,
+            dt
+          );
+      }
+
+      // Don't let water movement become too fast.
+      this.velocity.y =
+        THREE.MathUtils.clamp(
+          this.velocity.y,
+          -3,
+          3
+        );
+
+      return;
     }
 
-    // ========================================================
-    // X COLLISION
-    // ========================================================
+    this.velocity.y -=
+      this.gravity * dt;
+  }
+
+  // ============================================================
+  // KNOCKBACK
+  // ============================================================
+
+  updateKnockback(dt) {
+    if (
+      this.knockbackVelocity.lengthSq()
+      <= 0.001
+    ) {
+      return;
+    }
 
     this.position.x +=
-      this.velocity.x * dt;
+      this.knockbackVelocity.x *
+      dt;
 
     if (
       this.checkCollision(
         this.position
       )
     ) {
-
       this.position.x -=
-        this.velocity.x * dt;
+        this.knockbackVelocity.x *
+        dt;
+
+      this.knockbackVelocity.x =
+        0;
+    }
+
+    this.position.z +=
+      this.knockbackVelocity.z *
+      dt;
+
+    if (
+      this.checkCollision(
+        this.position
+      )
+    ) {
+      this.position.z -=
+        this.knockbackVelocity.z *
+        dt;
+
+      this.knockbackVelocity.z =
+        0;
+    }
+
+    this.position.y +=
+      this.knockbackVelocity.y *
+      dt;
+
+    if (
+      this.checkCollision(
+        this.position
+      )
+    ) {
+      this.position.y -=
+        this.knockbackVelocity.y *
+        dt;
+
+      this.knockbackVelocity.y =
+        0;
+    }
+
+    this.knockbackVelocity.multiplyScalar(
+      Math.exp(-8 * dt)
+    );
+  }
+
+  // ============================================================
+  // X COLLISION
+  // ============================================================
+
+  moveX(amount) {
+    if (
+      amount === 0
+    ) {
+      return;
+    }
+
+    this.position.x +=
+      amount;
+
+    if (
+      this.checkCollision(
+        this.position
+      )
+    ) {
+      this.position.x -=
+        amount;
 
       this.velocity.x = 0;
     }
+  }
 
-    // ========================================================
-    // Z COLLISION
-    // ========================================================
+  // ============================================================
+  // Z COLLISION
+  // ============================================================
+
+  moveZ(amount) {
+    if (
+      amount === 0
+    ) {
+      return;
+    }
 
     this.position.z +=
-      this.velocity.z * dt;
+      amount;
 
     if (
       this.checkCollision(
         this.position
       )
     ) {
-
       this.position.z -=
-        this.velocity.z * dt;
+        amount;
 
       this.velocity.z = 0;
     }
+  }
 
-    // ========================================================
-    // Y COLLISION
-    // ========================================================
+  // ============================================================
+  // Y COLLISION
+  // ============================================================
+
+  moveY(amount) {
+    if (
+      amount === 0
+    ) {
+      return;
+    }
+
+    const oldY =
+      this.position.y;
 
     this.position.y +=
-      this.velocity.y * dt;
-
-    this.onGround = false;
+      amount;
 
     if (
       this.checkCollision(
         this.position
       )
     ) {
-
-      this.position.y -=
-        this.velocity.y * dt;
+      this.position.y =
+        oldY;
 
       if (
-        this.velocity.y < 0
+        amount < 0
       ) {
-        this.onGround = true;
+        this.onGround =
+          true;
       }
 
-      this.velocity.y = 0;
+      this.velocity.y =
+        0;
+    }
+  }
+
+  // ============================================================
+  // FALL DAMAGE
+  // ============================================================
+
+  updateFallDamage() {
+    // Started falling.
+    if (
+      !this.onGround &&
+      this.velocity.y < 0
+    ) {
+      if (
+        this.fallDistance <= 0
+      ) {
+        this.fallStartY =
+          this.position.y;
+      }
+
+      this.fallDistance =
+        Math.max(
+          this.fallDistance,
+          this.fallStartY -
+            this.position.y
+        );
     }
 
-    // ========================================================
-    // CAMERA
-    // ========================================================
+    // Landed.
+    if (
+      this.onGround &&
+      !this.wasOnGround
+    ) {
+      if (
+        !this.inWater &&
+        this.fallDistance >
+          this.fallDamageStart
+      ) {
+        const damage =
+          Math.floor(
+            (
+              this.fallDistance -
+              this.fallDamageStart
+            ) *
+            this.fallDamageMultiplier
+          );
 
-    this.camera.position.copy(
-      this.position
-    );
+        if (
+          damage > 0
+        ) {
+          this.damage(
+            damage
+          );
+        }
+      }
 
-    this.camera.position.y +=
-      this.height - 0.2;
+      this.fallDistance =
+        0;
+    }
+
+    this.wasOnGround =
+      this.onGround;
+  }
+
+  // ============================================================
+  // HEAD BOB
+  // ============================================================
+
+  updateHeadBob(
+    dt,
+    input
+  ) {
+    const horizontalSpeed =
+      Math.sqrt(
+        this.velocity.x *
+          this.velocity.x +
+        this.velocity.z *
+          this.velocity.z
+      );
+
+    const moving =
+      this.onGround &&
+      input.lengthSq() > 0.01 &&
+      horizontalSpeed > 0.2;
+
+    const target =
+      moving
+        ? this.isSprinting
+          ? 1
+          : 0.65
+        : 0;
+
+    this.bobAmount =
+      THREE.MathUtils.damp(
+        this.bobAmount,
+        target,
+        10,
+        dt
+      );
+
+    if (
+      this.bobAmount >
+      0.01
+    ) {
+      const frequency =
+        this.isSprinting
+          ? 12
+          : 9;
+
+      this.bobTime +=
+        dt * frequency;
+
+      this.cameraBobX =
+        Math.cos(
+          this.bobTime
+        ) *
+        0.025 *
+        this.bobAmount;
+
+      this.cameraBobY =
+        Math.abs(
+          Math.sin(
+            this.bobTime
+          )
+        ) *
+        0.045 *
+        this.bobAmount;
+    } else {
+      this.cameraBobX =
+        THREE.MathUtils.damp(
+          this.cameraBobX,
+          0,
+          10,
+          dt
+        );
+
+      this.cameraBobY =
+        THREE.MathUtils.damp(
+          this.cameraBobY,
+          0,
+          10,
+          dt
+        );
+    }
+  }
+
+  // ============================================================
+  // CAMERA
+  // ============================================================
+
+  updateCamera(dt) {
+    const targetEyeHeight =
+      this.height -
+      0.2;
+
+    let cameraY =
+      this.position.y +
+      targetEyeHeight;
+
+    // Crouch camera smoothing.
+    if (
+      dt > 0
+    ) {
+      const desired =
+        this.position.y +
+        targetEyeHeight;
+
+      this.camera.position.y =
+        THREE.MathUtils.damp(
+          this.camera.position.y,
+          desired +
+            this.cameraBobY,
+          15,
+          dt
+        );
+    } else {
+      this.camera.position.y =
+        cameraY;
+    }
+
+    this.camera.position.x =
+      this.position.x +
+      this.cameraBobX;
+
+    this.camera.position.z =
+      this.position.z;
 
     this.camera.rotation.order =
       "YXZ";
@@ -1178,5 +2391,145 @@ export class Player {
 
     this.camera.rotation.x =
       this.pitch;
+  }
+
+  // ============================================================
+  // MAIN UPDATE
+  // ============================================================
+
+  update(dt) {
+    if (this.dead) {
+      this.velocity.set(
+        0,
+        0,
+        0
+      );
+
+      this.updateCamera(dt);
+
+      return;
+    }
+
+    // Prevent huge physics jumps.
+    dt =
+      Math.min(
+        dt,
+        0.05
+      );
+
+    // ----------------------------------------------------------
+    // WATER
+    // ----------------------------------------------------------
+
+    this.updateWaterState();
+
+    // ----------------------------------------------------------
+    // CROUCH
+    // ----------------------------------------------------------
+
+    this.updateCrouch();
+
+    // ----------------------------------------------------------
+    // INPUT
+    // ----------------------------------------------------------
+
+    const input =
+      this.getMovementInput();
+
+    // ----------------------------------------------------------
+    // SPRINT
+    // ----------------------------------------------------------
+
+    this.updateSprint(
+      dt,
+      input
+    );
+
+    // ----------------------------------------------------------
+    // HORIZONTAL MOVEMENT
+    // ----------------------------------------------------------
+
+    this.updateHorizontalMovement(
+      dt,
+      input
+    );
+
+    // ----------------------------------------------------------
+    // JUMP
+    // ----------------------------------------------------------
+
+    this.updateJump();
+
+    // ----------------------------------------------------------
+    // GRAVITY
+    // ----------------------------------------------------------
+
+    this.updateVerticalPhysics(
+      dt
+    );
+
+    // ----------------------------------------------------------
+    // KNOCKBACK
+    // ----------------------------------------------------------
+
+    this.updateKnockback(
+      dt
+    );
+
+    // ----------------------------------------------------------
+    // X
+    // ----------------------------------------------------------
+
+    this.moveX(
+      this.velocity.x * dt
+    );
+
+    // ----------------------------------------------------------
+    // Z
+    // ----------------------------------------------------------
+
+    this.moveZ(
+      this.velocity.z * dt
+    );
+
+    // ----------------------------------------------------------
+    // Y
+    // ----------------------------------------------------------
+
+    this.onGround =
+      false;
+
+    this.moveY(
+      this.velocity.y * dt
+    );
+
+    // ----------------------------------------------------------
+    // FALL DAMAGE
+    // ----------------------------------------------------------
+
+    this.updateFallDamage();
+
+    // ----------------------------------------------------------
+    // WATER STATE AGAIN
+    // ----------------------------------------------------------
+
+    this.updateWaterState();
+
+    // ----------------------------------------------------------
+    // HEAD BOB
+    // ----------------------------------------------------------
+
+    this.updateHeadBob(
+      dt,
+      input
+    );
+
+    // ----------------------------------------------------------
+    // CAMERA
+    // ----------------------------------------------------------
+
+    this.updateCamera(
+      dt
+    );
   }
 }
