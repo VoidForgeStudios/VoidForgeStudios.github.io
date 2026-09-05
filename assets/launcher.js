@@ -91,7 +91,17 @@
 
       renderGames();
     } catch (error) {
-      console.error("Could not load games.json:", error);
+      const embeddedRegistry = $("#embeddedGameRegistry");
+
+      try {
+        games = embeddedRegistry ? JSON.parse(embeddedRegistry.textContent) : [];
+      } catch (fallbackError) {
+        games = [];
+        console.error("Could not load games.json or embedded registry:", fallbackError);
+      }
+
+      renderGames();
+      console.warn("Using embedded game registry because games.json could not be fetched:", error);
     }
   }
 
@@ -267,6 +277,13 @@
     window.addEventListener("offline", () => setText($("#connectionStatus"), "Offline mode"));
   }
 
+  function registerServiceWorker() {
+    if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+
+    navigator.serviceWorker.register("./sw.js", { scope: "./" })
+      .catch(error => console.warn("VoidForge offline support is unavailable:", error));
+  }
+
   function renderSimpleView(title, subtitle) {
     const root = $("#viewRoot");
     if (!root) return;
@@ -304,6 +321,7 @@
 
   setupGameWindow();
   setupLauncher();
+  registerServiceWorker();
   loadGames();
 
 })();
