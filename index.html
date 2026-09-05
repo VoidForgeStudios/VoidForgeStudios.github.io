@@ -1,264 +1,50 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090712">
-<meta name="description" content="VoidForge Studios — advanced web game launcher">
-<title>VoidForge — Web Launcher</title>
-<style>
-:root{
-  --bg:#07050d;--panel:rgba(18,14,31,.78);--panel2:rgba(26,20,44,.78);
-  --line:rgba(255,255,255,.09);--text:#f7f4ff;--muted:#aaa2bd;
-  --accent:#9b6cff;--accent2:#5f8cff;--good:#54e39a;--warn:#ffd166;
-  --shadow:0 24px 70px rgba(0,0,0,.42);--radius:22px
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);background:
-radial-gradient(circle at 10% 0%,rgba(122,72,255,.18),transparent 32rem),
-radial-gradient(circle at 90% 10%,rgba(60,120,255,.14),transparent 28rem),var(--bg)}
-button,input{font:inherit}
-button{cursor:pointer}
-a{color:inherit}
-.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
-.sidebar{position:sticky;top:0;height:100vh;padding:22px 16px;border-right:1px solid var(--line);background:rgba(7,5,13,.72);backdrop-filter:blur(18px)}
-.brand{display:flex;gap:12px;align-items:center;padding:8px 10px 24px}
-.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 12px 35px rgba(120,80,255,.3)}
-.brand b{display:block}.brand span{font-size:12px;color:var(--muted)}
-nav{display:grid;gap:6px}
-.nav{border:1px solid transparent;background:transparent;color:var(--muted);padding:12px 13px;border-radius:13px;text-align:left}
-.nav.active,.nav:hover{color:var(--text);background:rgba(255,255,255,.06);border-color:var(--line)}
-.side-bottom{position:absolute;left:16px;right:16px;bottom:18px}
-.status{padding:14px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.035)}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 12px var(--good);margin-right:7px}
-.main{min-width:0;padding:26px 30px 50px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:26px}
-.search{width:min(430px,100%);display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);padding:11px 14px;border-radius:14px}
-.search input{width:100%;border:0;outline:0;background:transparent;color:var(--text)}
-.actions{display:flex;gap:9px}
-.icon-btn{width:42px;height:42px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:13px}
-.hero{position:relative;overflow:hidden;padding:32px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(135deg,rgba(31,23,56,.92),rgba(13,12,25,.82));box-shadow:var(--shadow)}
-.hero:after{content:"";position:absolute;width:280px;height:280px;right:-80px;top:-120px;border-radius:50%;background:rgba(126,82,255,.22);filter:blur(30px)}
-.eyebrow{color:#bda9ff;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
-h1{font-size:clamp(34px,5vw,62px);line-height:.98;margin:10px 0 14px;max-width:720px}
-.hero p{color:var(--muted);max-width:700px;line-height:1.65;margin:0 0 22px}
-.btn{border:1px solid var(--line);border-radius:13px;padding:11px 16px;color:var(--text);background:rgba(255,255,255,.055)}
-.btn.primary{background:linear-gradient(135deg,var(--accent),#7652ff);border-color:transparent;font-weight:800}
-.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
-.stat{padding:15px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.035)}
-.stat strong{font-size:21px}.stat small{display:block;color:var(--muted);margin-top:4px}
-.section{margin-top:30px}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:13px}
-.section h2{margin:0;font-size:20px}.muted{color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px}
-.card{position:relative;overflow:hidden;padding:19px;border:1px solid var(--line);border-radius:20px;background:var(--panel);transition:.2s}
-.card:hover{transform:translateY(-3px);border-color:rgba(155,108,255,.4)}
-.card.selected{border-color:rgba(155,108,255,.75);box-shadow:0 0 0 1px rgba(155,108,255,.18) inset}
-.cover{height:130px;border-radius:15px;margin-bottom:15px;background:linear-gradient(135deg,#30204e,#10192d);display:grid;place-items:center;font-size:36px;font-weight:900}
-.card h3{margin:0 0 5px}.card p{color:var(--muted);font-size:13px;line-height:1.5;min-height:40px}
-.badges{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 15px}.badge{font-size:11px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.07);color:#cfc6de}
-.card-actions{display:flex;gap:8px}
-.card-actions .btn{flex:1}
-.install{margin-top:28px;display:grid;grid-template-columns:1.4fr .8fr;gap:15px}
-.panel{border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:20px}
-.row{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.row:last-child{border-bottom:0}.row b{font-size:13px}.row span{color:var(--muted);font-size:13px}
-.progress{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:13px 0}
-.bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .18s}
-.log{height:150px;overflow:auto;background:#05040a;border:1px solid var(--line);border-radius:13px;padding:12px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfc8dc}
-.log div{margin-bottom:6px}.log .good{color:var(--good)}.log .warn{color:var(--warn)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;place-items:center;padding:20px;z-index:50}
-.modal.show{display:grid}.modal-box{width:min(850px,100%);height:min(80vh,700px);background:#0e0b18;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
-.modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid var(--line)}
-.game-frame{width:100%;height:calc(100% - 59px);border:0;background:#000}
-.toast{position:fixed;right:20px;bottom:20px;z-index:70;transform:translateY(20px);opacity:0;pointer-events:none;background:#151022;border:1px solid var(--line);padding:13px 15px;border-radius:13px;transition:.2s;box-shadow:var(--shadow)}
-.toast.show{transform:none;opacity:1}
-.mobile-nav{display:none}
-@media(max-width:850px){
- .app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:18px}.mobile-nav{display:flex;gap:6px;overflow:auto;margin-bottom:16px}.mobile-nav .nav{white-space:nowrap}
- .top{align-items:stretch;flex-direction:column}.stats{grid-template-columns:1fr}.install{grid-template-columns:1fr}
-}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0820">
+  <meta name="description" content="VoidForge Studios browser game launcher">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/voidforge-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/launcher.css">
+  <title>VoidForge — Game Launcher</title>
 </head>
 <body>
-<div class="app">
-<aside class="sidebar">
-  <div class="brand"><div class="logo">VF</div><div><b>VoidForge</b><span>Studios Launcher</span></div></div>
-  <nav>
-    <button class="nav active" data-section="home">⌂ &nbsp; Library</button>
-    <button class="nav" data-section="updates">↻ &nbsp; Updates</button>
-    <button class="nav" data-section="settings">⚙ &nbsp; Settings</button>
-    <button class="nav" data-section="about">ⓘ &nbsp; About</button>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" aria-label="Launcher navigation">
+      <a class="brand" href="#library" aria-label="VoidForge Studios home"><img src="assets/voidforge-mark.svg" alt=""><span><strong>VoidForge</strong><small>STUDIOS · WEB LAUNCHER</small></span></a>
+      <nav class="nav-list" aria-label="Primary">
+        <button class="nav-item is-active" data-view="library"><span aria-hidden="true">▦</span> Library</button>
+        <button class="nav-item" data-view="discover"><span aria-hidden="true">◇</span> Discover</button>
+        <button class="nav-item" data-view="updates"><span aria-hidden="true">↻</span> Updates <i class="nav-pip" aria-label="Update status"></i></button>
+        <button class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> Settings</button>
+        <button class="nav-item" data-view="about"><span aria-hidden="true">ⓘ</span> About</button>
+      </nav>
+      <div class="sidebar-footer"><div class="connection"><i></i><span><b id="connectionStatus">Checking connection</b><small>GitHub Pages web edition</small></span></div><a class="support-link" href="https://github.com/VoidForgeStudios/VoidForgeStudios.github.io" target="_blank" rel="noopener noreferrer">↗ Project support</a></div>
+    </aside>
+
+    <main id="main-content" class="main-content" tabindex="-1">
+      <header class="topbar">
+        <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <label class="search-box"><span aria-hidden="true">⌕</span><input id="gameSearch" type="search" autocomplete="off" placeholder="Search your library" aria-label="Search games"><kbd>/</kbd></label>
+        <div class="top-actions"><button class="icon-button" id="fullscreenLauncher" aria-label="Toggle launcher fullscreen" title="Fullscreen">⛶</button><button class="profile-button" data-view="settings" aria-label="Open settings"><span>VF</span><b>Player</b><small>Web edition</small></button></div>
+      </header>
+      <div id="viewRoot"></div>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button class="nav-item is-active" data-view="library">▦<span>Library</span></button><button class="nav-item" data-view="discover">◇<span>Discover</span></button><button class="nav-item" data-view="updates">↻<span>Updates</span></button><button class="nav-item" data-view="settings">⚙<span>Settings</span></button>
   </nav>
-  <div class="side-bottom"><div class="status"><span class="dot"></span><b>Web launcher online</b><div class="muted" style="font-size:12px;margin-top:5px">GitHub Pages compatible</div></div></div>
-</aside>
 
-<main class="main">
-  <div class="mobile-nav">
-    <button class="nav active">Library</button><button class="nav">Updates</button><button class="nav">Settings</button>
-  </div>
-  <header class="top">
-    <div>
-      <div class="eyebrow">VoidForge Studios</div>
-      <div class="muted" style="font-size:13px;margin-top:3px">Your games, one launcher.</div>
-    </div>
-    <div class="actions">
-      <div class="search">⌕ <input id="search" placeholder="Search games…"></div>
-      <button class="icon-btn" id="fullscreen" title="Fullscreen">⛶</button>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="eyebrow">Web Edition</div>
-    <h1>Enter the Void.</h1>
-    <p>Launch your VoidForge games directly from the browser. The launcher reads the games bundled with this GitHub Pages project, remembers your library, and opens browser-compatible games without requiring a desktop installer.</p>
-    <button class="btn primary" id="heroLaunch">▶ Launch selected game</button>
-    <div class="stats">
-      <div class="stat"><strong id="gameCount">0</strong><small>Games detected</small></div>
-      <div class="stat"><strong id="recentName">None</strong><small>Last played</small></div>
-      <div class="stat"><strong>WEB</strong><small>Platform</small></div>
-    </div>
+  <div class="dialog-backdrop" id="dialogBackdrop" hidden></div>
+  <section class="game-view" id="gameView" aria-label="Game player" hidden>
+    <header class="game-toolbar"><div><span class="live-indicator"></span><strong id="playingGameTitle">Loading game</strong><small id="gameLoadStatus">Checking game files…</small></div><div><button class="toolbar-button" id="gameInfo">Game info</button><button class="toolbar-button" id="reloadGame">↻ Reload</button><button class="toolbar-button" id="gameFullscreen">⛶ Fullscreen</button><button class="toolbar-button danger" id="exitGame">Exit game <kbd>Esc</kbd></button></div></header>
+    <div class="game-stage"><div class="loading-panel" id="gameLoader"><div class="loader-orbit"></div><p class="eyebrow">VoidForge launching</p><h2 id="loadingStep">Checking game</h2><p id="loadingDetail">Verifying the browser entry point.</p><div class="indeterminate"><i></i></div></div><div class="game-error" id="gameError" hidden></div><iframe id="gameFrame" title="VoidForge game" allow="fullscreen; gamepad; autoplay; pointer-lock" referrerpolicy="strict-origin-when-cross-origin" src="about:blank"></iframe></div>
   </section>
-
-  <section class="section">
-    <div class="section-head"><div><h2>Your Library</h2><div class="muted" style="font-size:12px">Available inside this deployment</div></div><button class="btn" id="refresh">Refresh</button></div>
-    <div class="grid" id="games"></div>
-  </section>
-
-  <section class="install">
-    <div class="panel">
-      <div class="section-head"><h2>Launcher Activity</h2><button class="btn" id="clearLog">Clear</button></div>
-      <div class="progress"><div class="bar" id="bar"></div></div>
-      <div class="muted" id="progressText" style="font-size:12px;margin-bottom:12px">Ready.</div>
-      <div class="log" id="log"></div>
-    </div>
-    <div class="panel">
-      <h2 style="margin-top:0">Selected Game</h2>
-      <div class="row"><b>Name</b><span id="selName">—</span></div>
-      <div class="row"><b>Path</b><span id="selPath">—</span></div>
-      <div class="row"><b>Browser</b><span id="selBrowser">Checking…</span></div>
-      <div class="row"><b>Storage</b><span id="storage">Browser cache</span></div>
-      <button class="btn primary" style="width:100%;margin-top:14px" id="launch">▶ Play</button>
-    </div>
-  </section>
-
-  <section class="section" id="settingsSection" style="display:none">
-    <div class="panel">
-      <h2>Settings</h2>
-      <div class="row"><b>Remember selected game</b><input type="checkbox" id="remember" checked></div>
-      <div class="row"><b>Open games in fullscreen</b><input type="checkbox" id="autoFull"></div>
-      <div class="row"><b>Reduced motion</b><span>Uses your system preference</span></div>
-    </div>
-  </section>
-</main>
-</div>
-
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <div class="modal-head"><b id="modalTitle">Game</b><button class="icon-btn" id="closeModal">✕</button></div>
-    <iframe id="gameFrame" class="game-frame" allow="fullscreen; gamepad; autoplay"></iframe>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
-
-<script>
-const REPO_BASE = location.pathname.replace(/\/[^/]*$/, "/");
-const GAME_CANDIDATES = [
-  {id:"minecraft", name:"Minecraft", path:"minecraft/index.html", icon:"⛏", desc:"The Minecraft browser game bundled with VoidForge.", tags:["Browser","Playable","Local"]},
-  {id:"forge-realms", name:"Forge Realms", path:"forge-realms/index.html", icon:"⚒", desc:"Forge Realms — automatically available when its game folder is deployed.", tags:["Browser"]},
-  {id:"starfall-protocol", name:"Starfall Protocol", path:"starfall-protocol/index.html", icon:"✦", desc:"Starfall Protocol — automatically available when its game folder is deployed.", tags:["Browser"]}
-];
-
-const state = {
-  games: GAME_CANDIDATES,
-  selected: localStorage.getItem("vf-selected") || "minecraft",
-  settings: JSON.parse(localStorage.getItem("vf-settings") || '{"remember":true,"autoFull":false}')
-};
-
-const $ = id => document.getElementById(id);
-function log(msg, cls=""){ const d=document.createElement("div"); d.className=cls; d.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`; $("log").appendChild(d); $("log").scrollTop=$("log").scrollHeight; }
-function toast(msg){ $("toast").textContent=msg; $("toast").classList.add("show"); setTimeout(()=>$("toast").classList.remove("show"),2400); }
-
-async function checkGame(game){
-  try { const r=await fetch(game.path,{method:"HEAD",cache:"no-store"}); return r.ok; }
-  catch(e){ return false; }
-}
-async function discover(){
-  const checks=await Promise.all(state.games.map(async g=>({...g,available:await checkGame(g)})));
-  // Keep known entries so the launcher can tell the user when a game isn't deployed.
-  state.games=checks;
-  render();
-  log(`Library scan complete — ${checks.filter(x=>x.available).length} playable game(s) found.`, "good");
-}
-function render(){
-  const q=$("search").value.trim().toLowerCase();
-  const list=state.games.filter(g=>(g.name+" "+g.desc+" "+g.tags.join(" ")).toLowerCase().includes(q));
-  $("games").innerHTML=list.map(g=>`
-    <article class="card ${g.id===state.selected?"selected":""}" data-id="${g.id}">
-      <div class="cover">${g.icon}</div>
-      <h3>${g.name}</h3><p>${g.desc}</p>
-      <div class="badges">${g.tags.map(t=>`<span class="badge">${t}</span>`).join("")}
-      <span class="badge">${g.available?"Ready":"Not deployed"}</span></div>
-      <div class="card-actions">
-        <button class="btn ${g.available?"primary":""}" data-play="${g.id}" ${g.available?"":"disabled"}>${g.available?"▶ Play":"Unavailable"}</button>
-        <button class="btn" data-select="${g.id}">Select</button>
-      </div>
-    </article>`).join("");
-  $("gameCount").textContent=state.games.filter(g=>g.available).length;
-  const sel=state.games.find(g=>g.id===state.selected)||state.games[0];
-  if(sel){
-    $("selName").textContent=sel.name;$("selPath").textContent=sel.path;
-    $("selBrowser").textContent=sel.available?"Compatible":"Not found in deployment";
-    $("launch").disabled=!sel.available;
-    $("heroLaunch").disabled=!sel.available;
-  }
-  const recent=localStorage.getItem("vf-recent");
-  $("recentName").textContent=recent||"None";
-}
-function select(id){
-  state.selected=id;
-  if(state.settings.remember) localStorage.setItem("vf-selected",id);
-  render();
-  log(`Selected ${state.games.find(g=>g.id===id)?.name||id}.`);
-}
-async function launch(id=state.selected){
-  const g=state.games.find(x=>x.id===id);
-  if(!g||!g.available){toast("This game is not deployed yet.");return}
-  select(id);
-  $("bar").style.width="20%";$("progressText").textContent="Loading game…";log(`Opening ${g.name}.`);
-  await new Promise(r=>setTimeout(r,220));
-  $("bar").style.width="65%";
-  $("modalTitle").textContent=`VoidForge — ${g.name}`;
-  $("gameFrame").src=g.path;
-  $("modal").classList.add("show");
-  $("bar").style.width="100%";$("progressText").textContent=`${g.name} launched.`;
-  localStorage.setItem("vf-recent",g.name); render();
-  log(`${g.name} launched successfully.`, "good");
-  if(state.settings.autoFull) setTimeout(()=>document.documentElement.requestFullscreen?.().catch(()=>{}),300);
-}
-$("games").addEventListener("click",e=>{
-  const p=e.target.closest("[data-play]"),s=e.target.closest("[data-select]");
-  if(p) launch(p.dataset.play); if(s) select(s.dataset.select);
-});
-$("launch").onclick=()=>launch();$("heroLaunch").onclick=()=>launch();
-$("search").oninput=render;
-$("refresh").onclick=()=>{log("Refreshing library…");discover()};
-$("clearLog").onclick=()=>$("log").innerHTML="";
-$("closeModal").onclick=()=>{$("gameFrame").src="about:blank";$("modal").classList.remove("show");log("Game window closed.");};
-$("modal").addEventListener("click",e=>{if(e.target.id==="modal")$("closeModal").click()});
-$("fullscreen").onclick=()=>document.documentElement.requestFullscreen?.().catch(()=>{});
-$("remember").checked=state.settings.remember;$("autoFull").checked=state.settings.autoFull;
-$("remember").onchange=e=>{state.settings.remember=e.target.checked;localStorage.setItem("vf-settings",JSON.stringify(state.settings))};
-$("autoFull").onchange=e=>{state.settings.autoFull=e.target.checked;localStorage.setItem("vf-settings",JSON.stringify(state.settings))};
-document.querySelectorAll(".nav[data-section]").forEach(n=>n.onclick=()=>{
-  document.querySelectorAll(".nav[data-section]").forEach(x=>x.classList.remove("active"));n.classList.add("active");
-  $("settingsSection").style.display=n.dataset.section==="settings"?"block":"none";
-  if(n.dataset.section==="about") toast("VoidForge Web Launcher • GitHub Pages edition");
-  if(n.dataset.section==="updates") {log("Update check: web assets are served from this deployment.");toast("Web version uses the current deployed files.");}
-});
-log("VoidForge Web Launcher initialized.");
-discover();
-</script>
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+  <script type="module" src="assets/launcher.js"></script>
 </body>
 </html>
