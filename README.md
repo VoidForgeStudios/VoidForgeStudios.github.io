@@ -1,29 +1,38 @@
 # VoidForge Studios Web Launcher
 
-A static, GitHub Pages-compatible web launcher for the browser games bundled in this repository.
+A static, GitHub Pages-compatible launcher for the VoidForge Studios browser game.
 
 ## Included game
 
-- **BlockWorld** — the Minecraft-style voxel prototype in [`minecraft/`](minecraft/), launched from `minecraft/index.html`.
+- **Minecraft / BlockWorld** — a self-contained browser voxel game in [`minecraft/`](minecraft/), launched by the root launcher at `minecraft/index.html`.
+
+The launcher keeps a single Minecraft library entry, supports search and navigation views, and provides reload, fullscreen, game information, and exit controls while playing.
 
 ## Development
 
-Run a static server from the repository root (ES modules in BlockWorld do not work from `file://`):
+Run a static server from the repository root (Minecraft uses an ES module and does not work from `file://`):
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Open `http://localhost:8000/`. The launcher is deliberately relative-path based, so it also works when GitHub Pages serves it from a repository subpath.
+Open `http://localhost:8000/` and select **Play now**. The launcher is deliberately relative-path based, so it also works when GitHub Pages serves it from a repository subpath.
 
-## Adding a browser game
+## Minecraft controls
 
-1. Deploy the game's files and its real HTML entry point.
-2. Add its real metadata and relative `entry` path to [`games.json`](games.json).
-3. Do not add a registry entry until that entry point exists. The launcher verifies it before launch.
+- Click **PLAY** to lock the mouse and start.
+- WASD moves; Shift sprints; Space jumps; mouse looks around.
+- Left click breaks a block; right click places the selected block.
+- Keys 1–4 select the hotbar block; Esc unlocks the mouse.
 
-A browser cannot scan a deployed directory listing on GitHub Pages, so `games.json` is the explicit deploy-time game registry. The launcher does not install executables or write files to a visitor's computer.
+## GitHub Pages deployment
+
+1. Push this repository to GitHub.
+2. In **Settings → Pages**, choose **Deploy from a branch**, then select the branch and repository root.
+3. Open the deployed repository URL, such as `https://USERNAME.github.io/REPOSITORY/`.
+
+All launcher, manifest, and service-worker paths are relative so project-site URLs work without configuration. [`games.json`](games.json) is the deployed game registry and contains only the `minecraft` entry; the same entry is embedded in `index.html` as a fallback for local `file://` viewing.
 
 ## PWA behavior
 
-The service worker caches the small launcher shell only. Game files are network-first and are not blindly stored by the launcher, avoiding unexpected caching of larger game resources.
+The service worker caches only the small launcher shell. Minecraft requests remain network-loaded and are not added to the launcher cache, avoiding stale game resources.

@@ -66,8 +66,6 @@
     <button class="nav-item" data-view="settings">⚙<span>Settings</span></button>
   </nav>
 
-  <div class="dialog-backdrop" id="dialogBackdrop" hidden></div>
-
   <section class="game-view" id="gameView" aria-label="Game player" hidden>
     <header class="game-toolbar">
       <div>
@@ -105,6 +103,11 @@
   </section>
 
   <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Used when games.json cannot be fetched (for example, when opened from file://). -->
+  <script id="embeddedGameRegistry" type="application/json">
+    [{"id":"minecraft","name":"Minecraft","subtitle":"Voxel Sandbox","entry":"minecraft","version":"1.0.0","platform":"Browser","status":"Available","tags":["Voxel","3D","Sandbox"],"description":"A browser-based Minecraft-style game."}]
+  </script>
 
   <script type="module" src="assets/launcher.js"></script>
 </body>

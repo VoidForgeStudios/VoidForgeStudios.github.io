@@ -1,10 +1,10 @@
 {
   "name": "VoidForge Web Launcher",
   "short_name": "VoidForge",
-  "description": "A browser-first launcher for VoidForge Studios games.",
+  "description": "A browser-first launcher for VoidForge Studios Minecraft game.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0b0820",
   "theme_color": "#0b0820",
-  "icons": [{ "src": "assets/voidforge-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+  "icons": [{ "src": "./assets/voidforge-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
 }

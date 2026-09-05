@@ -1,4 +1,4 @@
-/* VoidForge Launcher - Multi Game Support */
+/* VoidForge Launcher */
 
 (() => {
   "use strict";
@@ -25,6 +25,16 @@
 
   let games = [];
   let currentGame = null;
+
+  function showToast(message) {
+    const region = $("#toastRegion");
+    if (!region) return;
+    const toast = document.createElement("p");
+    toast.className = "toast";
+    toast.textContent = message;
+    region.replaceChildren(toast);
+    window.setTimeout(() => toast.remove(), 3500);
+  }
 
   /* -------------------------
      Helpers
@@ -81,11 +91,11 @@
 
       const data = await response.json();
 
-      games = Array.isArray(data)
+      games = (Array.isArray(data)
         ? data
         : Array.isArray(data.games)
           ? data.games
-          : [];
+          : []).filter(game => game?.id === "minecraft" && normalizeFolder(game.entry) === "minecraft");
 
       console.log("VoidForge games:", games);
 
@@ -241,8 +251,13 @@
       if (document.fullscreenElement) {
         document.exitFullscreen?.();
       } else {
-        stage.requestFullscreen?.();
+        stage.requestFullscreen?.().catch(() => showToast("Fullscreen is unavailable in this browser."));
       }
+    });
+
+    $("#gameInfo")?.addEventListener("click", () => {
+      if (!currentGame) return;
+      showToast(`${currentGame.name} ${currentGame.version || ""} · ${currentGame.description || "Ready to play."}`.trim());
     });
 
     document.addEventListener("keydown", (event) => {
@@ -264,21 +279,34 @@
     const navItems = $$("[data-view]");
     navItems.forEach(item => item.addEventListener("click", () => {
       navItems.forEach(nav => nav.classList.toggle("is-active", nav.dataset.view === item.dataset.view));
+      document.body.classList.remove("nav-open");
       if (item.dataset.view === "library" || item.dataset.view === "discover") renderGames();
       else if (item.dataset.view === "updates") renderSimpleView("Updates", "Your library is up to date.");
       else if (item.dataset.view === "about") renderSimpleView("About VoidForge", "A small collection of browser games, built for the open web.");
       else renderSimpleView("Settings", "Launcher settings are ready for your next session.");
     }));
     $("#gameSearch")?.addEventListener("input", renderGames);
-    $("#fullscreenLauncher")?.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen?.() : document.documentElement.requestFullscreen?.());
-    $("#mobileMenu")?.addEventListener("click", () => document.body.classList.toggle("nav-open"));
+    $("#fullscreenLauncher")?.addEventListener("click", () => {
+      if (document.fullscreenElement) document.exitFullscreen?.();
+      else document.documentElement.requestFullscreen?.().catch(() => showToast("Fullscreen is unavailable in this browser."));
+    });
+    $("#mobileMenu")?.addEventListener("click", () => {
+      const open = document.body.classList.toggle("nav-open");
+      $("#mobileMenu")?.setAttribute("aria-expanded", String(open));
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "/" && document.activeElement?.tagName !== "INPUT") {
+        event.preventDefault();
+        $("#gameSearch")?.focus();
+      }
+    });
     setText($("#connectionStatus"), navigator.onLine ? "Online" : "Offline mode");
     window.addEventListener("online", () => setText($("#connectionStatus"), "Online"));
     window.addEventListener("offline", () => setText($("#connectionStatus"), "Offline mode"));
   }
 
   function registerServiceWorker() {
-    if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+    if (!("serviceWorker" in navigator) || !["http:", "https:"].includes(location.protocol)) return;
 
     navigator.serviceWorker.register("./sw.js", { scope: "./" })
       .catch(error => console.warn("VoidForge offline support is unavailable:", error));
@@ -307,7 +335,7 @@
   window.launch = launchGame;
 
   window.VoidForge = {
-    games,
+    get games() { return games; },
     launchGame,
     closeGame,
     reloadGame,
