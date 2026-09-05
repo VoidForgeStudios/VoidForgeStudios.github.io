@@ -5,7 +5,13 @@ const frame = $("#gameFrame");
 const gameView = $("#gameView");
 const gameLoader = $("#gameLoader");
 const gameError = $("#gameError");
-const storageKey = "voidforge.launcher.v1";
+
+const storageKey = "voidforge.launcher.v2";
+const launcherVersion = "1.2.0";
+
+/* -------------------------------------------------------
+   Defaults
+------------------------------------------------------- */
 
 const defaults = {
   selectedId: "",
@@ -15,7 +21,10 @@ const defaults = {
     remember: true,
     autoFullscreen: false,
     confirmExit: true,
-    reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false,
+    reducedMotion:
+      window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      )?.matches ?? false,
     compact: false,
     brightness: 100,
     launch: "embedded"
@@ -24,10 +33,12 @@ const defaults = {
 
 let state = loadState();
 let games = [];
+
 let activeView = "library";
 let pendingGame = null;
 let gameLoading = false;
 let previousFocus = null;
+let launchStartedAt = 0;
 
 /* -------------------------------------------------------
    State
@@ -35,7 +46,9 @@ let previousFocus = null;
 
 function loadState() {
   try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+    const saved = JSON.parse(
+      localStorage.getItem(storageKey) || "null"
+    );
 
     if (!saved || typeof saved !== "object") {
       return structuredClone(defaults);
@@ -44,34 +57,57 @@ function loadState() {
     return {
       ...structuredClone(defaults),
       ...saved,
-      favorites: Array.isArray(saved.favorites) ? saved.favorites : [],
-      recent: Array.isArray(saved.recent) ? saved.recent : [],
+
+      favorites: Array.isArray(saved.favorites)
+        ? saved.favorites
+        : [],
+
+      recent: Array.isArray(saved.recent)
+        ? saved.recent
+        : [],
+
       settings: {
         ...structuredClone(defaults.settings),
-        ...(saved.settings && typeof saved.settings === "object"
+
+        ...(saved.settings &&
+        typeof saved.settings === "object"
           ? saved.settings
           : {})
       }
     };
-  } catch {
+  } catch (error) {
+    console.warn(
+      "[VoidForge] Could not load launcher state:",
+      error
+    );
+
     return structuredClone(defaults);
   }
 }
 
 function saveState() {
   try {
-    localStorage.setItem(storageKey, JSON.stringify(state));
-  } catch {
-    // Storage can be disabled or unavailable.
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(state)
+    );
+  } catch (error) {
+    console.warn(
+      "[VoidForge] Could not save launcher state:",
+      error
+    );
   }
 }
 
 /* -------------------------------------------------------
-   Helpers
+   DOM Helpers
 ------------------------------------------------------- */
 
 function setText(node, text) {
-  if (node) node.textContent = text;
+  if (node) {
+    node.textContent = text;
+  }
+
   return node;
 }
 
@@ -83,8 +119,20 @@ function el(tag, options = {}, children = []) {
       node.className = value;
     } else if (key === "text") {
       node.textContent = value;
-    } else if (key.startsWith("on") && typeof value === "function") {
-      node.addEventListener(key.slice(2), value);
+    } else if (
+      key.startsWith("on") &&
+      typeof value === "function"
+    ) {
+      node.addEventListener(
+        key.slice(2),
+        value
+      );
+    } else if (
+      key === "checked" ||
+      key === "hidden" ||
+      key === "disabled"
+    ) {
+      node[key] = Boolean(value);
     } else {
       node.setAttribute(key, value);
     }
@@ -98,18 +146,34 @@ function el(tag, options = {}, children = []) {
   return node;
 }
 
-function button(label, className = "", handler = null) {
+function button(
+  label,
+  className = "",
+  handler = null
+) {
   return el("button", {
     class: `button ${className}`.trim(),
     type: "button",
     text: label,
-    ...(handler ? { onclick: handler } : {})
+    ...(handler
+      ? {
+          onclick: handler
+        }
+      : {})
   });
 }
 
+/* -------------------------------------------------------
+   Notifications
+------------------------------------------------------- */
+
 function toast(message) {
   const region = $("#toastRegion");
-  if (!region) return;
+
+  if (!region) {
+    console.info("[VoidForge]", message);
+    return;
+  }
 
   const note = el("div", {
     class: "toast",
@@ -124,17 +188,116 @@ function toast(message) {
   }, 3200);
 }
 
+/* -------------------------------------------------------
+   Game Helpers
+------------------------------------------------------- */
+
 function selectedGame() {
   return (
-    games.find(game => game.id === state.selectedId) ||
+    games.find(
+      game => game.id === state.selectedId
+    ) ||
     games[0] ||
     null
   );
 }
 
-function gameUrl(game) {
-  return new URL(game.entry, document.baseURI).href;
+/**
+ * Converts a game folder into:
+ *
+ * gamefolder/index.html
+ *
+ * Examples:
+ *
+ * blockworld
+ * -> blockworld/index.html
+ *
+ * blockworld/
+ * -> blockworld/index.html
+ *
+ * /blockworld/
+ * -> blockworld/index.html
+ *
+ * games/blockworld
+ * -> games/blockworld/index.html
+ */
+function normalizeGameEntry(entry) {
+  if (
+    typeof entry !== "string" ||
+    !entry.trim()
+  ) {
+    throw new Error(
+      "Game entry is empty."
+    );
+  }
+
+  let path = entry
+    .trim()
+    .replace(/\\/g, "/");
+
+  // Remove leading slashes.
+  path = path.replace(/^\/+/, "");
+
+  // Remove trailing slashes.
+  path = path.replace(/\/+$/, "");
+
+  // Remove accidental ./ prefixes.
+  path = path.replace(/^(\.\/)+/, "");
+
+  if (!path) {
+    throw new Error(
+      "Game entry resolves to an empty path."
+    );
+  }
+
+  // Prevent directory traversal.
+  const segments = path.split("/");
+
+  if (
+    segments.includes("..") ||
+    segments.includes(".")
+  ) {
+    throw new Error(
+      `Invalid game path: ${entry}`
+    );
+  }
+
+  return `${path}/index.html`;
 }
+
+/**
+ * Resolve the game against the current deployment.
+ *
+ * This is important for GitHub Pages repository sites.
+ *
+ * Example:
+ *
+ * https://username.github.io/VoidForge/
+ *
+ * + blockworld/index.html
+ *
+ * becomes:
+ *
+ * https://username.github.io/VoidForge/blockworld/index.html
+ */
+function gameUrl(game) {
+  const entry = normalizeGameEntry(
+    game.entry
+  );
+
+  return new URL(
+    entry,
+    document.baseURI
+  ).href;
+}
+
+function gameDisplayPath(game) {
+  return normalizeGameEntry(game.entry);
+}
+
+/* -------------------------------------------------------
+   Preferences
+------------------------------------------------------- */
 
 function applyPreferences() {
   const settings = state.settings;
@@ -151,7 +314,10 @@ function applyPreferences() {
 
   const brightness = Math.max(
     70,
-    Math.min(120, Number(settings.brightness) || 100)
+    Math.min(
+      120,
+      Number(settings.brightness) || 100
+    )
   );
 
   document.body.style.setProperty(
@@ -160,19 +326,18 @@ function applyPreferences() {
   );
 }
 
-function selectGame(id) {
-  state.selectedId = id;
-
-  if (state.settings.remember) {
-    saveState();
-  }
-
-  renderView();
-}
+/* -------------------------------------------------------
+   Game Registry
+------------------------------------------------------- */
 
 function sanitizeGames(data) {
-  if (!data || !Array.isArray(data.games)) {
-    throw new Error("games.json does not contain a valid games array.");
+  if (
+    !data ||
+    !Array.isArray(data.games)
+  ) {
+    throw new Error(
+      "games.json does not contain a valid games array."
+    );
   }
 
   return data.games
@@ -188,29 +353,92 @@ function sanitizeGames(data) {
       );
     })
     .filter(game => {
-      // Prevent registry entries from escaping the deployment root.
-      const normalized = game.entry.replace(/\\/g, "/");
-      return (
-        !normalized.startsWith("/") &&
-        !normalized.includes("../") &&
-        !normalized.includes("/..")
-      );
+      try {
+        const entry = game.entry
+          .trim()
+          .replace(/\\/g, "/");
+
+        /*
+         * Entries are game folders.
+         *
+         * Allowed:
+         *
+         * blockworld
+         * games/blockworld
+         * arcade/racer
+         *
+         * Not allowed:
+         *
+         * ../secret
+         * ../../file
+         * blockworld/../secret
+         */
+        if (
+          entry.includes("../") ||
+          entry.includes("/..") ||
+          entry === ".." ||
+          entry.startsWith("../")
+        ) {
+          return false;
+        }
+
+        normalizeGameEntry(entry);
+
+        return true;
+      } catch {
+        return false;
+      }
     })
     .map(game => ({
-      id: game.id,
-      name: game.name,
-      subtitle: typeof game.subtitle === "string" ? game.subtitle : "",
-      entry: game.entry,
-      version: typeof game.version === "string" ? game.version : "1.0",
-      platform: typeof game.platform === "string" ? game.platform : "Browser",
-      status: typeof game.status === "string" ? game.status : "Available",
+      id: game.id.trim(),
+
+      name: game.name.trim(),
+
+      subtitle:
+        typeof game.subtitle === "string"
+          ? game.subtitle
+          : "",
+
+      /*
+       * IMPORTANT:
+       *
+       * This is now a folder, NOT an HTML file.
+       *
+       * "blockworld"
+       *
+       * automatically becomes:
+       *
+       * "blockworld/index.html"
+       */
+      entry: game.entry.trim(),
+
+      version:
+        typeof game.version === "string"
+          ? game.version
+          : "1.0",
+
+      platform:
+        typeof game.platform === "string"
+          ? game.platform
+          : "Browser",
+
+      status:
+        typeof game.status === "string"
+          ? game.status
+          : "Available",
+
       tags: Array.isArray(game.tags)
-        ? game.tags.filter(tag => typeof tag === "string")
+        ? game.tags.filter(
+            tag =>
+              typeof tag === "string"
+          )
         : [],
+
       description:
         typeof game.description === "string"
           ? game.description
           : "No description available.",
+
       accent:
         typeof game.accent === "string"
           ? game.accent
@@ -218,19 +446,32 @@ function sanitizeGames(data) {
     }));
 }
 
+/* -------------------------------------------------------
+   Fetch Games
+------------------------------------------------------- */
+
 async function fetchGames() {
-  const url = new URL("games.json", document.baseURI);
+  const url = new URL(
+    "games.json",
+    document.baseURI
+  );
 
-  // Cache-busting is useful with GitHub Pages deployments.
-  url.searchParams.set("_", Date.now().toString());
+  // Cache bust for GitHub Pages.
+  url.searchParams.set(
+    "_",
+    Date.now().toString()
+  );
 
-  const response = await fetch(url.href, {
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      Accept: "application/json"
+  const response = await fetch(
+    url.href,
+    {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json"
+      }
     }
-  });
+  );
 
   if (!response.ok) {
     throw new Error(
@@ -239,6 +480,7 @@ async function fetchGames() {
   }
 
   const data = await response.json();
+
   games = sanitizeGames(data);
 
   if (games.length === 0) {
@@ -247,19 +489,30 @@ async function fetchGames() {
     return;
   }
 
-  const selectedStillExists = games.some(
-    game => game.id === state.selectedId
-  );
+  const selectedStillExists =
+    games.some(
+      game =>
+        game.id === state.selectedId
+    );
 
   if (!selectedStillExists) {
-    state.selectedId = games[0].id;
+    state.selectedId =
+      games[0].id;
   }
 
-  // Remove history/favorites for games that no longer exist.
-  const validIds = new Set(games.map(game => game.id));
+  const validIds = new Set(
+    games.map(game => game.id)
+  );
 
-  state.favorites = state.favorites.filter(id => validIds.has(id));
-  state.recent = state.recent.filter(id => validIds.has(id));
+  state.favorites =
+    state.favorites.filter(
+      id => validIds.has(id)
+    );
+
+  state.recent =
+    state.recent.filter(
+      id => validIds.has(id)
+    );
 
   saveState();
 }
@@ -271,12 +524,15 @@ async function fetchGames() {
 function tags(game) {
   return el(
     "div",
-    { class: "tag-list" },
+    {
+      class: "tag-list"
+    },
     [
       el("span", {
         class: "tag",
         text: `v${game.version}`
       }),
+
       ...game.tags.map(tag =>
         el("span", {
           class: "tag",
@@ -289,17 +545,22 @@ function tags(game) {
 
 function libraryView() {
   const game = selectedGame();
-  const root = document.createDocumentFragment();
+
+  const root =
+    document.createDocumentFragment();
 
   if (game) {
     root.append(
       el(
         "section",
-        { class: "hero" },
+        {
+          class: "hero"
+        },
         [
           el("p", {
             class: "eyebrow",
-            text: "Featured · browser ready"
+            text:
+              "Featured · browser ready"
           }),
 
           el("h1", {
@@ -313,16 +574,23 @@ function libraryView() {
 
           el(
             "div",
-            { class: "hero-meta" },
+            {
+              class: "hero-meta"
+            },
             [
               el("span", {
                 class: "meta-chip",
-                text: game.subtitle || "Browser game"
+                text:
+                  game.subtitle ||
+                  "Browser game"
               }),
+
               el("span", {
                 class: "meta-chip",
-                text: `v${game.version}`
+                text:
+                  `v${game.version}`
               }),
+
               el("span", {
                 class: "meta-chip",
                 text: game.platform
@@ -332,11 +600,23 @@ function libraryView() {
 
           el(
             "div",
-            { class: "button-row" },
+            {
+              class: "button-row"
+            },
             [
-              button("▶ Play now", "primary", () => launch(game)),
-              button("More information", "", () =>
-                showGameInformation(game)
+              button(
+                "▶ Play now",
+                "primary",
+                () => launch(game)
+              ),
+
+              button(
+                "More information",
+                "",
+                () =>
+                  showGameInformation(
+                    game
+                  )
               )
             ]
           )
@@ -347,118 +627,187 @@ function libraryView() {
     root.append(
       el(
         "section",
-        { class: "empty-state" },
+        {
+          class: "empty-state"
+        },
         [
           el("h2", {
             text: "No games found"
           }),
+
           el("p", {
-            text: "The launcher could not find any games in games.json."
+            text:
+              "The launcher could not find any games in games.json."
           })
         ]
       )
     );
   }
 
-  const search = $("#gameSearch");
+  const search =
+    $("#gameSearch");
+
   const query = search
-    ? search.value.trim().toLowerCase()
+    ? search.value
+        .trim()
+        .toLowerCase()
     : "";
 
-  const filter = viewRoot.dataset.filter || "all";
-  const order = viewRoot.dataset.order || "recent";
+  const filter =
+    viewRoot.dataset.filter ||
+    "all";
 
-  let list = games.filter(item => {
-    const haystack = [
-      item.name,
-      item.subtitle,
-      item.description,
-      ...item.tags
-    ]
-      .join(" ")
-      .toLowerCase();
+  const order =
+    viewRoot.dataset.order ||
+    "recent";
 
-    return haystack.includes(query);
-  });
+  let list = games.filter(
+    item => {
+      const haystack = [
+        item.name,
+        item.subtitle,
+        item.description,
+        ...item.tags
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(
+        query
+      );
+    }
+  );
 
   if (filter === "favorites") {
-    list = list.filter(item =>
-      state.favorites.includes(item.id)
+    list = list.filter(
+      item =>
+        state.favorites.includes(
+          item.id
+        )
     );
   }
 
   if (order === "name") {
     list.sort((a, b) =>
-      a.name.localeCompare(b.name)
+      a.name.localeCompare(
+        b.name
+      )
     );
   } else {
     list.sort((a, b) => {
-      const aIndex = state.recent.indexOf(a.id);
-      const bIndex = state.recent.indexOf(b.id);
+      const aIndex =
+        state.recent.indexOf(
+          a.id
+        );
 
-      const aRank = aIndex === -1 ? Infinity : aIndex;
-      const bRank = bIndex === -1 ? Infinity : bIndex;
+      const bIndex =
+        state.recent.indexOf(
+          b.id
+        );
 
-      return aRank - bRank;
+      const aRank =
+        aIndex === -1
+          ? Infinity
+          : aIndex;
+
+      const bRank =
+        bIndex === -1
+          ? Infinity
+          : bIndex;
+
+      return (
+        aRank - bRank
+      );
     });
   }
 
   const controls = el(
     "div",
-    { class: "library-controls" },
+    {
+      class: "library-controls"
+    },
     [
-      filterButton("All games", "all", filter),
-      filterButton("Favorites", "favorites", filter),
+      filterButton(
+        "All games",
+        "all",
+        filter
+      ),
+
+      filterButton(
+        "Favorites",
+        "favorites",
+        filter
+      ),
 
       el(
         "select",
         {
-          class: "select-control",
-          "aria-label": "Sort games",
+          class:
+            "select-control",
+          "aria-label":
+            "Sort games",
           onchange: event => {
-            viewRoot.dataset.order = event.target.value;
+            viewRoot.dataset.order =
+              event.target.value;
+
             renderView();
           }
         },
         [
           el("option", {
             value: "recent",
-            text: "Recently played"
+            text:
+              "Recently played"
           }),
+
           el("option", {
             value: "name",
-            text: "Name A–Z"
+            text:
+              "Name A–Z"
           })
         ]
       )
     ]
   );
 
-  controls.querySelector("select").value = order;
+  controls.querySelector(
+    "select"
+  ).value = order;
 
   root.append(
     el(
       "section",
-      { class: "section" },
+      {
+        class: "section"
+      },
       [
         el(
           "div",
-          { class: "section-heading" },
+          {
+            class:
+              "section-heading"
+          },
           [
             el(
               "div",
               {},
               [
                 el("h2", {
-                  text: "Your library"
+                  text:
+                    "Your library"
                 }),
+
                 el("p", {
-                  text: `${games.length} game${
-                    games.length === 1 ? "" : "s"
-                  } listed in this deployment`
+                  text:
+                    `${games.length} game${
+                      games.length === 1
+                        ? ""
+                        : "s"
+                    } listed in this deployment`
                 })
               ]
             ),
+
             controls
           ]
         ),
@@ -466,18 +815,29 @@ function libraryView() {
         list.length
           ? el(
               "div",
-              { class: "game-grid" },
-              list.map(gameCard)
+              {
+                class:
+                  "game-grid"
+              },
+              list.map(
+                gameCard
+              )
             )
           : el(
               "div",
-              { class: "empty-state" },
+              {
+                class:
+                  "empty-state"
+              },
               [
                 el("h3", {
-                  text: "Nothing matches this view"
+                  text:
+                    "Nothing matches this view"
                 }),
+
                 el("p", {
-                  text: "Try another search or show all available games."
+                  text:
+                    "Try another search or show all available games."
                 })
               ]
             )
@@ -488,7 +848,10 @@ function libraryView() {
   root.append(
     el(
       "section",
-      { class: "section info-grid" },
+      {
+        class:
+          "section info-grid"
+      },
       [
         statPanel(
           String(games.length),
@@ -497,7 +860,11 @@ function libraryView() {
 
         statPanel(
           state.recent[0]
-            ? games.find(g => g.id === state.recent[0])?.name || "—"
+            ? games.find(
+                g =>
+                  g.id ===
+                  state.recent[0]
+              )?.name || "—"
             : "Not yet",
           "Last played"
         ),
@@ -513,43 +880,68 @@ function libraryView() {
   return root;
 }
 
-function filterButton(label, value, current) {
+function filterButton(
+  label,
+  value,
+  current
+) {
   return button(
     label,
     `filter-button ${
-      current === value ? "is-active" : ""
+      current === value
+        ? "is-active"
+        : ""
     }`,
     () => {
-      viewRoot.dataset.filter = value;
+      viewRoot.dataset.filter =
+        value;
+
       renderView();
     }
   );
 }
 
 function gameCard(game) {
-  const favorite = state.favorites.includes(game.id);
+  const favorite =
+    state.favorites.includes(
+      game.id
+    );
 
   const fav = button(
     favorite ? "★" : "☆",
-    `favorite ${favorite ? "is-favorite" : ""}`,
+    `favorite ${
+      favorite
+        ? "is-favorite"
+        : ""
+    }`,
     event => {
       event.stopPropagation();
-      toggleFavorite(game.id);
+
+      toggleFavorite(
+        game.id
+      );
     }
   );
 
   fav.setAttribute(
     "aria-label",
-    `${favorite ? "Remove" : "Add"} ${
-      game.name
-    } ${favorite ? "from" : "to"} favorites`
+    `${
+      favorite
+        ? "Remove"
+        : "Add"
+    } ${game.name} ${
+      favorite
+        ? "from"
+        : "to"
+    } favorites`
   );
 
   return el(
     "article",
     {
       class: `game-card ${
-        game.id === state.selectedId
+        game.id ===
+        state.selectedId
           ? "is-selected"
           : ""
       }`
@@ -557,11 +949,14 @@ function gameCard(game) {
     [
       el(
         "div",
-        { class: "game-art" },
+        {
+          class: "game-art"
+        },
         [
           el("strong", {
             text: game.name
           }),
+
           fav
         ]
       ),
@@ -584,25 +979,42 @@ function gameCard(game) {
 
       el(
         "div",
-        { class: "card-footer" },
+        {
+          class:
+            "card-footer"
+        },
         [
           el("span", {
-            class: "availability",
-            text: game.status === "Available"
-              ? "● Available in browser"
-              : `● ${game.status}`
+            class:
+              "availability",
+            text:
+              game.status ===
+              "Available"
+                ? "● Available in browser"
+                : `● ${game.status}`
           }),
 
           el(
             "div",
-            { class: "button-row" },
+            {
+              class:
+                "button-row"
+            },
             [
-              button("Play", "primary", () =>
-                launch(game)
+              button(
+                "Play",
+                "primary",
+                () =>
+                  launch(game)
               ),
 
-              button("Select", "", () =>
-                selectGame(game.id)
+              button(
+                "Select",
+                "",
+                () =>
+                  selectGame(
+                    game.id
+                  )
               )
             ]
           )
@@ -612,17 +1024,25 @@ function gameCard(game) {
   );
 }
 
-function statPanel(value, label) {
+function statPanel(
+  value,
+  label
+) {
   return el(
     "div",
-    { class: "panel" },
+    {
+      class: "panel"
+    },
     [
       el("strong", {
-        class: "stat-value",
+        class:
+          "stat-value",
         text: value
       }),
+
       el("span", {
-        class: "stat-label",
+        class:
+          "stat-label",
         text: label
       })
     ]
@@ -633,18 +1053,26 @@ function statPanel(value, label) {
    Pages
 ------------------------------------------------------- */
 
-function page(title, kicker, content) {
+function page(
+  title,
+  kicker,
+  content
+) {
   return el(
     "section",
-    { class: "updates" },
+    {
+      class: "updates"
+    },
     [
       el("p", {
         class: "eyebrow",
         text: kicker
       }),
+
       el("h1", {
         text: title
       }),
+
       content
     ]
   );
@@ -656,22 +1084,28 @@ function discoverView() {
     "Curated from this deployment",
     el(
       "div",
-      { class: "empty-state" },
+      {
+        class:
+          "empty-state"
+      },
       [
         el("h3", {
-          text: "Your web library is up to date"
+          text:
+            "Your web library is up to date"
         }),
 
         el("p", {
           text:
-            "VoidForge lists browser games declared in games.json. " +
-            "New games appear after their files and registry entry are deployed."
+            "VoidForge lists browser games declared in games.json. New games appear after their files and registry entry are deployed."
         }),
 
         button(
           "Open library",
           "primary",
-          () => changeView("library")
+          () =>
+            changeView(
+              "library"
+            )
         )
       ]
     )
@@ -681,25 +1115,31 @@ function discoverView() {
 function updatesView() {
   const panel = el(
     "div",
-    { class: "panel" },
+    {
+      class: "panel"
+    },
     [
       el(
         "div",
-        { class: "update-status" },
+        {
+          class:
+            "update-status"
+        },
         [
           el("i"),
+
           el(
             "div",
             {},
             [
               el("h2", {
-                text: "You are using the deployed launcher"
+                text:
+                  "You are using the deployed launcher"
               }),
 
               el("p", {
                 text:
-                  "GitHub Pages serves the newest published deployment when you reload. " +
-                  "This launcher does not install or patch files on your device."
+                  "GitHub Pages serves the newest published deployment when you reload. This launcher does not install or patch files on your device."
               })
             ]
           )
@@ -708,17 +1148,23 @@ function updatesView() {
 
       el(
         "div",
-        { class: "setting-row" },
+        {
+          class:
+            "setting-row"
+        },
         [
           el(
             "div",
             {},
             [
               el("b", {
-                text: "Launcher version"
+                text:
+                  "Launcher version"
               }),
+
               el("small", {
-                text: "1.1.0 · static web edition"
+                text:
+                  `${launcherVersion} · static web edition`
               })
             ]
           ),
@@ -728,12 +1174,18 @@ function updatesView() {
             {},
             [
               el("b", {
-                text: "Game registry"
+                text:
+                  "Game registry"
               }),
+
               el("small", {
-                text: `${games.length} declared browser game${
-                  games.length === 1 ? "" : "s"
-                }`
+                text:
+                  `${games.length} declared browser game${
+                    games.length ===
+                    1
+                      ? ""
+                      : "s"
+                  }`
               })
             ]
           )
@@ -746,10 +1198,16 @@ function updatesView() {
         async () => {
           try {
             await fetchGames();
-            toast("Game registry refreshed.");
+
+            toast(
+              "Game registry refreshed."
+            );
+
             renderView();
           } catch (error) {
-            toast(error.message);
+            toast(
+              error.message
+            );
           }
         }
       )
@@ -763,37 +1221,62 @@ function updatesView() {
   );
 }
 
-function setting(label, help, control) {
+/* -------------------------------------------------------
+   Settings
+------------------------------------------------------- */
+
+function setting(
+  label,
+  help,
+  control
+) {
   return el(
     "div",
-    { class: "setting-row" },
+    {
+      class:
+        "setting-row"
+    },
     [
       el(
         "div",
         {},
         [
-          el("b", { text: label }),
-          el("small", { text: help })
+          el("b", {
+            text: label
+          }),
+
+          el("small", {
+            text: help
+          })
         ]
       ),
+
       control
     ]
   );
 }
 
 function checkbox(key) {
-  const input = el("input", {
-    class: "toggle",
-    type: "checkbox",
-    "aria-label": key,
-    onchange: event => {
-      state.settings[key] = event.target.checked;
-      saveState();
-      applyPreferences();
-    }
-  });
+  const input = el(
+    "input",
+    {
+      class: "toggle",
+      type: "checkbox",
+      "aria-label": key,
+      onchange: event => {
+        state.settings[key] =
+          event.target.checked;
 
-  input.checked = Boolean(state.settings[key]);
+        saveState();
+
+        applyPreferences();
+      }
+    }
+  );
+
+  input.checked = Boolean(
+    state.settings[key]
+  );
 
   return input;
 }
@@ -801,7 +1284,10 @@ function checkbox(key) {
 function settingsView() {
   const general = el(
     "div",
-    { class: "panel setting-group" },
+    {
+      class:
+        "panel setting-group"
+    },
     [
       el("h2", {
         text: "General"
@@ -816,20 +1302,27 @@ function settingsView() {
       setting(
         "Auto fullscreen",
         "Request browser fullscreen after a game is launched.",
-        checkbox("autoFullscreen")
+        checkbox(
+          "autoFullscreen"
+        )
       ),
 
       setting(
         "Confirm before exiting",
         "Ask before closing an active game session.",
-        checkbox("confirmExit")
+        checkbox(
+          "confirmExit"
+        )
       )
     ]
   );
 
   const appearance = el(
     "div",
-    { class: "panel setting-group" },
+    {
+      class:
+        "panel setting-group"
+    },
     [
       el("h2", {
         text: "Appearance"
@@ -838,7 +1331,9 @@ function settingsView() {
       setting(
         "Reduce animations",
         "Minimize non-essential movement in the launcher.",
-        checkbox("reducedMotion")
+        checkbox(
+          "reducedMotion"
+        )
       ),
 
       setting(
@@ -849,13 +1344,19 @@ function settingsView() {
           type: "range",
           min: "70",
           max: "120",
-          value: state.settings.brightness,
-          "aria-label": "Interface brightness",
+          value:
+            state.settings
+              .brightness,
+          "aria-label":
+            "Interface brightness",
           oninput: event => {
             state.settings.brightness =
-              Number(event.target.value);
+              Number(
+                event.target.value
+              );
 
             saveState();
+
             applyPreferences();
           }
         })
@@ -865,7 +1366,10 @@ function settingsView() {
 
   const data = el(
     "div",
-    { class: "panel setting-group" },
+    {
+      class:
+        "panel setting-group"
+    },
     [
       el("h2", {
         text: "Data"
@@ -884,8 +1388,7 @@ function settingsView() {
       el("p", {
         class: "subtitle",
         text:
-          "Game data is controlled by each game. " +
-          "The launcher does not store credentials or install files."
+          "Game data is controlled by each game. The launcher does not store credentials or install files."
       })
     ]
   );
@@ -905,6 +1408,10 @@ function settingsView() {
   );
 }
 
+/* -------------------------------------------------------
+   About
+------------------------------------------------------- */
+
 function aboutView() {
   const repository =
     "https://github.com/VoidForgeStudios/VoidForgeStudios.github.io";
@@ -914,30 +1421,33 @@ function aboutView() {
     "Browser-first game launcher",
     el(
       "div",
-      { class: "panel about-list" },
+      {
+        class:
+          "panel about-list"
+      },
       [
         el("p", {
           text:
-            "VoidForge Studios Web Launcher is a static GitHub Pages interface " +
-            "for browser games included in this repository."
+            "VoidForge Studios Web Launcher is a static GitHub Pages interface for browser games included in this repository."
         }),
 
         el("p", {
           text:
-            "Launcher version: 1.1.0 · Web platform: GitHub Pages"
+            `Launcher version: ${launcherVersion} · Web platform: GitHub Pages`
         }),
 
         el("a", {
           href: repository,
           target: "_blank",
-          rel: "noopener noreferrer",
-          text: "View the VoidForge repository ↗"
+          rel:
+            "noopener noreferrer",
+          text:
+            "View the VoidForge repository ↗"
         }),
 
         el("p", {
           text:
-            "BlockWorld is the bundled Minecraft-style voxel prototype. " +
-            "It runs directly in the browser."
+            "Games are loaded from their own folders. Each game folder must contain an index.html file."
         })
       ]
     )
@@ -945,19 +1455,23 @@ function aboutView() {
 }
 
 /* -------------------------------------------------------
-   Favorites / data
+   Favorites / Data
 ------------------------------------------------------- */
 
 function toggleFavorite(id) {
-  if (state.favorites.includes(id)) {
-    state.favorites = state.favorites.filter(
-      item => item !== id
-    );
+  if (
+    state.favorites.includes(id)
+  ) {
+    state.favorites =
+      state.favorites.filter(
+        item => item !== id
+      );
   } else {
     state.favorites.push(id);
   }
 
   saveState();
+
   renderView();
 }
 
@@ -971,31 +1485,51 @@ function clearData() {
   }
 
   try {
-    localStorage.removeItem(storageKey);
+    localStorage.removeItem(
+      storageKey
+    );
   } catch {
     // Ignore storage errors.
   }
 
-  state = structuredClone(defaults);
+  state =
+    structuredClone(defaults);
 
   applyPreferences();
+
   renderView();
 
-  toast("Launcher data cleared.");
-}
-
-function showGameInformation(game) {
-  const tagText = game.tags.length
-    ? game.tags.join(", ")
-    : "None";
-
   toast(
-    `${game.name} · v${game.version} · ${game.platform} · ${tagText}`
+    "Launcher data cleared."
   );
 }
 
+function showGameInformation(game) {
+  const tagText =
+    game.tags.length
+      ? game.tags.join(", ")
+      : "None";
+
+  const path =
+    gameDisplayPath(game);
+
+  toast(
+    `${game.name} · v${game.version} · ${game.platform} · ${tagText} · ${path}`
+  );
+}
+
+function selectGame(id) {
+  state.selectedId = id;
+
+  if (state.settings.remember) {
+    saveState();
+  }
+
+  renderView();
+}
+
 /* -------------------------------------------------------
-   Rendering / navigation
+   Rendering / Navigation
 ------------------------------------------------------- */
 
 function renderView() {
@@ -1009,16 +1543,23 @@ function renderView() {
     about: aboutView
   };
 
-  const renderer = views[activeView] || libraryView;
+  const renderer =
+    views[activeView] ||
+    libraryView;
 
-  viewRoot.append(renderer());
+  viewRoot.append(
+    renderer()
+  );
 
   document
-    .querySelectorAll("[data-view]")
+    .querySelectorAll(
+      "[data-view]"
+    )
     .forEach(node => {
       node.classList.toggle(
         "is-active",
-        node.dataset.view === activeView
+        node.dataset.view ===
+          activeView
       );
     });
 }
@@ -1032,47 +1573,84 @@ function changeView(view) {
     "about"
   ];
 
-  if (!validViews.includes(view)) {
+  if (
+    !validViews.includes(view)
+  ) {
     view = "library";
   }
 
   activeView = view;
 
   closeMobileNavigation();
+
   renderView();
 
   window.scrollTo({
     top: 0,
-    behavior: state.settings.reducedMotion
-      ? "auto"
-      : "smooth"
+    behavior:
+      state.settings
+        .reducedMotion
+        ? "auto"
+        : "smooth"
   });
 
-  requestAnimationFrame(() => {
-    viewRoot.focus?.();
-  });
+  requestAnimationFrame(
+    () => {
+      viewRoot.focus?.();
+    }
+  );
 }
 
 /* -------------------------------------------------------
-   Game launching
+   Game Launching
 ------------------------------------------------------- */
 
 async function launch(game) {
-  if (!game || !game.entry) {
-    toast("This game has no valid entry point.");
+  if (!game) {
+    toast(
+      "No game was selected."
+    );
+    return;
+  }
+
+  if (!game.entry) {
+    toast(
+      "This game has no valid folder."
+    );
     return;
   }
 
   if (gameLoading) {
+    toast(
+      "A game is already loading."
+    );
+    return;
+  }
+
+  let url;
+
+  try {
+    url = gameUrl(game);
+  } catch (error) {
+    toast(
+      `Invalid game path: ${error.message}`
+    );
     return;
   }
 
   gameLoading = true;
   pendingGame = game;
-  previousFocus = document.activeElement;
+  previousFocus =
+    document.activeElement;
+
+  launchStartedAt =
+    performance.now();
 
   gameView.hidden = false;
-  document.body.classList.add("game-open");
+
+  document.body.classList.add(
+    "game-open"
+  );
 
   setText(
     $("#playingGameTitle"),
@@ -1091,37 +1669,57 @@ async function launch(game) {
 
   setText(
     $("#loadingDetail"),
-    `Opening ${game.entry}`
+    `Opening ${gameDisplayPath(
+      game
+    )}`
   );
 
   gameLoader.hidden = false;
   gameError.hidden = true;
 
-  frame.onload = handleGameLoad;
-  frame.onerror = handleGameError;
+  frame.onload =
+    handleGameLoad;
+
+  frame.onerror =
+    handleGameError;
+
+  console.info(
+    "[VoidForge] Loading game:",
+    {
+      id: game.id,
+      name: game.name,
+      folder: game.entry,
+      entry:
+        gameDisplayPath(game),
+      url
+    }
+  );
+
+  /*
+   * Reset iframe first.
+   */
+  frame.removeAttribute(
+    "src"
+  );
+
+  /*
+   * Allow browser rendering
+   * before assigning the new URL.
+   */
+  await new Promise(
+    resolve =>
+      requestAnimationFrame(
+        resolve
+      )
+  );
 
   /*
    * IMPORTANT:
-   * Do NOT perform a HEAD request first.
    *
-   * GitHub Pages is a static host and the safest approach
-   * is to directly load the actual HTML entry point.
+   * This loads:
+   *
+   * /GAME_FOLDER/index.html
    */
-  const url = gameUrl(game);
-
-  console.info("[VoidForge] Loading game:", {
-    name: game.name,
-    entry: game.entry,
-    url
-  });
-
-  frame.removeAttribute("src");
-
-  // Give the browser a rendering tick before changing iframe src.
-  await new Promise(resolve =>
-    requestAnimationFrame(resolve)
-  );
-
   frame.src = url;
 }
 
@@ -1131,23 +1729,39 @@ function handleGameLoad() {
   gameLoader.hidden = true;
   gameError.hidden = true;
 
+  const elapsed =
+    Math.round(
+      performance.now() -
+        launchStartedAt
+    );
+
   setText(
     $("#gameLoadStatus"),
     "Ready"
   );
 
+  console.info(
+    `[VoidForge] Game loaded in ${elapsed}ms.`
+  );
+
   if (pendingGame) {
     state.recent = [
       pendingGame.id,
+
       ...state.recent.filter(
-        id => id !== pendingGame.id
+        id =>
+          id !==
+          pendingGame.id
       )
     ].slice(0, 5);
 
     saveState();
   }
 
-  if (state.settings.autoFullscreen) {
+  if (
+    state.settings
+      .autoFullscreen
+  ) {
     requestGameFullscreen();
   }
 }
@@ -1160,19 +1774,33 @@ function handleGameError() {
       "The game could not start",
       "The browser reported an error while loading the game."
     );
+
     return;
+  }
+
+  let path;
+
+  try {
+    path =
+      gameDisplayPath(
+        pendingGame
+      );
+  } catch {
+    path =
+      pendingGame.entry;
   }
 
   showGameFailure(
     "The game could not start",
-    `VoidForge tried to load "${pendingGame.entry}". ` +
-      "Make sure that file exists in the deployed GitHub Pages repository."
+    `VoidForge tried to load "${path}". Make sure that file exists in the deployed GitHub Pages repository.`
   );
 }
 
-function showGameFailure(title, detail) {
+function showGameFailure(
+  title,
+  detail
+) {
   gameLoader.hidden = true;
-
   gameError.hidden = false;
 
   gameError.replaceChildren(
@@ -1186,7 +1814,10 @@ function showGameFailure(title, detail) {
 
     el(
       "div",
-      { class: "button-row" },
+      {
+        class:
+          "button-row"
+      },
       [
         button(
           "Return to launcher",
@@ -1197,7 +1828,11 @@ function showGameFailure(title, detail) {
         button(
           "Retry",
           "",
-          () => pendingGame && launch(pendingGame)
+          () =>
+            pendingGame &&
+            launch(
+              pendingGame
+            )
         )
       ]
     )
@@ -1209,32 +1844,48 @@ function showGameFailure(title, detail) {
   );
 }
 
+/* -------------------------------------------------------
+   Fullscreen
+------------------------------------------------------- */
+
 function requestGameFullscreen() {
   /*
-   * Try the iframe itself first.
-   *
-   * If the browser does not permit iframe fullscreen,
-   * fall back to fullscreen on the launcher game view.
+   * Try iframe fullscreen first.
    */
-  if (frame.requestFullscreen) {
-    frame.requestFullscreen().catch(() => {
-      gameView.requestFullscreen?.().catch(() => {});
-    });
+  if (
+    frame.requestFullscreen
+  ) {
+    frame
+      .requestFullscreen()
+      .catch(() => {
+        gameView
+          .requestFullscreen
+          ?.()
+          .catch(() => {});
+      });
 
     return;
   }
 
-  gameView.requestFullscreen?.().catch(() => {});
+  gameView
+    .requestFullscreen
+    ?.()
+    .catch(() => {});
 }
+
+/* -------------------------------------------------------
+   Reload Game
+------------------------------------------------------- */
 
 function reloadGame() {
   if (!pendingGame) {
     return;
   }
 
-  gameLoading = false;
+  const game =
+    pendingGame;
 
-  const game = pendingGame;
+  gameLoading = false;
 
   frame.onload = null;
   frame.onerror = null;
@@ -1257,23 +1908,43 @@ function reloadGame() {
     "Opening the game again."
   );
 
-  frame.src = "about:blank";
+  /*
+   * Clear current document.
+   */
+  frame.src =
+    "about:blank";
 
-  window.setTimeout(() => {
-    launch(game);
-  }, 50);
+  window.setTimeout(
+    () => {
+      launch(game);
+    },
+    50
+  );
 }
 
+/* -------------------------------------------------------
+   Exit Game
+------------------------------------------------------- */
+
 function exitGame() {
+  const src =
+    frame.getAttribute(
+      "src"
+    );
+
   const hasGame =
     !gameView.hidden &&
-    Boolean(frame.getAttribute("src")) &&
-    frame.getAttribute("src") !== "about:blank";
+    Boolean(src) &&
+    src !==
+      "about:blank";
 
   if (
     hasGame &&
-    state.settings.confirmExit &&
-    !confirm("Exit the current game session?")
+    state.settings
+      .confirmExit &&
+    !confirm(
+      "Exit the current game session?"
+    )
   ) {
     return;
   }
@@ -1283,21 +1954,33 @@ function exitGame() {
   frame.onload = null;
   frame.onerror = null;
 
-  frame.src = "about:blank";
+  frame.src =
+    "about:blank";
 
   gameView.hidden = true;
-  document.body.classList.remove("game-open");
+
+  document.body.classList.remove(
+    "game-open"
+  );
 
   pendingGame = null;
 
-  if (document.fullscreenElement) {
-    document.exitFullscreen?.().catch(() => {});
+  if (
+    document.fullscreenElement
+  ) {
+    document
+      .exitFullscreen
+      ?.()
+      .catch(() => {});
   }
 
   if (
     previousFocus &&
-    typeof previousFocus.focus === "function" &&
-    document.contains(previousFocus)
+    typeof previousFocus.focus ===
+      "function" &&
+    document.contains(
+      previousFocus
+    )
   ) {
     previousFocus.focus();
   }
@@ -1311,11 +1994,12 @@ function exitGame() {
 }
 
 /* -------------------------------------------------------
-   Mobile navigation
+   Mobile Navigation
 ------------------------------------------------------- */
 
 function closeMobileNavigation() {
-  const nav = $(".mobile-nav");
+  const nav =
+    $(".mobile-nav");
 
   if (!nav) {
     return;
@@ -1323,21 +2007,26 @@ function closeMobileNavigation() {
 
   nav.hidden = true;
 
-  $("#mobileMenu")?.setAttribute(
-    "aria-expanded",
-    "false"
-  );
+  $("#mobileMenu")
+    ?.setAttribute(
+      "aria-expanded",
+      "false"
+    );
 }
 
 function toggleMobileNavigation() {
-  const nav = $(".mobile-nav");
-  const menu = $("#mobileMenu");
+  const nav =
+    $(".mobile-nav");
+
+  const menu =
+    $("#mobileMenu");
 
   if (!nav || !menu) {
     return;
   }
 
-  nav.hidden = !nav.hidden;
+  nav.hidden =
+    !nav.hidden;
 
   menu.setAttribute(
     "aria-expanded",
@@ -1346,74 +2035,12 @@ function toggleMobileNavigation() {
 }
 
 /* -------------------------------------------------------
-   Events
+   Keyboard Shortcuts
 ------------------------------------------------------- */
 
-document.addEventListener("click", event => {
-  const target = event.target.closest("[data-view]");
-
-  if (!target) {
-    return;
-  }
-
-  changeView(target.dataset.view);
-});
-
-$("#gameSearch")?.addEventListener("input", () => {
-  if (activeView !== "library") {
-    activeView = "library";
-  }
-
-  renderView();
-});
-
-$("#fullscreenLauncher")?.addEventListener(
-  "click",
-  () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen?.().catch(() => {});
-      return;
-    }
-
-    document.documentElement
-      .requestFullscreen?.()
-      .catch(() => {
-        toast("Fullscreen is not available.");
-      });
-  }
-);
-
-$("#gameFullscreen")?.addEventListener(
-  "click",
-  requestGameFullscreen
-);
-
-$("#reloadGame")?.addEventListener(
-  "click",
-  reloadGame
-);
-
-$("#gameInfo")?.addEventListener(
-  "click",
-  () => {
-    if (pendingGame) {
-      showGameInformation(pendingGame);
-    }
-  }
-);
-
-$("#exitGame")?.addEventListener(
-  "click",
-  exitGame
-);
-
-$("#mobileMenu")?.addEventListener(
-  "click",
-  toggleMobileNavigation
-);
-
-document.addEventListener("keydown", event => {
-  const active = document.activeElement;
+function handleKeyboard(event) {
+  const active =
+    document.activeElement;
 
   const isTyping =
     active &&
@@ -1421,33 +2048,206 @@ document.addEventListener("keydown", event => {
       active.tagName
     );
 
+  /*
+   * /
+   *
+   * Focus search.
+   */
   if (
     event.key === "/" &&
     !isTyping
   ) {
     event.preventDefault();
-    $("#gameSearch")?.focus();
+
+    $("#gameSearch")
+      ?.focus();
+
+    return;
   }
 
+  /*
+   * Escape
+   *
+   * Exit active game.
+   */
   if (
     event.key === "Escape" &&
     !gameView.hidden
   ) {
+    event.preventDefault();
+
     exitGame();
+
+    return;
   }
-});
 
-window.addEventListener("hashchange", () => {
-  const view = location.hash.replace("#", "");
-
+  /*
+   * F
+   *
+   * Fullscreen active game.
+   */
   if (
-    ["library", "discover", "updates", "settings", "about"]
-      .includes(view)
+    event.key.toLowerCase() ===
+      "f" &&
+    !isTyping &&
+    !gameView.hidden
   ) {
-    activeView = view;
-    renderView();
+    event.preventDefault();
+
+    requestGameFullscreen();
+
+    return;
   }
-});
+
+  /*
+   * R
+   *
+   * Reload active game.
+   */
+  if (
+    event.key.toLowerCase() ===
+      "r" &&
+    !isTyping &&
+    !gameView.hidden
+  ) {
+    event.preventDefault();
+
+    reloadGame();
+  }
+}
+
+/* -------------------------------------------------------
+   Events
+------------------------------------------------------- */
+
+document.addEventListener(
+  "click",
+  event => {
+    const target =
+      event.target.closest(
+        "[data-view]"
+      );
+
+    if (!target) {
+      return;
+    }
+
+    changeView(
+      target.dataset.view
+    );
+  }
+);
+
+$("#gameSearch")
+  ?.addEventListener(
+    "input",
+    () => {
+      if (
+        activeView !==
+        "library"
+      ) {
+        activeView =
+          "library";
+      }
+
+      renderView();
+    }
+  );
+
+$("#fullscreenLauncher")
+  ?.addEventListener(
+    "click",
+    () => {
+      if (
+        document.fullscreenElement
+      ) {
+        document
+          .exitFullscreen
+          ?.()
+          .catch(() => {});
+
+        return;
+      }
+
+      document.documentElement
+        .requestFullscreen?.()
+        .catch(() => {
+          toast(
+            "Fullscreen is not available."
+          );
+        });
+    }
+  );
+
+$("#gameFullscreen")
+  ?.addEventListener(
+    "click",
+    requestGameFullscreen
+  );
+
+$("#reloadGame")
+  ?.addEventListener(
+    "click",
+    reloadGame
+  );
+
+$("#gameInfo")
+  ?.addEventListener(
+    "click",
+    () => {
+      if (pendingGame) {
+        showGameInformation(
+          pendingGame
+        );
+      }
+    }
+  );
+
+$("#exitGame")
+  ?.addEventListener(
+    "click",
+    exitGame
+  );
+
+$("#mobileMenu")
+  ?.addEventListener(
+    "click",
+    toggleMobileNavigation
+  );
+
+document.addEventListener(
+  "keydown",
+  handleKeyboard
+);
+
+/* -------------------------------------------------------
+   Browser Back Button / Hash Navigation
+------------------------------------------------------- */
+
+window.addEventListener(
+  "hashchange",
+  () => {
+    const view =
+      location.hash.replace(
+        "#",
+        ""
+      );
+
+    if (
+      [
+        "library",
+        "discover",
+        "updates",
+        "settings",
+        "about"
+      ].includes(view)
+    ) {
+      activeView = view;
+
+      renderView();
+    }
+  }
+);
 
 /* -------------------------------------------------------
    Initialization
@@ -1456,12 +2256,19 @@ window.addEventListener("hashchange", () => {
 async function initialize() {
   applyPreferences();
 
-  // The mobile nav should start closed.
-  const mobileNav = $(".mobile-nav");
+  /*
+   * Mobile navigation starts closed.
+   */
+  const mobileNav =
+    $(".mobile-nav");
+
   if (mobileNav) {
     mobileNav.hidden = true;
   }
 
+  /*
+   * Load games.json.
+   */
   try {
     await fetchGames();
 
@@ -1473,6 +2280,18 @@ async function initialize() {
     console.info(
       `[VoidForge] Loaded ${games.length} game(s).`
     );
+
+    games.forEach(game => {
+      try {
+        console.info(
+          `[VoidForge] ${game.name}: ${gameDisplayPath(
+            game
+          )}`
+        );
+      } catch {
+        // Ignore malformed entries.
+      }
+    });
   } catch (error) {
     games = [];
 
@@ -1486,29 +2305,42 @@ async function initialize() {
       error
     );
 
-    toast(error.message);
+    toast(
+      error.message
+    );
   }
 
+  /*
+   * Render launcher.
+   */
   renderView();
 
-  if ("serviceWorker" in navigator) {
-    const swUrl = new URL(
-      "sw.js",
-      document.baseURI
-    );
+  /*
+   * Service worker is optional.
+   *
+   * Failure must never stop the
+   * launcher or games.
+   */
+  if (
+    "serviceWorker" in
+    navigator
+  ) {
+    const swUrl =
+      new URL(
+        "sw.js",
+        document.baseURI
+      );
 
     navigator.serviceWorker
-      .register(swUrl.href)
+      .register(
+        swUrl.href
+      )
       .then(() => {
         console.info(
           "[VoidForge] Service worker registered."
         );
       })
       .catch(error => {
-        /*
-         * Service worker failure must NEVER prevent
-         * the launcher or games from working.
-         */
         console.warn(
           "[VoidForge] Service worker unavailable:",
           error
@@ -1516,5 +2348,9 @@ async function initialize() {
       });
   }
 }
+
+/* -------------------------------------------------------
+   Start
+------------------------------------------------------- */
 
 initialize();
