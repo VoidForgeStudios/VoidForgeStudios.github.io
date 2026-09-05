@@ -4,7 +4,7 @@ A static, GitHub Pages-compatible web launcher for the browser games bundled in 
 
 ## Included game
 
-- **Minecraft** — the bundled Minecraft-style BlockWorld voxel prototype in [`minecraft/`](minecraft/), launched from `minecraft/index.html`.
+- **BlockWorld** — the Minecraft-style voxel prototype in [`minecraft/`](minecraft/), launched from `minecraft/index.html`.
 
 ## Development
 
@@ -18,9 +18,9 @@ Open `http://localhost:8000/`. The launcher is deliberately relative-path based,
 
 ## Adding a browser game
 
-1. Deploy the game folder and its `index.html` entry point.
-2. Add its metadata and its **folder name only** as `entry` in [`games.json`](games.json), for example: `"entry": "minecraft"`.
-3. Do not add a registry entry until that folder's `index.html` exists. The launcher validates the folder name and resolves it to `minecraft/index.html` before launch.
+1. Deploy the game's files and its real HTML entry point.
+2. Add its real metadata and relative `entry` path to [`games.json`](games.json).
+3. Do not add a registry entry until that entry point exists. The launcher verifies it before launch.
 
 A browser cannot scan a deployed directory listing on GitHub Pages, so `games.json` is the explicit deploy-time game registry. The launcher does not install executables or write files to a visitor's computer.
 
