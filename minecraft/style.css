@@ -1,1 +1,765 @@
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:Arial,sans-serif}#game{width:100%;height:100%}canvas{display:block}.overlay{position:fixed}.hidden{display:none!important}#crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:bold;color:white;text-shadow:0 1px 3px #000;pointer-events:none;z-index:5}#hud{position:fixed;inset:0;pointer-events:none;z-index:4}.status{display:none}#status{position:absolute;top:14px;left:14px;padding:7px 10px;color:#fff;background:#0008;border-radius:6px;font-size:13px}#hotbar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:5px;padding:6px;background:#0009;border:2px solid #222;border-radius:7px}.slot{width:54px;height:54px;border:2px solid #777;background:#333d;display:flex;align-items:center;justify-content:center;position:relative;border-radius:4px}.slot.selected{border-color:#fff;box-shadow:0 0 0 2px #000}.slot span{font-size:10px;color:#fff;position:absolute;bottom:3px;left:4px;text-shadow:1px 1px #000}.swatch{width:32px;height:32px;border:1px solid #111;image-rendering:pixelated}#help{position:fixed;right:12px;top:12px;background:#0009;color:#fff;padding:10px;border-radius:6px;font-size:12px;line-height:1.5;z-index:4;pointer-events:none}#start{position:fixed;inset:0;background:linear-gradient(#0005,#0009);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:10;text-align:center}#start h1{font-size:56px;margin:0 0 8px;text-shadow:3px 3px #000}#start p{margin:0 0 25px}#play{font-size:20px;font-weight:bold;padding:13px 40px;border:2px solid #fff;background:#4b9b39;color:#fff;border-radius:6px;cursor:pointer}#play:hover{filter:brightness(1.15)}@media(max-width:700px){#help{font-size:10px}.slot{width:45px;height:45px}.swatch{width:26px;height:26px}}
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  background: #87ceeb;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  user-select: none;
+  touch-action: none;
+}
+
+body {
+  color: #fff;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.overlay {
+  position: fixed;
+}
+
+
+/* =========================================================
+   GAME
+   ========================================================= */
+
+#game {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  touch-action: none;
+}
+
+
+/* =========================================================
+   CROSSHAIR
+   ========================================================= */
+
+#crosshair {
+  position: fixed;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+
+  font-size: 25px;
+  font-weight: 900;
+
+  line-height: 1;
+
+  text-shadow:
+    2px 0 #000,
+    -2px 0 #000,
+    0 2px #000,
+    0 -2px #000;
+
+  pointer-events: none;
+
+  z-index: 20;
+}
+
+
+/* =========================================================
+   MAIN HUD
+   ========================================================= */
+
+#hud {
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  z-index: 10;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status {
+  display: none;
+}
+
+#status {
+  position: absolute;
+
+  top: 14px;
+  left: 14px;
+
+  min-width: 150px;
+
+  padding: 8px 11px;
+
+  color: #fff;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20,20,20,.82),
+      rgba(0,0,0,.68)
+    );
+
+  border: 1px solid rgba(255,255,255,.18);
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  letter-spacing: .2px;
+
+  box-shadow:
+    0 4px 15px rgba(0,0,0,.25);
+
+  backdrop-filter: blur(6px);
+
+  z-index: 30;
+}
+
+
+/* =========================================================
+   HEALTH HUD
+   ========================================================= */
+
+#healthHUD {
+  position: fixed;
+
+  left: 50%;
+  bottom: 84px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 2px;
+
+  height: 30px;
+
+  padding: 2px 4px;
+
+  pointer-events: none;
+
+  z-index: 25;
+}
+
+.heart {
+  position: relative;
+
+  width: 27px;
+  height: 27px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin: 0;
+  padding: 0;
+
+  color: #ef3340;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 25px;
+  font-weight: 900;
+
+  line-height: 27px;
+
+  text-align: center;
+
+  text-shadow:
+    2px 2px 0 #111,
+    -1px -1px 0 rgba(0,0,0,.8);
+
+  transition:
+    transform .12s ease,
+    opacity .12s ease;
+}
+
+
+/* =========================================================
+   HOTBAR
+   ========================================================= */
+
+#hotbar {
+  position: fixed;
+
+  left: 50%;
+  bottom: 18px;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 6px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(30,30,30,.88),
+      rgba(10,10,10,.82)
+    );
+
+  border: 2px solid #111;
+
+  border-radius: 9px;
+
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.4),
+    inset 0 1px rgba(255,255,255,.08);
+
+  backdrop-filter: blur(5px);
+
+  z-index: 15;
+
+  pointer-events: auto;
+}
+
+
+/* =========================================================
+   HOTBAR SLOT
+   ========================================================= */
+
+.slot {
+  position: relative;
+
+  width: 54px;
+  height: 54px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(75,75,75,.95),
+      rgba(38,38,38,.95)
+    );
+
+  border:
+    2px solid #666;
+
+  border-radius: 5px;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.12),
+    inset 0 -2px rgba(0,0,0,.35);
+
+  transition:
+    transform .08s ease,
+    border-color .08s ease,
+    box-shadow .08s ease;
+
+  cursor: pointer;
+}
+
+
+/* Hover */
+
+.slot:hover {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(95,95,95,.98),
+      rgba(50,50,50,.98)
+    );
+
+  border-color: #aaa;
+
+  transform: translateY(-1px);
+}
+
+
+/* Selected */
+
+.slot.selected {
+  border-color: #fff;
+
+  box-shadow:
+    0 0 0 2px #111,
+    0 0 0 4px rgba(255,255,255,.75),
+    inset 0 1px rgba(255,255,255,.2);
+
+  transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   ITEM SWATCH
+   ========================================================= */
+
+.swatch {
+  width: 34px;
+  height: 34px;
+
+  object-fit: contain;
+
+  border: 1px solid rgba(0,0,0,.7);
+
+  image-rendering: pixelated;
+
+  filter:
+    drop-shadow(2px 2px 0 rgba(0,0,0,.45));
+
+  transition:
+    transform .1s ease;
+}
+
+.slot:hover .swatch {
+  transform: scale(1.04);
+}
+
+
+/* =========================================================
+   ITEM NUMBER / LABEL
+   ========================================================= */
+
+.slot span {
+  position: absolute;
+
+  left: 4px;
+  bottom: 3px;
+
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  line-height: 1;
+
+  text-shadow:
+    1px 1px 0 #000,
+    -1px 0 #000;
+}
+
+
+/* =========================================================
+   HELP PANEL
+   ========================================================= */
+
+#help {
+  position: fixed;
+
+  right: 14px;
+  top: 14px;
+
+  max-width: 230px;
+
+  padding: 10px 12px;
+
+  color: rgba(255,255,255,.95);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15,15,15,.78),
+      rgba(0,0,0,.62)
+    );
+
+  border:
+    1px solid rgba(255,255,255,.16);
+
+  border-radius: 8px;
+
+  font-size: 12px;
+
+  line-height: 1.55;
+
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.3);
+
+  backdrop-filter: blur(7px);
+
+  z-index: 30;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   START SCREEN
+   ========================================================= */
+
+#start {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  color: #fff;
+
+  text-align: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(0,0,0,.18),
+      rgba(0,0,0,.7)
+    );
+
+  backdrop-filter: blur(2px);
+
+  z-index: 100;
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+#start h1 {
+  margin: 0 0 10px;
+
+  font-size:
+    clamp(38px, 8vw, 68px);
+
+  font-weight: 900;
+
+  letter-spacing: -2px;
+
+  text-shadow:
+    4px 4px 0 #111,
+    0 8px 25px rgba(0,0,0,.45);
+}
+
+
+/* =========================================================
+   START DESCRIPTION
+   ========================================================= */
+
+#start p {
+  margin: 0 0 25px;
+
+  max-width: 500px;
+
+  color: rgba(255,255,255,.85);
+
+  font-size: 15px;
+
+  line-height: 1.5;
+
+  text-shadow:
+    1px 2px 3px #000;
+}
+
+
+/* =========================================================
+   PLAY BUTTON
+   ========================================================= */
+
+#play {
+  min-width: 190px;
+
+  padding: 13px 40px;
+
+  border:
+    2px solid rgba(255,255,255,.9);
+
+  border-radius: 7px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #63bd48,
+      #3d8d2e
+    );
+
+  color: #fff;
+
+  font-size: 20px;
+  font-weight: 800;
+
+  letter-spacing: .3px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 0 #28651f,
+    0 10px 25px rgba(0,0,0,.35);
+
+  transition:
+    transform .1s ease,
+    filter .1s ease;
+}
+
+#play:hover {
+  filter: brightness(1.12);
+
+  transform:
+    translateY(-2px);
+}
+
+#play:active {
+  transform:
+    translateY(3px);
+
+  box-shadow:
+    0 2px 0 #28651f,
+    0 5px 15px rgba(0,0,0,.3);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  #status {
+    top: 10px;
+    left: 10px;
+
+    padding: 6px 9px;
+
+    font-size: 11px;
+  }
+
+  #help {
+    top: 10px;
+    right: 10px;
+
+    max-width: 160px;
+
+    padding: 7px 9px;
+
+    font-size: 10px;
+  }
+
+
+  /* -------------------------
+     MOBILE HOTBAR
+     ------------------------- */
+
+  #hotbar {
+    bottom: 18px;
+
+    gap: 4px;
+
+    padding: 5px;
+
+    max-width: calc(100vw - 16px);
+
+    overflow: hidden;
+  }
+
+  .slot {
+    width: 45px;
+    height: 45px;
+
+    flex: 0 0 45px;
+  }
+
+  .swatch {
+    width: 27px;
+    height: 27px;
+  }
+
+  .slot span {
+    left: 3px;
+    bottom: 2px;
+
+    font-size: 9px;
+  }
+
+
+  /* -------------------------
+     MOBILE HEARTS
+     ------------------------- */
+
+  #healthHUD {
+    bottom: 72px;
+
+    gap: 0;
+
+    height: 23px;
+
+    padding: 0;
+  }
+
+  .heart {
+    width: 21px;
+    height: 21px;
+
+    font-size: 20px;
+
+    line-height: 21px;
+  }
+
+
+  /* -------------------------
+     MOBILE CROSSHAIR
+     ------------------------- */
+
+  #crosshair {
+    font-size: 22px;
+  }
+
+
+  /* -------------------------
+     START SCREEN
+     ------------------------- */
+
+  #start {
+    padding: 18px;
+  }
+
+  #start h1 {
+    font-size:
+      clamp(38px, 13vw, 58px);
+
+    letter-spacing: -1px;
+  }
+
+  #start p {
+    font-size: 13px;
+
+    max-width: 330px;
+  }
+
+  #play {
+    width: min(90vw, 280px);
+
+    padding: 13px 25px;
+
+    font-size: 18px;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  #hotbar {
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .slot {
+    width: 39px;
+    height: 39px;
+
+    flex-basis: 39px;
+  }
+
+  .swatch {
+    width: 23px;
+    height: 23px;
+  }
+
+  #healthHUD {
+    bottom: 67px;
+  }
+
+  .heart {
+    width: 19px;
+    height: 19px;
+
+    font-size: 18px;
+  }
+}
+
+
+/* =========================================================
+   LANDSCAPE MOBILE
+   ========================================================= */
+
+@media (max-height: 500px) and (max-width: 900px) {
+
+  #hotbar {
+    bottom: 10px;
+  }
+
+  #healthHUD {
+    bottom: 58px;
+  }
+
+  #help {
+    display: none;
+  }
+
+  #status {
+    top: 8px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
