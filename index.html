@@ -3,9 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>VoidForge Studios</title>
 
 <style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
 *{
     margin:0;
     padding:0;
@@ -13,100 +19,202 @@
     user-select:none;
 }
 
-html,body{
+:root{
+    --bg:#030305;
+    --panel:#0b0b10;
+    --panel2:#111118;
+    --white:#ffffff;
+    --text:#dddddf;
+    --muted:#777783;
+    --dim:#44444d;
+    --line:rgba(255,255,255,.10);
+    --glow:rgba(255,255,255,.16);
+
+    --transition:.3s cubic-bezier(.2,.8,.2,1);
+}
+
+html,
+body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#030305;
-    font-family:Arial,Helvetica,sans-serif;
+
+    background:var(--bg);
+
     color:white;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
 
-canvas{
+button{
+    font-family:inherit;
+}
+
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+#particles{
     position:fixed;
     inset:0;
+
+    width:100%;
+    height:100%;
+
     z-index:0;
+
+    pointer-events:none;
 }
 
-/* ================= INTRO ================= */
+
+/* =========================================================
+   INTRO
+========================================================= */
 
 #intro{
     position:fixed;
     inset:0;
-    z-index:10;
+
+    z-index:100;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     background:
-        radial-gradient(circle at center,#15151d 0%,#050507 45%,#010102 100%);
-    transition:opacity 1.2s ease;
+        radial-gradient(
+            circle at center,
+            #181820 0%,
+            #07070a 42%,
+            #010102 100%
+        );
+
+    transition:
+        opacity 1.2s ease,
+        visibility 1.2s ease;
+}
+
+#intro.hidden{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
 }
 
 .intro-content{
     text-align:center;
-    animation:introZoom 2.8s ease forwards;
+
+    animation:
+        introZoom 2.8s ease forwards;
 }
 
 .void{
-    font-size:clamp(55px,12vw,130px);
+    font-size:clamp(55px,12vw,140px);
+
     font-weight:900;
+
     letter-spacing:18px;
-    background:linear-gradient(90deg,#fff,#8e8e9b,#fff);
+
+    background:
+        linear-gradient(
+            90deg,
+            #fff,
+            #777783,
+            #fff
+        );
+
     -webkit-background-clip:text;
+    background-clip:text;
+
     color:transparent;
-    filter:drop-shadow(0 0 25px rgba(255,255,255,.18));
+
+    filter:
+        drop-shadow(
+            0 0 25px
+            rgba(255,255,255,.18)
+        );
 }
 
 .forge{
-    font-size:clamp(18px,3vw,32px);
-    letter-spacing:14px;
     margin-top:8px;
+
+    font-size:
+        clamp(18px,3vw,32px);
+
+    letter-spacing:14px;
+
     color:#858591;
 }
 
 .studios{
     margin-top:22px;
+
     font-size:13px;
+
     letter-spacing:8px;
+
     color:#555560;
 }
 
 .intro-line{
     width:0;
     height:1px;
+
     margin:30px auto 0;
+
     background:white;
-    animation:lineGrow 1.8s 1s ease forwards;
+
+    box-shadow:
+        0 0 12px white;
+
+    animation:
+        lineGrow 1.8s 1s ease forwards;
 }
 
 @keyframes introZoom{
+
     0%{
         opacity:0;
         transform:scale(.75);
         filter:blur(12px);
     }
+
     25%{
         opacity:1;
         filter:blur(0);
     }
+
     100%{
         transform:scale(1);
     }
 }
 
 @keyframes lineGrow{
-    to{width:280px}
+    to{
+        width:280px;
+    }
 }
 
-/* ================= MAIN MENU ================= */
+
+/* =========================================================
+   MAIN MENU
+========================================================= */
 
 #menu{
     position:fixed;
     inset:0;
+
     z-index:5;
+
     opacity:0;
+
     pointer-events:none;
-    transition:opacity 1s ease;
+
+    transition:
+        opacity 1s ease;
 }
 
 #menu.active{
@@ -117,204 +225,1043 @@ canvas{
 .menu-overlay{
     position:absolute;
     inset:0;
+
     background:
-        linear-gradient(90deg,
-            rgba(0,0,0,.88) 0%,
-            rgba(0,0,0,.55) 45%,
-            rgba(0,0,0,.15) 100%);
+        linear-gradient(
+            90deg,
+            rgba(0,0,0,.94) 0%,
+            rgba(0,0,0,.70) 35%,
+            rgba(0,0,0,.30) 70%,
+            rgba(0,0,0,.10) 100%
+        );
+
+    pointer-events:none;
 }
 
 .menu-content{
     position:absolute;
+
     left:8%;
     top:50%;
+
     transform:translateY(-50%);
+
+    z-index:2;
 }
 
 .menu-title{
-    font-size:clamp(45px,7vw,90px);
+    font-size:
+        clamp(45px,7vw,95px);
+
     font-weight:900;
+
     letter-spacing:8px;
+
+    line-height:.9;
+
+    text-shadow:
+        0 0 40px rgba(255,255,255,.06);
 }
 
 .menu-subtitle{
-    margin-top:5px;
+    margin-top:10px;
+
     color:#777783;
-    letter-spacing:7px;
+
+    letter-spacing:8px;
+
     font-size:13px;
 }
 
+
+/* =========================================================
+   MENU BUTTONS
+========================================================= */
+
 .buttons{
     margin-top:55px;
+
     display:flex;
+
     flex-direction:column;
-    gap:14px;
-    width:270px;
+
+    gap:12px;
+
+    width:300px;
 }
 
 .menu-btn{
     position:relative;
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(255,255,255,.035);
-    color:#ddd;
+
+    border:1px solid
+        rgba(255,255,255,.12);
+
+    background:
+        rgba(255,255,255,.035);
+
+    color:#ccc;
+
     padding:18px 25px;
+
     text-align:left;
-    font-size:14px;
+
+    font-size:13px;
+
     letter-spacing:4px;
+
     cursor:pointer;
+
     overflow:hidden;
-    transition:.25s;
+
+    transition:var(--transition);
+
     backdrop-filter:blur(8px);
 }
 
 .menu-btn::before{
     content:"";
+
     position:absolute;
+
     left:0;
     top:0;
+
     width:3px;
     height:100%;
+
     background:white;
+
     transform:scaleY(0);
-    transition:.25s;
+
+    transform-origin:center;
+
+    transition:var(--transition);
+}
+
+.menu-btn::after{
+    content:"";
+
+    position:absolute;
+
+    left:-100%;
+
+    top:0;
+
+    width:100%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.08),
+            transparent
+        );
+
+    transition:.5s;
 }
 
 .menu-btn:hover{
-    background:rgba(255,255,255,.11);
-    transform:translateX(8px);
+    background:
+        rgba(255,255,255,.10);
+
+    transform:translateX(9px);
+
     color:white;
+
+    border-color:
+        rgba(255,255,255,.25);
+
+    box-shadow:
+        0 0 25px
+        rgba(255,255,255,.04);
 }
 
 .menu-btn:hover::before{
     transform:scaleY(1);
 }
 
+.menu-btn:hover::after{
+    left:100%;
+}
+
+
+/* =========================================================
+   TOP UI
+========================================================= */
+
+.sound{
+    position:absolute;
+
+    right:30px;
+    top:28px;
+
+    z-index:10;
+
+    color:#666670;
+
+    font-size:11px;
+
+    letter-spacing:2px;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.sound:hover{
+    color:white;
+}
+
+.status{
+    position:absolute;
+
+    right:30px;
+    top:55px;
+
+    color:#44444d;
+
+    font-size:9px;
+
+    letter-spacing:2px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
 .footer{
     position:absolute;
+
     bottom:28px;
     left:8%;
+
     color:#44444d;
+
     font-size:10px;
+
     letter-spacing:3px;
 }
 
 .version{
     position:absolute;
+
     right:30px;
     bottom:28px;
+
     color:#44444d;
+
     font-size:10px;
+
     letter-spacing:2px;
 }
 
-/* ================= MODAL ================= */
 
-.modal{
+/* =========================================================
+   PANEL SYSTEM
+========================================================= */
+
+.page-panel{
     position:fixed;
+
     inset:0;
-    z-index:20;
-    display:none;
+
+    z-index:50;
+
+    display:flex;
+
     align-items:center;
     justify-content:center;
-    background:rgba(0,0,0,.75);
-    backdrop-filter:blur(12px);
+
+    padding:30px;
+
+    background:
+        rgba(0,0,0,.78);
+
+    backdrop-filter:
+        blur(18px);
+
+    opacity:0;
+
+    visibility:hidden;
+
+    pointer-events:none;
+
+    transition:
+        opacity .35s ease,
+        visibility .35s ease;
 }
 
-.modal.show{
-    display:flex;
+.page-panel.show{
+    opacity:1;
+
+    visibility:visible;
+
+    pointer-events:auto;
 }
 
 .panel{
-    width:min(600px,90%);
-    padding:40px;
-    background:rgba(12,12,17,.92);
-    border:1px solid rgba(255,255,255,.12);
-    box-shadow:0 0 80px rgba(0,0,0,.8);
+    position:relative;
+
+    width:
+        min(850px,94vw);
+
+    max-height:
+        88vh;
+
+    overflow:auto;
+
+    padding:45px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,18,25,.97),
+            rgba(6,6,10,.97)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    box-shadow:
+        0 0 100px
+        rgba(0,0,0,.9);
+
+    transform:
+        translateY(25px)
+        scale(.96);
+
+    transition:
+        transform .4s
+        cubic-bezier(.2,.8,.2,1);
 }
 
-.panel h2{
-    letter-spacing:5px;
-    margin-bottom:20px;
+.page-panel.show .panel{
+    transform:
+        translateY(0)
+        scale(1);
 }
 
-.panel p{
-    color:#888892;
-    line-height:1.7;
+.panel::-webkit-scrollbar{
+    width:4px;
 }
 
-.close{
-    margin-top:25px;
-    padding:12px 20px;
-    background:white;
-    border:0;
-    cursor:pointer;
+.panel::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.panel::-webkit-scrollbar-thumb{
+    background:#444;
+}
+
+.panel-header{
+    display:flex;
+
+    align-items:flex-start;
+
+    justify-content:space-between;
+
+    margin-bottom:35px;
+}
+
+.panel-title{
+    font-size:28px;
+
+    letter-spacing:6px;
+
+    font-weight:700;
+}
+
+.panel-number{
+    color:#44444d;
+
+    font-size:10px;
+
     letter-spacing:3px;
 }
 
-/* SOUND */
+.panel-text{
+    color:#888892;
 
-.sound{
+    line-height:1.8;
+
+    font-size:14px;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+.close{
+    margin-top:35px;
+
+    padding:13px 25px;
+
+    background:white;
+
+    border:0;
+
+    color:#050505;
+
+    cursor:pointer;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    letter-spacing:3px;
+
+    transition:.2s;
+}
+
+.close:hover{
+    background:#aaa;
+
+    transform:translateX(4px);
+}
+
+
+/* =========================================================
+   GAMES
+========================================================= */
+
+.games-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:18px;
+}
+
+.game-card{
+    position:relative;
+
+    min-height:210px;
+
+    padding:25px;
+
+    overflow:hidden;
+
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.045),
+            rgba(255,255,255,.015)
+        );
+
+    transition:var(--transition);
+}
+
+.game-card:hover{
+    transform:
+        translateY(-5px);
+
+    border-color:
+        rgba(255,255,255,.22);
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,.35);
+}
+
+.game-card::before{
+    content:"";
+
     position:absolute;
-    right:30px;
-    top:28px;
-    z-index:30;
-    color:#666670;
-    font-size:11px;
+
+    inset:0;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(255,255,255,.10),
+            transparent 45%
+        );
+
+    pointer-events:none;
+}
+
+.game-number{
+    color:#555560;
+
+    font-size:10px;
+
+    letter-spacing:3px;
+
+    margin-bottom:35px;
+}
+
+.game-card h3{
+    font-size:19px;
+
+    letter-spacing:4px;
+
+    margin-bottom:12px;
+}
+
+.game-card p{
+    color:#777783;
+
+    font-size:12px;
+
+    line-height:1.7;
+}
+
+.game-status{
+    position:absolute;
+
+    left:25px;
+    bottom:22px;
+
+    font-size:9px;
+
     letter-spacing:2px;
+
+    color:#555560;
+}
+
+
+/* =========================================================
+   ABOUT
+========================================================= */
+
+.about-layout{
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:40px;
+}
+
+.about-block{
+    padding:25px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    background:
+        rgba(255,255,255,.02);
+}
+
+.about-block h3{
+    margin-bottom:15px;
+
+    font-size:12px;
+
+    letter-spacing:3px;
+}
+
+.about-block p{
+    color:#777783;
+
+    font-size:13px;
+
+    line-height:1.8;
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+.settings-list{
+    display:flex;
+
+    flex-direction:column;
+}
+
+.setting{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:20px 0;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.07);
+}
+
+.setting-info h3{
+    font-size:13px;
+
+    letter-spacing:2px;
+
+    margin-bottom:6px;
+}
+
+.setting-info p{
+    color:#555560;
+
+    font-size:11px;
+}
+
+.setting-control{
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+}
+
+.toggle{
+    position:relative;
+
+    width:52px;
+    height:28px;
+
+    border:1px solid
+        rgba(255,255,255,.15);
+
+    background:#17171d;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.toggle::before{
+    content:"";
+
+    position:absolute;
+
+    top:5px;
+    left:5px;
+
+    width:16px;
+    height:16px;
+
+    background:#555560;
+
+    transition:.25s;
+}
+
+.toggle.active{
+    background:white;
+}
+
+.toggle.active::before{
+    left:29px;
+
+    background:black;
+}
+
+.setting-value{
+    width:35px;
+
+    color:#666670;
+
+    font-size:9px;
+
+    letter-spacing:1px;
+}
+
+
+/* =========================================================
+   SELECT
+========================================================= */
+
+select{
+    background:#111118;
+
+    color:white;
+
+    border:
+        1px solid
+        rgba(255,255,255,.15);
+
+    padding:9px 14px;
+
+    outline:none;
+
     cursor:pointer;
 }
+
+
+/* =========================================================
+   CREDITS
+========================================================= */
+
+.credits{
+    text-align:center;
+}
+
+.logo-small{
+    font-size:36px;
+
+    font-weight:900;
+
+    letter-spacing:8px;
+
+    margin-bottom:10px;
+}
+
+.credit-subtitle{
+    color:#555560;
+
+    letter-spacing:5px;
+
+    font-size:10px;
+
+    margin-bottom:40px;
+}
+
+.credit-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:15px;
+}
+
+.credit-box{
+    padding:22px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+}
+
+.credit-box span{
+    display:block;
+
+    color:#555560;
+
+    font-size:9px;
+
+    letter-spacing:3px;
+
+    margin-bottom:10px;
+}
+
+.credit-box strong{
+    font-size:12px;
+
+    letter-spacing:2px;
+}
+
+
+/* =========================================================
+   PLAY SCREEN
+========================================================= */
+
+#playPanel .panel{
+    min-height:500px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+}
+
+.play-symbol{
+    width:100px;
+    height:100px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:
+        1px solid
+        rgba(255,255,255,.2);
+
+    border-radius:50%;
+
+    margin-bottom:30px;
+
+    box-shadow:
+        0 0 60px
+        rgba(255,255,255,.08);
+
+    animation:
+        pulse 2s infinite;
+}
+
+.play-symbol::after{
+    content:"";
+
+    margin-left:7px;
+
+    width:0;
+    height:0;
+
+    border-top:12px solid transparent;
+    border-bottom:12px solid transparent;
+    border-left:18px solid white;
+}
+
+@keyframes pulse{
+
+    0%,100%{
+        box-shadow:
+            0 0 30px
+            rgba(255,255,255,.04);
+    }
+
+    50%{
+        box-shadow:
+            0 0 70px
+            rgba(255,255,255,.14);
+    }
+}
+
+.play-title{
+    font-size:38px;
+
+    letter-spacing:8px;
+}
+
+.play-description{
+    margin-top:15px;
+
+    color:#666670;
+
+    font-size:12px;
+
+    letter-spacing:2px;
+}
+
+
+/* =========================================================
+   NOTIFICATION
+========================================================= */
+
+.notification{
+    position:fixed;
+
+    left:50%;
+    bottom:40px;
+
+    z-index:200;
+
+    transform:
+        translate(-50%,20px);
+
+    padding:14px 22px;
+
+    background:
+        rgba(15,15,20,.95);
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    color:#aaa;
+
+    font-size:10px;
+
+    letter-spacing:2px;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.3s;
+}
+
+.notification.show{
+    opacity:1;
+
+    transform:
+        translate(-50%,0);
+}
+
+
+/* =========================================================
+   NO ANIMATION MODE
+========================================================= */
+
+.no-animations *,
+.no-animations *::before,
+.no-animations *::after{
+    animation:none !important;
+
+    transition:none !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:700px){
+
+    .menu-content{
+        left:7%;
+        right:7%;
+    }
+
+    .menu-title{
+        font-size:12vw;
+
+        letter-spacing:5px;
+    }
+
+    .buttons{
+        width:100%;
+
+        max-width:300px;
+    }
+
+    .footer{
+        left:7%;
+
+        font-size:8px;
+    }
+
+    .version{
+        right:15px;
+    }
+
+    .panel{
+        padding:28px;
+
+        max-height:90vh;
+    }
+
+    .games-grid,
+    .about-layout,
+    .credit-grid{
+        grid-template-columns:1fr;
+    }
+
+    .sound{
+        right:15px;
+    }
+}
+
 </style>
 </head>
 
+
 <body>
+
+
+<!-- =========================================================
+     PARTICLES
+========================================================= -->
 
 <canvas id="particles"></canvas>
 
-<!-- ================= INTRO ================= -->
+
+<!-- =========================================================
+     INTRO
+========================================================= -->
 
 <section id="intro">
+
     <div class="intro-content">
-        <div class="void">VOID</div>
-        <div class="forge">FORGE</div>
-        <div class="studios">STUDIOS</div>
+
+        <div class="void">
+            VOID
+        </div>
+
+        <div class="forge">
+            FORGE
+        </div>
+
+        <div class="studios">
+            STUDIOS
+        </div>
+
         <div class="intro-line"></div>
+
     </div>
+
 </section>
 
-<!-- ================= MAIN MENU ================= -->
+
+<!-- =========================================================
+     MAIN MENU
+========================================================= -->
 
 <section id="menu">
 
     <div class="menu-overlay"></div>
 
-    <div class="sound" id="soundBtn">
+
+    <!-- SOUND -->
+
+    <div
+        class="sound"
+        id="soundBtn"
+        onclick="toggleSound()"
+    >
         SOUND: ON
     </div>
 
+    <div class="status">
+        SYSTEM: ONLINE
+    </div>
+
+
+    <!-- MENU -->
+
     <div class="menu-content">
 
-        <div class="menu-title">VOIDFORGE</div>
-        <div class="menu-subtitle">STUDIOS</div>
+        <div class="menu-title">
+            VOIDFORGE
+        </div>
+
+        <div class="menu-subtitle">
+            STUDIOS
+        </div>
+
 
         <div class="buttons">
 
-            <button class="menu-btn" onclick="playGame()">
+            <button
+                class="menu-btn"
+                onclick="openPanel('playPanel')"
+            >
                 PLAY
             </button>
 
-            <button class="menu-btn" onclick="openPanel('games')">
+            <button
+                class="menu-btn"
+                onclick="openPanel('gamesPanel')"
+            >
                 GAMES
             </button>
 
-            <button class="menu-btn" onclick="openPanel('about')">
+            <button
+                class="menu-btn"
+                onclick="openPanel('aboutPanel')"
+            >
                 ABOUT
             </button>
 
-            <button class="menu-btn" onclick="openPanel('settings')">
+            <button
+                class="menu-btn"
+                onclick="openPanel('settingsPanel')"
+            >
                 SETTINGS
             </button>
 
-            <button class="menu-btn" onclick="openPanel('credits')">
+            <button
+                class="menu-btn"
+                onclick="openPanel('creditsPanel')"
+            >
                 CREDITS
             </button>
 
@@ -322,199 +1269,1239 @@ canvas{
 
     </div>
 
+
+    <!-- FOOTER -->
+
     <div class="footer">
         CRAFTING WORLDS BEYOND THE VOID
     </div>
 
     <div class="version">
-        VOIDFORGE // 0.1
+        VOIDFORGE // 0.1.0
     </div>
 
 </section>
 
-<!-- ================= MODAL ================= -->
 
-<div class="modal" id="modal">
+<!-- =========================================================
+     PLAY PANEL
+========================================================= -->
+
+<div
+    class="page-panel"
+    id="playPanel"
+>
 
     <div class="panel">
 
-        <h2 id="panelTitle">VOIDFORGE</h2>
+        <div class="play-symbol"></div>
 
-        <p id="panelText">
-            Welcome to VoidForge Studios.
-        </p>
+        <div class="play-title">
+            VOIDFORGE
+        </div>
 
-        <button class="close" onclick="closePanel()">
-            CLOSE
+        <div class="play-description">
+            GAME INITIALIZATION READY
+        </div>
+
+        <button
+            class="close"
+            onclick="launchGame()"
+        >
+            LAUNCH GAME
+        </button>
+
+        <button
+            class="close"
+            onclick="closePanel('playPanel')"
+        >
+            BACK
         </button>
 
     </div>
 
 </div>
 
+
+<!-- =========================================================
+     GAMES PANEL
+========================================================= -->
+
+<div
+    class="page-panel"
+    id="gamesPanel"
+>
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">
+                OUR GAMES
+            </div>
+
+            <div class="panel-number">
+                VF / 001
+            </div>
+
+        </div>
+
+
+        <div class="games-grid">
+
+
+            <div class="game-card">
+
+                <div class="game-number">
+                    PROJECT 001
+                </div>
+
+                <h3>
+                    VOID: ECHOES
+                </h3>
+
+                <p>
+                    An atmospheric science-fiction
+                    adventure where forgotten signals
+                    lead into an unknown world.
+                </p>
+
+                <div class="game-status">
+                    IN DEVELOPMENT
+                </div>
+
+            </div>
+
+
+            <div class="game-card">
+
+                <div class="game-number">
+                    PROJECT 002
+                </div>
+
+                <h3>
+                    PROJECT ABYSS
+                </h3>
+
+                <p>
+                    Descend into a world beneath the
+                    surface and discover what was never
+                    meant to be found.
+                </p>
+
+                <div class="game-status">
+                    CONCEPT
+                </div>
+
+            </div>
+
+
+            <div class="game-card">
+
+                <div class="game-number">
+                    PROJECT 003
+                </div>
+
+                <h3>
+                    NULL
+                </h3>
+
+                <p>
+                    Classified.
+                    Project information unavailable.
+                </p>
+
+                <div class="game-status">
+                    CLASSIFIED
+                </div>
+
+            </div>
+
+
+            <div class="game-card">
+
+                <div class="game-number">
+                    PROJECT 004
+                </div>
+
+                <h3>
+                    UNKNOWN
+                </h3>
+
+                <p>
+                    Something is being forged beyond
+                    the edge of the known universe.
+                </p>
+
+                <div class="game-status">
+                    UNKNOWN
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            class="close"
+            onclick="closePanel('gamesPanel')"
+        >
+            BACK
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ABOUT PANEL
+========================================================= -->
+
+<div
+    class="page-panel"
+    id="aboutPanel"
+>
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">
+                ABOUT
+            </div>
+
+            <div class="panel-number">
+                VF / 002
+            </div>
+
+        </div>
+
+
+        <div class="about-layout">
+
+
+            <div class="about-block">
+
+                <h3>
+                    WHO WE ARE
+                </h3>
+
+                <p>
+                    VoidForge Studios is an independent
+                    game studio focused on building
+                    immersive worlds, experimental
+                    gameplay and unique digital
+                    experiences.
+                </p>
+
+            </div>
+
+
+            <div class="about-block">
+
+                <h3>
+                    OUR VISION
+                </h3>
+
+                <p>
+                    We want to create worlds that feel
+                    mysterious, atmospheric and alive.
+                    Every project begins with a simple
+                    question:
+                    what exists beyond the void?
+                </p>
+
+            </div>
+
+
+            <div class="about-block">
+
+                <h3>
+                    DESIGN
+                </h3>
+
+                <p>
+                    Minimal interfaces, cinematic
+                    environments and systems designed
+                    to keep the player curious.
+                </p>
+
+            </div>
+
+
+            <div class="about-block">
+
+                <h3>
+                    TECHNOLOGY
+                </h3>
+
+                <p>
+                    Built with modern web technology,
+                    custom systems and experimental
+                    gameplay concepts.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            class="close"
+            onclick="closePanel('aboutPanel')"
+        >
+            BACK
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SETTINGS PANEL
+========================================================= -->
+
+<div
+    class="page-panel"
+    id="settingsPanel"
+>
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <div class="panel-title">
+                SETTINGS
+            </div>
+
+            <div class="panel-number">
+                VF / 003
+            </div>
+
+        </div>
+
+
+        <div class="settings-list">
+
+
+            <!-- SOUND -->
+
+            <div class="setting">
+
+                <div class="setting-info">
+
+                    <h3>
+                        SOUND
+                    </h3>
+
+                    <p>
+                        Enable interface audio.
+                    </p>
+
+                </div>
+
+                <div class="setting-control">
+
+                    <button
+                        class="toggle active"
+                        id="soundToggle"
+                        onclick="toggleSound()"
+                    ></button>
+
+                    <span
+                        class="setting-value"
+                        id="soundValue"
+                    >
+                        ON
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- PARTICLES -->
+
+            <div class="setting">
+
+                <div class="setting-info">
+
+                    <h3>
+                        PARTICLES
+                    </h3>
+
+                    <p>
+                        Display background particles.
+                    </p>
+
+                </div>
+
+                <div class="setting-control">
+
+                    <button
+                        class="toggle active"
+                        id="particleToggle"
+                        onclick="toggleParticles()"
+                    ></button>
+
+                    <span
+                        class="setting-value"
+                        id="particleValue"
+                    >
+                        ON
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ANIMATIONS -->
+
+            <div class="setting">
+
+                <div class="setting-info">
+
+                    <h3>
+                        ANIMATIONS
+                    </h3>
+
+                    <p>
+                        Enable interface animations.
+                    </p>
+
+                </div>
+
+                <div class="setting-control">
+
+                    <button
+                        class="toggle active"
+                        id="animationToggle"
+                        onclick="toggleAnimations()"
+                    ></button>
+
+                    <span
+                        class="setting-value"
+                        id="animationValue"
+                    >
+                        ON
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUALITY -->
+
+            <div class="setting">
+
+                <div class="setting-info">
+
+                    <h3>
+                        PARTICLE QUALITY
+                    </h3>
+
+                    <p>
+                        Control background particle count.
+                    </p>
+
+                </div>
+
+                <select
+                    id="qualitySelect"
+                    onchange="changeQuality()"
+                >
+
+                    <option value="low">
+                        LOW
+                    </option>
+
+                    <option
+                        value="medium"
+                        selected
+                    >
+                        MEDIUM
+                    </option>
+
+                    <option value="high">
+                        HIGH
+                    </option>
+
+                </select>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            class="close"
+            onclick="closePanel('settingsPanel')"
+        >
+            BACK
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     CREDITS PANEL
+========================================================= -->
+
+<div
+    class="page-panel"
+    id="creditsPanel"
+>
+
+    <div class="panel credits">
+
+        <div class="panel-header">
+
+            <div class="panel-title">
+                CREDITS
+            </div>
+
+            <div class="panel-number">
+                VF / 004
+            </div>
+
+        </div>
+
+
+        <div class="logo-small">
+            VOIDFORGE
+        </div>
+
+        <div class="credit-subtitle">
+            STUDIOS
+        </div>
+
+
+        <div class="credit-grid">
+
+
+            <div class="credit-box">
+
+                <span>
+                    STUDIO
+                </span>
+
+                <strong>
+                    VOIDFORGE STUDIOS
+                </strong>
+
+            </div>
+
+
+            <div class="credit-box">
+
+                <span>
+                    DESIGN
+                </span>
+
+                <strong>
+                    VOIDFORGE TEAM
+                </strong>
+
+            </div>
+
+
+            <div class="credit-box">
+
+                <span>
+                    PROGRAMMING
+                </span>
+
+                <strong>
+                    VOIDFORGE ENGINEERING
+                </strong>
+
+            </div>
+
+
+            <div class="credit-box">
+
+                <span>
+                    ART
+                </span>
+
+                <strong>
+                    VOIDFORGE CREATIVE
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            class="close"
+            onclick="closePanel('creditsPanel')"
+        >
+            BACK
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     NOTIFICATION
+========================================================= -->
+
+<div
+    class="notification"
+    id="notification"
+>
+    SYSTEM MESSAGE
+</div>
+
+
 <script>
 
-/* ================= INTRO ================= */
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-const intro = document.getElementById("intro");
-const menu = document.getElementById("menu");
+const intro =
+    document.getElementById("intro");
+
+const menu =
+    document.getElementById("menu");
+
+const canvas =
+    document.getElementById("particles");
+
+const ctx =
+    canvas.getContext("2d");
+
+
+/* =========================================================
+   INTRO
+========================================================= */
 
 setTimeout(() => {
 
-    intro.style.opacity = "0";
+    intro.classList.add("hidden");
 
     setTimeout(() => {
-        intro.style.display = "none";
+
         menu.classList.add("active");
+
     },1200);
 
 },4200);
 
 
-/* ================= PARTICLES ================= */
-
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
+/* =========================================================
+   PARTICLE SYSTEM
+========================================================= */
 
 let particles = [];
 
+let particleCount = 130;
+
+let particlesEnabled = true;
+
 function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+
+    canvas.width =
+        window.innerWidth *
+        window.devicePixelRatio;
+
+    canvas.height =
+        window.innerHeight *
+        window.devicePixelRatio;
+
+    canvas.style.width =
+        window.innerWidth + "px";
+
+    canvas.style.height =
+        window.innerHeight + "px";
+
+    ctx.scale(
+        window.devicePixelRatio,
+        window.devicePixelRatio
+    );
 }
 
-resize();
-window.addEventListener("resize",resize);
+function createParticles(){
 
-for(let i=0;i<130;i++){
+    particles = [];
 
-    particles.push({
-        x:Math.random()*innerWidth,
-        y:Math.random()*innerHeight,
-        size:Math.random()*2,
-        speed:Math.random()*.35+.05,
-        opacity:Math.random()*.6+.1
-    });
+    for(
+        let i = 0;
+        i < particleCount;
+        i++
+    ){
 
+        particles.push({
+
+            x:
+                Math.random() *
+                window.innerWidth,
+
+            y:
+                Math.random() *
+                window.innerHeight,
+
+            size:
+                Math.random() *
+                1.8 + .2,
+
+            speed:
+                Math.random() *
+                .35 + .05,
+
+            opacity:
+                Math.random() *
+                .55 + .05,
+
+            drift:
+                (Math.random()-.5) * .12
+
+        });
+
+    }
 }
 
 function animateParticles(){
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+    );
+
+    if(!particlesEnabled){
+
+        requestAnimationFrame(
+            animateParticles
+        );
+
+        return;
+    }
+
 
     for(const p of particles){
 
         p.y -= p.speed;
 
-        if(p.y < 0){
-            p.y = canvas.height;
-            p.x = Math.random()*canvas.width;
+        p.x += p.drift;
+
+
+        if(p.y < -5){
+
+            p.y =
+                window.innerHeight + 5;
+
+            p.x =
+                Math.random() *
+                window.innerWidth;
         }
 
+
+        if(p.x < -5)
+            p.x =
+                window.innerWidth + 5;
+
+        if(p.x >
+            window.innerWidth + 5)
+            p.x = -5;
+
+
         ctx.beginPath();
-        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.size,
+            0,
+            Math.PI * 2
+        );
 
         ctx.fillStyle =
-            `rgba(255,255,255,${p.opacity})`;
+            `rgba(
+                255,
+                255,
+                255,
+                ${p.opacity}
+            )`;
 
         ctx.fill();
     }
 
-    requestAnimationFrame(animateParticles);
+    requestAnimationFrame(
+        animateParticles
+    );
 }
+
+resize();
+
+createParticles();
 
 animateParticles();
 
+window.addEventListener(
+    "resize",
+    () => {
 
-/* ================= MENU ================= */
+        resize();
 
-function playGame(){
+        createParticles();
 
-    alert("Game launching...");
+    }
+);
 
-    // Replace this with:
-    // window.location.href = "game.html";
+
+/* =========================================================
+   PANEL SYSTEM
+========================================================= */
+
+function openPanel(panelId){
+
+    const panel =
+        document.getElementById(panelId);
+
+    if(!panel)
+        return;
+
+    panel.classList.add("show");
+
+    document.body.style.overflow =
+        "hidden";
 }
 
 
-function openPanel(type){
+function closePanel(panelId){
 
-    const title = document.getElementById("panelTitle");
-    const text = document.getElementById("panelText");
+    const panel =
+        document.getElementById(panelId);
 
-    if(type === "games"){
+    if(!panel)
+        return;
 
-        title.innerText = "OUR GAMES";
+    panel.classList.remove("show");
 
-        text.innerText =
-        "VoidForge Studios is building original worlds, games and experiences. More projects are coming.";
-
-    }
-
-    if(type === "about"){
-
-        title.innerText = "ABOUT VOIDFORGE";
-
-        text.innerText =
-        "VoidForge Studios is an independent game studio focused on creating immersive worlds, experimental gameplay and unique digital experiences.";
-
-    }
-
-    if(type === "settings"){
-
-        title.innerText = "SETTINGS";
-
-        text.innerText =
-        "Settings system ready. Graphics, audio, controls and accessibility options can be added here.";
-
-    }
-
-    if(type === "credits"){
-
-        title.innerText = "CREDITS";
-
-        text.innerText =
-        "VOIDFORGE STUDIOS\n\nCreated with passion, code and imagination.";
-
-    }
-
-    document.getElementById("modal").classList.add("show");
+    document.body.style.overflow =
+        "hidden";
 }
 
 
-function closePanel(){
+/* =========================================================
+   CLOSE WHEN CLICKING OUTSIDE PANEL
+========================================================= */
 
-    document.getElementById("modal")
-        .classList.remove("show");
+document
+    .querySelectorAll(".page-panel")
+    .forEach(panel => {
 
-}
+        panel.addEventListener(
+            "click",
+            event => {
+
+                if(
+                    event.target === panel
+                ){
+
+                    panel.classList.remove(
+                        "show"
+                    );
+
+                }
+
+            }
+        );
+
+    });
 
 
-/* ================= SOUND ================= */
+/* =========================================================
+   SOUND
+========================================================= */
 
 let soundOn = true;
 
 const soundBtn =
     document.getElementById("soundBtn");
 
-soundBtn.onclick = () => {
+function toggleSound(){
 
     soundOn = !soundOn;
 
     soundBtn.innerText =
-        soundOn ? "SOUND: ON" : "SOUND: OFF";
-};
+        soundOn
+            ? "SOUND: ON"
+            : "SOUND: OFF";
 
 
-/* ================= KEYBOARD ================= */
+    const toggle =
+        document.getElementById(
+            "soundToggle"
+        );
 
-document.addEventListener("keydown",(e)=>{
+    const value =
+        document.getElementById(
+            "soundValue"
+        );
 
-    if(e.key === "Escape"){
-        closePanel();
+
+    if(soundOn){
+
+        toggle.classList.add(
+            "active"
+        );
+
+        value.innerText = "ON";
+
+        showNotification(
+            "SOUND ENABLED"
+        );
+
+    }else{
+
+        toggle.classList.remove(
+            "active"
+        );
+
+        value.innerText = "OFF";
+
+        showNotification(
+            "SOUND DISABLED"
+        );
+
+    }
+}
+
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+function toggleParticles(){
+
+    particlesEnabled =
+        !particlesEnabled;
+
+
+    const toggle =
+        document.getElementById(
+            "particleToggle"
+        );
+
+    const value =
+        document.getElementById(
+            "particleValue"
+        );
+
+
+    if(particlesEnabled){
+
+        toggle.classList.add(
+            "active"
+        );
+
+        value.innerText = "ON";
+
+        canvas.style.opacity = "1";
+
+        showNotification(
+            "PARTICLES ENABLED"
+        );
+
+    }else{
+
+        toggle.classList.remove(
+            "active"
+        );
+
+        value.innerText = "OFF";
+
+        canvas.style.opacity = "0";
+
+        showNotification(
+            "PARTICLES DISABLED"
+        );
+
+    }
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+let animationsEnabled = true;
+
+function toggleAnimations(){
+
+    animationsEnabled =
+        !animationsEnabled;
+
+
+    const toggle =
+        document.getElementById(
+            "animationToggle"
+        );
+
+    const value =
+        document.getElementById(
+            "animationValue"
+        );
+
+
+    document.body.classList.toggle(
+        "no-animations",
+        !animationsEnabled
+    );
+
+
+    if(animationsEnabled){
+
+        toggle.classList.add(
+            "active"
+        );
+
+        value.innerText = "ON";
+
+        showNotification(
+            "ANIMATIONS ENABLED"
+        );
+
+    }else{
+
+        toggle.classList.remove(
+            "active"
+        );
+
+        value.innerText = "OFF";
+
+        showNotification(
+            "ANIMATIONS DISABLED"
+        );
+
+    }
+}
+
+
+/* =========================================================
+   PARTICLE QUALITY
+========================================================= */
+
+function changeQuality(){
+
+    const quality =
+        document.getElementById(
+            "qualitySelect"
+        ).value;
+
+
+    if(quality === "low"){
+
+        particleCount = 60;
+
     }
 
-});
+    if(quality === "medium"){
+
+        particleCount = 130;
+
+    }
+
+    if(quality === "high"){
+
+        particleCount = 260;
+
+    }
+
+
+    createParticles();
+
+
+    showNotification(
+        "PARTICLE QUALITY: " +
+        quality.toUpperCase()
+    );
+}
+
+
+/* =========================================================
+   GAME
+========================================================= */
+
+function launchGame(){
+
+    showNotification(
+        "GAME ENGINE INITIALIZING..."
+    );
+
+
+    setTimeout(() => {
+
+        /*
+            Replace this with:
+
+            window.location.href =
+                "game.html";
+
+            when your actual game exists.
+        */
+
+        showNotification(
+            "GAME BUILD NOT INSTALLED"
+        );
+
+    },1500);
+
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+let notificationTimer;
+
+function showNotification(message){
+
+    const notification =
+        document.getElementById(
+            "notification"
+        );
+
+    notification.innerText =
+        message;
+
+    notification.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        notificationTimer
+    );
+
+
+    notificationTimer =
+        setTimeout(() => {
+
+            notification.classList.remove(
+                "show"
+            );
+
+        },2200);
+}
+
+
+/* =========================================================
+   KEYBOARD CONTROLS
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+
+        /* ESCAPE */
+
+        if(event.key === "Escape"){
+
+            document
+                .querySelectorAll(
+                    ".page-panel.show"
+                )
+                .forEach(panel => {
+
+                    panel.classList.remove(
+                        "show"
+                    );
+
+                });
+
+        }
+
+
+        /* ENTER / SPACE */
+
+        if(
+            event.key === "Enter" ||
+            event.key === " "
+        ){
+
+            const active =
+                document.activeElement;
+
+            if(
+                active &&
+                active.classList.contains(
+                    "menu-btn"
+                )
+            ){
+
+                active.click();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   BUTTON SOUND EFFECT PLACEHOLDER
+========================================================= */
+
+document
+    .querySelectorAll(
+        ".menu-btn, .close, .toggle"
+    )
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                if(!soundOn)
+                    return;
+
+                /*
+                    Add WebAudio sound here
+                    if desired.
+                */
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   INITIAL STATE
+========================================================= */
+
+document.getElementById(
+    "soundToggle"
+).classList.add("active");
+
+document.getElementById(
+    "particleToggle"
+).classList.add("active");
+
+document.getElementById(
+    "animationToggle"
+).classList.add("active");
 
 </script>
 
