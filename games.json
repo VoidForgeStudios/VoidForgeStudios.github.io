@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "generatedFor": "VoidForgeStudios.github.io",
+  "games": [
+    {
+      "id": "blockworld",
+      "name": "BlockWorld",
+      "subtitle": "Minecraft-style voxel prototype",
+      "entry": "minecraft/index.html",
+      "version": "0.2",
+      "platform": "Browser",
+      "status": "Available",
+      "tags": ["Sandbox", "Voxel", "Single-player"],
+      "description": "Explore a generated voxel world, place blocks, and shape the terrain directly in your browser.",
+      "accent": "emerald"
+    }
+  ]
+}
