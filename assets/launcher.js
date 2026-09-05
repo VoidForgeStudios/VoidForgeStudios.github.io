@@ -1,2356 +1,2376 @@
-const $ = (selector, root = document) => root.querySelector(selector);
-
-const viewRoot = $("#viewRoot");
-const frame = $("#gameFrame");
-const gameView = $("#gameView");
-const gameLoader = $("#gameLoader");
-const gameError = $("#gameError");
-
-const storageKey = "voidforge.launcher.v2";
-const launcherVersion = "1.2.0";
-
-/* -------------------------------------------------------
-   Defaults
-------------------------------------------------------- */
-
-const defaults = {
-  selectedId: "",
-  favorites: [],
-  recent: [],
-  settings: {
-    remember: true,
-    autoFullscreen: false,
-    confirmExit: true,
-    reducedMotion:
-      window.matchMedia?.(
-        "(prefers-reduced-motion: reduce)"
-      )?.matches ?? false,
-    compact: false,
-    brightness: 100,
-    launch: "embedded"
-  }
-};
-
-let state = loadState();
-let games = [];
-
-let activeView = "library";
-let pendingGame = null;
-let gameLoading = false;
-let previousFocus = null;
-let launchStartedAt = 0;
-
-/* -------------------------------------------------------
-   State
-------------------------------------------------------- */
-
-function loadState() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(storageKey) || "null"
-    );
-
-    if (!saved || typeof saved !== "object") {
-      return structuredClone(defaults);
-    }
-
-    return {
-      ...structuredClone(defaults),
-      ...saved,
-
-      favorites: Array.isArray(saved.favorites)
-        ? saved.favorites
-        : [],
-
-      recent: Array.isArray(saved.recent)
-        ? saved.recent
-        : [],
-
-      settings: {
-        ...structuredClone(defaults.settings),
-
-        ...(saved.settings &&
-        typeof saved.settings === "object"
-          ? saved.settings
-          : {})
-      }
-    };
-  } catch (error) {
-    console.warn(
-      "[VoidForge] Could not load launcher state:",
-      error
-    );
-
-    return structuredClone(defaults);
-  }
-}
-
-function saveState() {
-  try {
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify(state)
-    );
-  } catch (error) {
-    console.warn(
-      "[VoidForge] Could not save launcher state:",
-      error
-    );
-  }
-}
-
-/* -------------------------------------------------------
-   DOM Helpers
-------------------------------------------------------- */
-
-function setText(node, text) {
-  if (node) {
-    node.textContent = text;
-  }
-
-  return node;
-}
-
-function el(tag, options = {}, children = []) {
-  const node = document.createElement(tag);
-
-  Object.entries(options).forEach(([key, value]) => {
-    if (key === "class") {
-      node.className = value;
-    } else if (key === "text") {
-      node.textContent = value;
-    } else if (
-      key.startsWith("on") &&
-      typeof value === "function"
-    ) {
-      node.addEventListener(
-        key.slice(2),
-        value
-      );
-    } else if (
-      key === "checked" ||
-      key === "hidden" ||
-      key === "disabled"
-    ) {
-      node[key] = Boolean(value);
-    } else {
-      node.setAttribute(key, value);
-    }
-  });
-
-  children
-    .flat()
-    .filter(Boolean)
-    .forEach(child => node.append(child));
-
-  return node;
-}
-
-function button(
-  label,
-  className = "",
-  handler = null
-) {
-  return el("button", {
-    class: `button ${className}`.trim(),
-    type: "button",
-    text: label,
-    ...(handler
-      ? {
-          onclick: handler
-        }
-      : {})
-  });
-}
-
-/* -------------------------------------------------------
-   Notifications
-------------------------------------------------------- */
-
-function toast(message) {
-  const region = $("#toastRegion");
-
-  if (!region) {
-    console.info("[VoidForge]", message);
-    return;
-  }
-
-  const note = el("div", {
-    class: "toast",
-    role: "status",
-    text: message
-  });
-
-  region.append(note);
-
-  window.setTimeout(() => {
-    note.remove();
-  }, 3200);
-}
-
-/* -------------------------------------------------------
-   Game Helpers
-------------------------------------------------------- */
-
-function selectedGame() {
-  return (
-    games.find(
-      game => game.id === state.selectedId
-    ) ||
-    games[0] ||
-    null
-  );
-}
-
-/**
- * Converts a game folder into:
- *
- * gamefolder/index.html
- *
- * Examples:
- *
- * blockworld
- * -> blockworld/index.html
- *
- * blockworld/
- * -> blockworld/index.html
- *
- * /blockworld/
- * -> blockworld/index.html
- *
- * games/blockworld
- * -> games/blockworld/index.html
- */
-function normalizeGameEntry(entry) {
-  if (
-    typeof entry !== "string" ||
-    !entry.trim()
-  ) {
-    throw new Error(
-      "Game entry is empty."
-    );
-  }
-
-  let path = entry
-    .trim()
-    .replace(/\\/g, "/");
-
-  // Remove leading slashes.
-  path = path.replace(/^\/+/, "");
-
-  // Remove trailing slashes.
-  path = path.replace(/\/+$/, "");
-
-  // Remove accidental ./ prefixes.
-  path = path.replace(/^(\.\/)+/, "");
-
-  if (!path) {
-    throw new Error(
-      "Game entry resolves to an empty path."
-    );
-  }
-
-  // Prevent directory traversal.
-  const segments = path.split("/");
-
-  if (
-    segments.includes("..") ||
-    segments.includes(".")
-  ) {
-    throw new Error(
-      `Invalid game path: ${entry}`
-    );
-  }
-
-  return `${path}/index.html`;
-}
-
-/**
- * Resolve the game against the current deployment.
- *
- * This is important for GitHub Pages repository sites.
- *
- * Example:
- *
- * https://username.github.io/VoidForge/
- *
- * + blockworld/index.html
- *
- * becomes:
- *
- * https://username.github.io/VoidForge/blockworld/index.html
- */
-function gameUrl(game) {
-  const entry = normalizeGameEntry(
-    game.entry
-  );
-
-  return new URL(
-    entry,
-    document.baseURI
-  ).href;
-}
-
-function gameDisplayPath(game) {
-  return normalizeGameEntry(game.entry);
-}
-
-/* -------------------------------------------------------
-   Preferences
-------------------------------------------------------- */
-
-function applyPreferences() {
-  const settings = state.settings;
-
-  document.body.classList.toggle(
-    "reduce-motion",
-    Boolean(settings.reducedMotion)
-  );
-
-  document.body.classList.toggle(
-    "compact-library",
-    Boolean(settings.compact)
-  );
-
-  const brightness = Math.max(
-    70,
-    Math.min(
-      120,
-      Number(settings.brightness) || 100
-    )
-  );
-
-  document.body.style.setProperty(
-    "--brightness",
-    String(brightness / 100)
-  );
-}
-
-/* -------------------------------------------------------
-   Game Registry
-------------------------------------------------------- */
-
-function sanitizeGames(data) {
-  if (
-    !data ||
-    !Array.isArray(data.games)
-  ) {
-    throw new Error(
-      "games.json does not contain a valid games array."
-    );
-  }
-
-  return data.games
-    .filter(game => {
-      return (
-        game &&
-        typeof game.id === "string" &&
-        typeof game.name === "string" &&
-        typeof game.entry === "string" &&
-        game.id.trim() &&
-        game.name.trim() &&
-        game.entry.trim()
-      );
-    })
-    .filter(game => {
-      try {
-        const entry = game.entry
-          .trim()
-          .replace(/\\/g, "/");
-
-        /*
-         * Entries are game folders.
-         *
-         * Allowed:
-         *
-         * blockworld
-         * games/blockworld
-         * arcade/racer
-         *
-         * Not allowed:
-         *
-         * ../secret
-         * ../../file
-         * blockworld/../secret
-         */
-        if (
-          entry.includes("../") ||
-          entry.includes("/..") ||
-          entry === ".." ||
-          entry.startsWith("../")
-        ) {
-          return false;
-        }
-
-        normalizeGameEntry(entry);
-
-        return true;
-      } catch {
-        return false;
-      }
-    })
-    .map(game => ({
-      id: game.id.trim(),
-
-      name: game.name.trim(),
-
-      subtitle:
-        typeof game.subtitle === "string"
-          ? game.subtitle
-          : "",
-
-      /*
-       * IMPORTANT:
-       *
-       * This is now a folder, NOT an HTML file.
-       *
-       * "blockworld"
-       *
-       * automatically becomes:
-       *
-       * "blockworld/index.html"
-       */
-      entry: game.entry.trim(),
-
-      version:
-        typeof game.version === "string"
-          ? game.version
-          : "1.0",
-
-      platform:
-        typeof game.platform === "string"
-          ? game.platform
-          : "Browser",
-
-      status:
-        typeof game.status === "string"
-          ? game.status
-          : "Available",
-
-      tags: Array.isArray(game.tags)
-        ? game.tags.filter(
-            tag =>
-              typeof tag === "string"
-          )
-        : [],
-
-      description:
-        typeof game.description === "string"
-          ? game.description
-          : "No description available.",
-
-      accent:
-        typeof game.accent === "string"
-          ? game.accent
-          : "purple"
-    }));
-}
-
-/* -------------------------------------------------------
-   Fetch Games
-------------------------------------------------------- */
-
-async function fetchGames() {
-  const url = new URL(
-    "games.json",
-    document.baseURI
-  );
-
-  // Cache bust for GitHub Pages.
-  url.searchParams.set(
-    "_",
-    Date.now().toString()
-  );
-
-  const response = await fetch(
-    url.href,
-    {
-      method: "GET",
-      cache: "no-store",
-      headers: {
-        Accept: "application/json"
-      }
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Could not load games.json (${response.status} ${response.statusText}).`
-    );
-  }
-
-  const data = await response.json();
-
-  games = sanitizeGames(data);
-
-  if (games.length === 0) {
-    state.selectedId = "";
-    saveState();
-    return;
-  }
-
-  const selectedStillExists =
-    games.some(
-      game =>
-        game.id === state.selectedId
-    );
-
-  if (!selectedStillExists) {
-    state.selectedId =
-      games[0].id;
-  }
-
-  const validIds = new Set(
-    games.map(game => game.id)
-  );
-
-  state.favorites =
-    state.favorites.filter(
-      id => validIds.has(id)
-    );
-
-  state.recent =
-    state.recent.filter(
-      id => validIds.has(id)
-    );
-
-  saveState();
-}
-
-/* -------------------------------------------------------
-   Library
-------------------------------------------------------- */
-
-function tags(game) {
-  return el(
-    "div",
-    {
-      class: "tag-list"
-    },
-    [
-      el("span", {
-        class: "tag",
-        text: `v${game.version}`
-      }),
-
-      ...game.tags.map(tag =>
-        el("span", {
-          class: "tag",
-          text: tag
-        })
-      )
-    ]
-  );
-}
-
-function libraryView() {
-  const game = selectedGame();
-
-  const root =
-    document.createDocumentFragment();
-
-  if (game) {
-    root.append(
-      el(
-        "section",
-        {
-          class: "hero"
-        },
-        [
-          el("p", {
-            class: "eyebrow",
-            text:
-              "Featured · browser ready"
-          }),
-
-          el("h1", {
-            text: game.name
-          }),
-
-          el("p", {
-            class: "description",
-            text: game.description
-          }),
-
-          el(
-            "div",
-            {
-              class: "hero-meta"
-            },
-            [
-              el("span", {
-                class: "meta-chip",
-                text:
-                  game.subtitle ||
-                  "Browser game"
-              }),
-
-              el("span", {
-                class: "meta-chip",
-                text:
-                  `v${game.version}`
-              }),
-
-              el("span", {
-                class: "meta-chip",
-                text: game.platform
-              })
-            ]
-          ),
-
-          el(
-            "div",
-            {
-              class: "button-row"
-            },
-            [
-              button(
-                "▶ Play now",
-                "primary",
-                () => launch(game)
-              ),
-
-              button(
-                "More information",
-                "",
-                () =>
-                  showGameInformation(
-                    game
-                  )
-              )
-            ]
-          )
-        ]
-      )
-    );
-  } else {
-    root.append(
-      el(
-        "section",
-        {
-          class: "empty-state"
-        },
-        [
-          el("h2", {
-            text: "No games found"
-          }),
-
-          el("p", {
-            text:
-              "The launcher could not find any games in games.json."
-          })
-        ]
-      )
-    );
-  }
-
-  const search =
-    $("#gameSearch");
-
-  const query = search
-    ? search.value
-        .trim()
-        .toLowerCase()
-    : "";
-
-  const filter =
-    viewRoot.dataset.filter ||
-    "all";
-
-  const order =
-    viewRoot.dataset.order ||
-    "recent";
-
-  let list = games.filter(
-    item => {
-      const haystack = [
-        item.name,
-        item.subtitle,
-        item.description,
-        ...item.tags
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return haystack.includes(
-        query
-      );
-    }
-  );
-
-  if (filter === "favorites") {
-    list = list.filter(
-      item =>
-        state.favorites.includes(
-          item.id
-        )
-    );
-  }
-
-  if (order === "name") {
-    list.sort((a, b) =>
-      a.name.localeCompare(
-        b.name
-      )
-    );
-  } else {
-    list.sort((a, b) => {
-      const aIndex =
-        state.recent.indexOf(
-          a.id
-        );
-
-      const bIndex =
-        state.recent.indexOf(
-          b.id
-        );
-
-      const aRank =
-        aIndex === -1
-          ? Infinity
-          : aIndex;
-
-      const bRank =
-        bIndex === -1
-          ? Infinity
-          : bIndex;
-
-      return (
-        aRank - bRank
-      );
-    });
-  }
-
-  const controls = el(
-    "div",
-    {
-      class: "library-controls"
-    },
-    [
-      filterButton(
-        "All games",
-        "all",
-        filter
-      ),
-
-      filterButton(
-        "Favorites",
-        "favorites",
-        filter
-      ),
-
-      el(
-        "select",
-        {
-          class:
-            "select-control",
-          "aria-label":
-            "Sort games",
-          onchange: event => {
-            viewRoot.dataset.order =
-              event.target.value;
-
-            renderView();
-          }
-        },
-        [
-          el("option", {
-            value: "recent",
-            text:
-              "Recently played"
-          }),
-
-          el("option", {
-            value: "name",
-            text:
-              "Name A–Z"
-          })
-        ]
-      )
-    ]
-  );
-
-  controls.querySelector(
-    "select"
-  ).value = order;
-
-  root.append(
-    el(
-      "section",
-      {
-        class: "section"
-      },
-      [
-        el(
-          "div",
-          {
-            class:
-              "section-heading"
-          },
-          [
-            el(
-              "div",
-              {},
-              [
-                el("h2", {
-                  text:
-                    "Your library"
-                }),
-
-                el("p", {
-                  text:
-                    `${games.length} game${
-                      games.length === 1
-                        ? ""
-                        : "s"
-                    } listed in this deployment`
-                })
-              ]
-            ),
-
-            controls
-          ]
-        ),
-
-        list.length
-          ? el(
-              "div",
-              {
-                class:
-                  "game-grid"
-              },
-              list.map(
-                gameCard
-              )
-            )
-          : el(
-              "div",
-              {
-                class:
-                  "empty-state"
-              },
-              [
-                el("h3", {
-                  text:
-                    "Nothing matches this view"
-                }),
-
-                el("p", {
-                  text:
-                    "Try another search or show all available games."
-                })
-              ]
-            )
-      ]
-    )
-  );
-
-  root.append(
-    el(
-      "section",
-      {
-        class:
-          "section info-grid"
-      },
-      [
-        statPanel(
-          String(games.length),
-          "Games registered"
-        ),
-
-        statPanel(
-          state.recent[0]
-            ? games.find(
-                g =>
-                  g.id ===
-                  state.recent[0]
-              )?.name || "—"
-            : "Not yet",
-          "Last played"
-        ),
-
-        statPanel(
-          "WEB",
-          "Platform"
-        )
-      ]
-    )
-  );
-
-  return root;
-}
-
-function filterButton(
-  label,
-  value,
-  current
-) {
-  return button(
-    label,
-    `filter-button ${
-      current === value
-        ? "is-active"
-        : ""
-    }`,
-    () => {
-      viewRoot.dataset.filter =
-        value;
-
-      renderView();
-    }
-  );
-}
-
-function gameCard(game) {
-  const favorite =
-    state.favorites.includes(
-      game.id
-    );
-
-  const fav = button(
-    favorite ? "★" : "☆",
-    `favorite ${
-      favorite
-        ? "is-favorite"
-        : ""
-    }`,
-    event => {
-      event.stopPropagation();
-
-      toggleFavorite(
-        game.id
-      );
-    }
-  );
-
-  fav.setAttribute(
-    "aria-label",
-    `${
-      favorite
-        ? "Remove"
-        : "Add"
-    } ${game.name} ${
-      favorite
-        ? "from"
-        : "to"
-    } favorites`
-  );
-
-  return el(
-    "article",
-    {
-      class: `game-card ${
-        game.id ===
-        state.selectedId
-          ? "is-selected"
-          : ""
-      }`
-    },
-    [
-      el(
-        "div",
-        {
-          class: "game-art"
-        },
-        [
-          el("strong", {
-            text: game.name
-          }),
-
-          fav
-        ]
-      ),
-
-      el("h3", {
-        text: game.name
-      }),
-
-      el("div", {
-        class: "subtitle",
-        text: game.subtitle
-      }),
-
-      el("p", {
-        class: "description",
-        text: game.description
-      }),
-
-      tags(game),
-
-      el(
-        "div",
-        {
-          class:
-            "card-footer"
-        },
-        [
-          el("span", {
-            class:
-              "availability",
-            text:
-              game.status ===
-              "Available"
-                ? "● Available in browser"
-                : `● ${game.status}`
-          }),
-
-          el(
-            "div",
-            {
-              class:
-                "button-row"
-            },
-            [
-              button(
-                "Play",
-                "primary",
-                () =>
-                  launch(game)
-              ),
-
-              button(
-                "Select",
-                "",
-                () =>
-                  selectGame(
-                    game.id
-                  )
-              )
-            ]
-          )
-        ]
-      )
-    ]
-  );
-}
-
-function statPanel(
-  value,
-  label
-) {
-  return el(
-    "div",
-    {
-      class: "panel"
-    },
-    [
-      el("strong", {
-        class:
-          "stat-value",
-        text: value
-      }),
-
-      el("span", {
-        class:
-          "stat-label",
-        text: label
-      })
-    ]
-  );
-}
-
-/* -------------------------------------------------------
-   Pages
-------------------------------------------------------- */
-
-function page(
-  title,
-  kicker,
-  content
-) {
-  return el(
-    "section",
-    {
-      class: "updates"
-    },
-    [
-      el("p", {
-        class: "eyebrow",
-        text: kicker
-      }),
-
-      el("h1", {
-        text: title
-      }),
-
-      content
-    ]
-  );
-}
-
-function discoverView() {
-  return page(
-    "Discover",
-    "Curated from this deployment",
-    el(
-      "div",
-      {
-        class:
-          "empty-state"
-      },
-      [
-        el("h3", {
-          text:
-            "Your web library is up to date"
-        }),
-
-        el("p", {
-          text:
-            "VoidForge lists browser games declared in games.json. New games appear after their files and registry entry are deployed."
-        }),
-
-        button(
-          "Open library",
-          "primary",
-          () =>
-            changeView(
-              "library"
-            )
-        )
-      ]
-    )
-  );
-}
-
-function updatesView() {
-  const panel = el(
-    "div",
-    {
-      class: "panel"
-    },
-    [
-      el(
-        "div",
-        {
-          class:
-            "update-status"
-        },
-        [
-          el("i"),
-
-          el(
-            "div",
-            {},
-            [
-              el("h2", {
-                text:
-                  "You are using the deployed launcher"
-              }),
-
-              el("p", {
-                text:
-                  "GitHub Pages serves the newest published deployment when you reload. This launcher does not install or patch files on your device."
-              })
-            ]
-          )
-        ]
-      ),
-
-      el(
-        "div",
-        {
-          class:
-            "setting-row"
-        },
-        [
-          el(
-            "div",
-            {},
-            [
-              el("b", {
-                text:
-                  "Launcher version"
-              }),
-
-              el("small", {
-                text:
-                  `${launcherVersion} · static web edition`
-              })
-            ]
-          ),
-
-          el(
-            "div",
-            {},
-            [
-              el("b", {
-                text:
-                  "Game registry"
-              }),
-
-              el("small", {
-                text:
-                  `${games.length} declared browser game${
-                    games.length ===
-                    1
-                      ? ""
-                      : "s"
-                  }`
-              })
-            ]
-          )
-        ]
-      ),
-
-      button(
-        "Refresh game registry",
-        "primary",
-        async () => {
-          try {
-            await fetchGames();
-
-            toast(
-              "Game registry refreshed."
-            );
-
-            renderView();
-          } catch (error) {
-            toast(
-              error.message
-            );
-          }
-        }
-      )
-    ]
-  );
-
-  return page(
-    "Updates",
-    "Deployment status",
-    panel
-  );
-}
-
-/* -------------------------------------------------------
-   Settings
-------------------------------------------------------- */
-
-function setting(
-  label,
-  help,
-  control
-) {
-  return el(
-    "div",
-    {
-      class:
-        "setting-row"
-    },
-    [
-      el(
-        "div",
-        {},
-        [
-          el("b", {
-            text: label
-          }),
-
-          el("small", {
-            text: help
-          })
-        ]
-      ),
-
-      control
-    ]
-  );
-}
-
-function checkbox(key) {
-  const input = el(
-    "input",
-    {
-      class: "toggle",
-      type: "checkbox",
-      "aria-label": key,
-      onchange: event => {
-        state.settings[key] =
-          event.target.checked;
-
-        saveState();
-
-        applyPreferences();
-      }
-    }
-  );
-
-  input.checked = Boolean(
-    state.settings[key]
-  );
-
-  return input;
-}
-
-function settingsView() {
-  const general = el(
-    "div",
-    {
-      class:
-        "panel setting-group"
-    },
-    [
-      el("h2", {
-        text: "General"
-      }),
-
-      setting(
-        "Remember selected game",
-        "Restore your selected title on this device.",
-        checkbox("remember")
-      ),
-
-      setting(
-        "Auto fullscreen",
-        "Request browser fullscreen after a game is launched.",
-        checkbox(
-          "autoFullscreen"
-        )
-      ),
-
-      setting(
-        "Confirm before exiting",
-        "Ask before closing an active game session.",
-        checkbox(
-          "confirmExit"
-        )
-      )
-    ]
-  );
-
-  const appearance = el(
-    "div",
-    {
-      class:
-        "panel setting-group"
-    },
-    [
-      el("h2", {
-        text: "Appearance"
-      }),
-
-      setting(
-        "Reduce animations",
-        "Minimize non-essential movement in the launcher.",
-        checkbox(
-          "reducedMotion"
-        )
-      ),
-
-      setting(
-        "Interface brightness",
-        "Adjust this launcher only.",
-        el("input", {
-          class: "range",
-          type: "range",
-          min: "70",
-          max: "120",
-          value:
-            state.settings
-              .brightness,
-          "aria-label":
-            "Interface brightness",
-          oninput: event => {
-            state.settings.brightness =
-              Number(
-                event.target.value
-              );
-
-            saveState();
-
-            applyPreferences();
-          }
-        })
-      )
-    ]
-  );
-
-  const data = el(
-    "div",
-    {
-      class:
-        "panel setting-group"
-    },
-    [
-      el("h2", {
-        text: "Data"
-      }),
-
-      setting(
-        "Clear launcher data",
-        "Removes favorites, recent plays, and preferences from this browser.",
-        button(
-          "Clear data",
-          "danger-button",
-          clearData
-        )
-      ),
-
-      el("p", {
-        class: "subtitle",
-        text:
-          "Game data is controlled by each game. The launcher does not store credentials or install files."
-      })
-    ]
-  );
-
-  return page(
-    "Settings",
-    "Personalize your launcher",
-    el(
-      "div",
-      {},
-      [
-        general,
-        appearance,
-        data
-      ]
-    )
-  );
-}
-
-/* -------------------------------------------------------
-   About
-------------------------------------------------------- */
-
-function aboutView() {
-  const repository =
-    "https://github.com/VoidForgeStudios/VoidForgeStudios.github.io";
-
-  return page(
-    "About VoidForge",
-    "Browser-first game launcher",
-    el(
-      "div",
-      {
-        class:
-          "panel about-list"
-      },
-      [
-        el("p", {
-          text:
-            "VoidForge Studios Web Launcher is a static GitHub Pages interface for browser games included in this repository."
-        }),
-
-        el("p", {
-          text:
-            `Launcher version: ${launcherVersion} · Web platform: GitHub Pages`
-        }),
-
-        el("a", {
-          href: repository,
-          target: "_blank",
-          rel:
-            "noopener noreferrer",
-          text:
-            "View the VoidForge repository ↗"
-        }),
-
-        el("p", {
-          text:
-            "Games are loaded from their own folders. Each game folder must contain an index.html file."
-        })
-      ]
-    )
-  );
-}
-
-/* -------------------------------------------------------
-   Favorites / Data
-------------------------------------------------------- */
-
-function toggleFavorite(id) {
-  if (
-    state.favorites.includes(id)
-  ) {
-    state.favorites =
-      state.favorites.filter(
-        item => item !== id
-      );
-  } else {
-    state.favorites.push(id);
-  }
-
-  saveState();
-
-  renderView();
-}
-
-function clearData() {
-  if (
-    !confirm(
-      "Clear all VoidForge launcher preferences, favorites, and recent game history from this browser?"
-    )
-  ) {
-    return;
-  }
-
-  try {
-    localStorage.removeItem(
-      storageKey
-    );
-  } catch {
-    // Ignore storage errors.
-  }
-
-  state =
-    structuredClone(defaults);
-
-  applyPreferences();
-
-  renderView();
-
-  toast(
-    "Launcher data cleared."
-  );
-}
-
-function showGameInformation(game) {
-  const tagText =
-    game.tags.length
-      ? game.tags.join(", ")
-      : "None";
-
-  const path =
-    gameDisplayPath(game);
-
-  toast(
-    `${game.name} · v${game.version} · ${game.platform} · ${tagText} · ${path}`
-  );
-}
-
-function selectGame(id) {
-  state.selectedId = id;
-
-  if (state.settings.remember) {
-    saveState();
-  }
-
-  renderView();
-}
-
-/* -------------------------------------------------------
-   Rendering / Navigation
-------------------------------------------------------- */
-
-function renderView() {
-  viewRoot.replaceChildren();
-
-  const views = {
-    library: libraryView,
-    discover: discoverView,
-    updates: updatesView,
-    settings: settingsView,
-    about: aboutView
+(() => {
+  "use strict";
+
+  /*
+   * ============================================================
+   * VOIDFORGE LAUNCHER
+   * ============================================================
+   *
+   * Games are defined in games.json like:
+   *
+   * {
+   *   "id": "minecraft",
+   *   "name": "Minecraft",
+   *   "entry": "minecraft"
+   * }
+   *
+   * The launcher converts:
+   *
+   *   minecraft
+   *
+   * into:
+   *
+   *   minecraft/index.html
+   *
+   * IMPORTANT:
+   * We intentionally keep the iframe src RELATIVE.
+   *
+   * The DOM attribute becomes:
+   *
+   *   src="minecraft/index.html"
+   *
+   * rather than:
+   *
+   *   src="https://example.com/minecraft/index.html"
+   * ============================================================
+   */
+
+  const $ = (selector, root = document) => {
+    return root.querySelector(selector);
   };
 
-  const renderer =
-    views[activeView] ||
-    libraryView;
+  const $$ = (selector, root = document) => {
+    return Array.from(root.querySelectorAll(selector));
+  };
 
-  viewRoot.append(
-    renderer()
-  );
+  const viewRoot = $("#viewRoot");
+  const frame = $("#gameFrame");
+  const gameView = $("#gameView");
+  const gameLoader = $("#gameLoader");
+  const gameError = $("#gameError");
 
-  document
-    .querySelectorAll(
-      "[data-view]"
-    )
-    .forEach(node => {
-      node.classList.toggle(
-        "is-active",
-        node.dataset.view ===
-          activeView
+  const STORAGE_KEY = "voidforge.launcher.v2";
+  const GAMES_URL = "games.json";
+
+  const DEFAULT_STATE = {
+    selectedId: null,
+
+    favorites: [],
+
+    recent: [],
+
+    settings: {
+      remember: true,
+      autoFullscreen: false,
+      confirmExit: true,
+      reducedMotion: false,
+      compact: false,
+      brightness: 100,
+      launch: "embedded"
+    }
+  };
+
+  let state = loadState();
+  let games = [];
+
+  let currentPage = "library";
+
+  let pendingGame = null;
+  let gameLoading = false;
+  let gameStartedAt = 0;
+
+  let previousFocus = null;
+
+  let searchTerm = "";
+  let activeFilter = "all";
+
+  /*
+   * ------------------------------------------------------------
+   * STORAGE
+   * ------------------------------------------------------------
+   */
+
+  function cloneDefaultState() {
+    return JSON.parse(JSON.stringify(DEFAULT_STATE));
+  }
+
+  function loadState() {
+    const fallback = cloneDefaultState();
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+
+      if (!raw) {
+        return fallback;
+      }
+
+      const parsed = JSON.parse(raw);
+
+      if (!parsed || typeof parsed !== "object") {
+        return fallback;
+      }
+
+      return {
+        ...fallback,
+        ...parsed,
+
+        favorites: Array.isArray(parsed.favorites)
+          ? parsed.favorites
+          : [],
+
+        recent: Array.isArray(parsed.recent)
+          ? parsed.recent
+          : [],
+
+        settings: {
+          ...fallback.settings,
+          ...(parsed.settings || {})
+        }
+      };
+    } catch (error) {
+      console.warn("Unable to load launcher state:", error);
+      return fallback;
+    }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state)
       );
+    } catch (error) {
+      console.warn("Unable to save launcher state:", error);
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * DOM HELPERS
+   * ------------------------------------------------------------
+   */
+
+  function setText(element, value) {
+    if (!element) return;
+
+    element.textContent =
+      value === undefined ||
+      value === null
+        ? ""
+        : String(value);
+  }
+
+  function el(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) {
+      element.className = className;
+    }
+
+    if (text !== undefined) {
+      element.textContent = text;
+    }
+
+    return element;
+  }
+
+  function button(text, className, handler) {
+    const element = document.createElement("button");
+
+    element.type = "button";
+    element.textContent = text;
+
+    if (className) {
+      element.className = className;
+    }
+
+    if (handler) {
+      element.addEventListener("click", handler);
+    }
+
+    return element;
+  }
+
+  function toast(message) {
+    let container = $("#toastContainer");
+
+    if (!container) {
+      container = el("div", "toast-container");
+      container.id = "toastContainer";
+      document.body.appendChild(container);
+    }
+
+    const item = el("div", "toast", message);
+
+    container.appendChild(item);
+
+    requestAnimationFrame(() => {
+      item.classList.add("show");
     });
-}
 
-function changeView(view) {
-  const validViews = [
-    "library",
-    "discover",
-    "updates",
-    "settings",
-    "about"
-  ];
+    window.setTimeout(() => {
+      item.classList.remove("show");
 
-  if (
-    !validViews.includes(view)
-  ) {
-    view = "library";
+      window.setTimeout(() => {
+        item.remove();
+      }, 250);
+    }, 2600);
   }
-
-  activeView = view;
-
-  closeMobileNavigation();
-
-  renderView();
-
-  window.scrollTo({
-    top: 0,
-    behavior:
-      state.settings
-        .reducedMotion
-        ? "auto"
-        : "smooth"
-  });
-
-  requestAnimationFrame(
-    () => {
-      viewRoot.focus?.();
-    }
-  );
-}
-
-/* -------------------------------------------------------
-   Game Launching
-------------------------------------------------------- */
-
-async function launch(game) {
-  if (!game) {
-    toast(
-      "No game was selected."
-    );
-    return;
-  }
-
-  if (!game.entry) {
-    toast(
-      "This game has no valid folder."
-    );
-    return;
-  }
-
-  if (gameLoading) {
-    toast(
-      "A game is already loading."
-    );
-    return;
-  }
-
-  let url;
-
-  try {
-    url = gameUrl(game);
-  } catch (error) {
-    toast(
-      `Invalid game path: ${error.message}`
-    );
-    return;
-  }
-
-  gameLoading = true;
-  pendingGame = game;
-  previousFocus =
-    document.activeElement;
-
-  launchStartedAt =
-    performance.now();
-
-  gameView.hidden = false;
-
-  document.body.classList.add(
-    "game-open"
-  );
-
-  setText(
-    $("#playingGameTitle"),
-    game.name
-  );
-
-  setText(
-    $("#gameLoadStatus"),
-    "Starting game…"
-  );
-
-  setText(
-    $("#loadingStep"),
-    "Starting game"
-  );
-
-  setText(
-    $("#loadingDetail"),
-    `Opening ${gameDisplayPath(
-      game
-    )}`
-  );
-
-  gameLoader.hidden = false;
-  gameError.hidden = true;
-
-  frame.onload =
-    handleGameLoad;
-
-  frame.onerror =
-    handleGameError;
-
-  console.info(
-    "[VoidForge] Loading game:",
-    {
-      id: game.id,
-      name: game.name,
-      folder: game.entry,
-      entry:
-        gameDisplayPath(game),
-      url
-    }
-  );
 
   /*
-   * Reset iframe first.
-   */
-  frame.removeAttribute(
-    "src"
-  );
-
-  /*
-   * Allow browser rendering
-   * before assigning the new URL.
-   */
-  await new Promise(
-    resolve =>
-      requestAnimationFrame(
-        resolve
-      )
-  );
-
-  /*
-   * IMPORTANT:
+   * ------------------------------------------------------------
+   * GAME ENTRY / PATH HANDLING
+   * ------------------------------------------------------------
    *
-   * This loads:
+   * THIS IS THE IMPORTANT SECTION.
    *
-   * /GAME_FOLDER/index.html
+   * games.json:
+   *
+   *   "entry": "minecraft"
+   *
+   * becomes:
+   *
+   *   minecraft/index.html
+   *
+   * No absolute URL is generated.
+   * No document.baseURI conversion is performed.
+   * No hostname is added.
    */
-  frame.src = url;
-}
 
-function handleGameLoad() {
-  gameLoading = false;
+  function normalizeGameFolder(entry) {
+    let folder = String(entry || "")
+      .trim()
+      .replace(/\\/g, "/");
 
-  gameLoader.hidden = true;
-  gameError.hidden = true;
+    /*
+     * Remove leading ./ because we want:
+     *
+     * minecraft/index.html
+     *
+     * rather than:
+     *
+     * ./minecraft/index.html
+     */
 
-  const elapsed =
-    Math.round(
-      performance.now() -
-        launchStartedAt
-    );
+    folder = folder.replace(/^(\.\/)+/, "");
 
-  setText(
-    $("#gameLoadStatus"),
-    "Ready"
-  );
+    /*
+     * Remove leading/trailing slashes.
+     */
 
-  console.info(
-    `[VoidForge] Game loaded in ${elapsed}ms.`
-  );
+    folder = folder
+      .replace(/^\/+/, "")
+      .replace(/\/+$/, "");
 
-  if (pendingGame) {
-    state.recent = [
-      pendingGame.id,
+    /*
+     * Reject empty folders.
+     */
 
-      ...state.recent.filter(
-        id =>
-          id !==
-          pendingGame.id
-      )
-    ].slice(0, 5);
+    if (!folder) {
+      throw new Error("Game folder is empty.");
+    }
 
-    saveState();
-  }
+    /*
+     * Reject obvious traversal attempts.
+     */
 
-  if (
-    state.settings
-      .autoFullscreen
-  ) {
-    requestGameFullscreen();
-  }
-}
-
-function handleGameError() {
-  gameLoading = false;
-
-  if (!pendingGame) {
-    showGameFailure(
-      "The game could not start",
-      "The browser reported an error while loading the game."
-    );
-
-    return;
-  }
-
-  let path;
-
-  try {
-    path =
-      gameDisplayPath(
-        pendingGame
+    if (
+      folder === "." ||
+      folder === ".." ||
+      folder.includes("../") ||
+      folder.includes("/..") ||
+      folder.startsWith("../") ||
+      folder.endsWith("/..")
+    ) {
+      throw new Error(
+        `Invalid game folder: ${entry}`
       );
-  } catch {
-    path =
-      pendingGame.entry;
+    }
+
+    /*
+     * Do not allow the entry to directly specify an HTML file.
+     *
+     * The launcher controls the index.html filename.
+     *
+     * This means:
+     *
+     *   minecraft       -> allowed
+     *   minecraft/      -> allowed
+     *
+     *   minecraft/index.html -> rejected
+     */
+
+    if (/\.html?$/i.test(folder)) {
+      throw new Error(
+        `Game entry must be a folder, not an HTML file: ${entry}`
+      );
+    }
+
+    /*
+     * Reject URL schemes.
+     */
+
+    if (
+      /^[a-z][a-z0-9+.-]*:/i.test(folder) ||
+      folder.startsWith("//")
+    ) {
+      throw new Error(
+        `External game paths are not allowed: ${entry}`
+      );
+    }
+
+    /*
+     * Reject encoded traversal.
+
+     * This is intentionally conservative.
+     */
+
+    const lower = folder.toLowerCase();
+
+    if (
+      lower.includes("%2e%2e") ||
+      lower.includes("%2f") ||
+      lower.includes("%5c")
+    ) {
+      throw new Error(
+        `Unsafe game folder: ${entry}`
+      );
+    }
+
+    return folder;
   }
 
-  showGameFailure(
-    "The game could not start",
-    `VoidForge tried to load "${path}". Make sure that file exists in the deployed GitHub Pages repository.`
-  );
-}
+  function gameUrl(game) {
+    const folder = normalizeGameFolder(
+      game.entry
+    );
 
-function showGameFailure(
-  title,
-  detail
-) {
-  gameLoader.hidden = true;
-  gameError.hidden = false;
+    /*
+     * Return ONLY a relative path.
+     */
 
-  gameError.replaceChildren(
-    el("h2", {
-      text: title
-    }),
+    return `${folder}/index.html`;
+  }
 
-    el("p", {
-      text: detail
-    }),
-
-    el(
-      "div",
-      {
-        class:
-          "button-row"
-      },
-      [
-        button(
-          "Return to launcher",
-          "primary",
-          exitGame
-        ),
-
-        button(
-          "Retry",
-          "",
-          () =>
-            pendingGame &&
-            launch(
-              pendingGame
-            )
-        )
-      ]
-    )
-  );
-
-  setText(
-    $("#gameLoadStatus"),
-    "Launch failed"
-  );
-}
-
-/* -------------------------------------------------------
-   Fullscreen
-------------------------------------------------------- */
-
-function requestGameFullscreen() {
   /*
-   * Try iframe fullscreen first.
+   * ------------------------------------------------------------
+   * GAME VALIDATION
+   * ------------------------------------------------------------
    */
-  if (
-    frame.requestFullscreen
-  ) {
-    frame
-      .requestFullscreen()
-      .catch(() => {
-        gameView
-          .requestFullscreen
-          ?.()
-          .catch(() => {});
+
+  function sanitizeGames(data) {
+    if (!Array.isArray(data)) {
+      throw new Error(
+        "games.json must contain an array."
+      );
+    }
+
+    const output = [];
+    const ids = new Set();
+
+    for (const raw of data) {
+      if (!raw || typeof raw !== "object") {
+        continue;
+      }
+
+      const id = String(raw.id || "").trim();
+      const name = String(raw.name || "").trim();
+      const entry = String(raw.entry || "").trim();
+
+      if (!id || !name || !entry) {
+        console.warn(
+          "Skipping incomplete game:",
+          raw
+        );
+
+        continue;
+      }
+
+      if (ids.has(id)) {
+        console.warn(
+          "Skipping duplicate game:",
+          id
+        );
+
+        continue;
+      }
+
+      let normalizedEntry;
+
+      try {
+        normalizedEntry =
+          normalizeGameFolder(entry);
+      } catch (error) {
+        console.warn(
+          "Skipping invalid game:",
+          id,
+          error
+        );
+
+        continue;
+      }
+
+      ids.add(id);
+
+      const tags = Array.isArray(raw.tags)
+        ? raw.tags
+            .map(tag => String(tag).trim())
+            .filter(Boolean)
+        : [];
+
+      output.push({
+        id,
+
+        name,
+
+        subtitle:
+          String(raw.subtitle || "").trim(),
+
+        entry: normalizedEntry,
+
+        version:
+          String(raw.version || "").trim(),
+
+        platform:
+          String(raw.platform || "Browser").trim(),
+
+        status:
+          String(raw.status || "Available").trim(),
+
+        description:
+          String(raw.description || "").trim(),
+
+        tags,
+
+        icon:
+          String(raw.icon || "").trim(),
+
+        image:
+          String(raw.image || "").trim(),
+
+        category:
+          String(raw.category || "").trim(),
+
+        featured:
+          Boolean(raw.featured)
       });
+    }
 
-    return;
-  }
-
-  gameView
-    .requestFullscreen
-    ?.()
-    .catch(() => {});
-}
-
-/* -------------------------------------------------------
-   Reload Game
-------------------------------------------------------- */
-
-function reloadGame() {
-  if (!pendingGame) {
-    return;
-  }
-
-  const game =
-    pendingGame;
-
-  gameLoading = false;
-
-  frame.onload = null;
-  frame.onerror = null;
-
-  gameLoader.hidden = false;
-  gameError.hidden = true;
-
-  setText(
-    $("#gameLoadStatus"),
-    "Reloading…"
-  );
-
-  setText(
-    $("#loadingStep"),
-    "Reloading game"
-  );
-
-  setText(
-    $("#loadingDetail"),
-    "Opening the game again."
-  );
-
-  /*
-   * Clear current document.
-   */
-  frame.src =
-    "about:blank";
-
-  window.setTimeout(
-    () => {
-      launch(game);
-    },
-    50
-  );
-}
-
-/* -------------------------------------------------------
-   Exit Game
-------------------------------------------------------- */
-
-function exitGame() {
-  const src =
-    frame.getAttribute(
-      "src"
-    );
-
-  const hasGame =
-    !gameView.hidden &&
-    Boolean(src) &&
-    src !==
-      "about:blank";
-
-  if (
-    hasGame &&
-    state.settings
-      .confirmExit &&
-    !confirm(
-      "Exit the current game session?"
-    )
-  ) {
-    return;
-  }
-
-  gameLoading = false;
-
-  frame.onload = null;
-  frame.onerror = null;
-
-  frame.src =
-    "about:blank";
-
-  gameView.hidden = true;
-
-  document.body.classList.remove(
-    "game-open"
-  );
-
-  pendingGame = null;
-
-  if (
-    document.fullscreenElement
-  ) {
-    document
-      .exitFullscreen
-      ?.()
-      .catch(() => {});
-  }
-
-  if (
-    previousFocus &&
-    typeof previousFocus.focus ===
-      "function" &&
-    document.contains(
-      previousFocus
-    )
-  ) {
-    previousFocus.focus();
-  }
-
-  previousFocus = null;
-
-  setText(
-    $("#gameLoadStatus"),
-    "Checking game files…"
-  );
-}
-
-/* -------------------------------------------------------
-   Mobile Navigation
-------------------------------------------------------- */
-
-function closeMobileNavigation() {
-  const nav =
-    $(".mobile-nav");
-
-  if (!nav) {
-    return;
-  }
-
-  nav.hidden = true;
-
-  $("#mobileMenu")
-    ?.setAttribute(
-      "aria-expanded",
-      "false"
-    );
-}
-
-function toggleMobileNavigation() {
-  const nav =
-    $(".mobile-nav");
-
-  const menu =
-    $("#mobileMenu");
-
-  if (!nav || !menu) {
-    return;
-  }
-
-  nav.hidden =
-    !nav.hidden;
-
-  menu.setAttribute(
-    "aria-expanded",
-    String(!nav.hidden)
-  );
-}
-
-/* -------------------------------------------------------
-   Keyboard Shortcuts
-------------------------------------------------------- */
-
-function handleKeyboard(event) {
-  const active =
-    document.activeElement;
-
-  const isTyping =
-    active &&
-    /input|textarea|select/i.test(
-      active.tagName
-    );
-
-  /*
-   * /
-   *
-   * Focus search.
-   */
-  if (
-    event.key === "/" &&
-    !isTyping
-  ) {
-    event.preventDefault();
-
-    $("#gameSearch")
-      ?.focus();
-
-    return;
+    return output;
   }
 
   /*
-   * Escape
-   *
-   * Exit active game.
+   * ------------------------------------------------------------
+   * FETCH GAMES
+   * ------------------------------------------------------------
    */
-  if (
-    event.key === "Escape" &&
-    !gameView.hidden
-  ) {
-    event.preventDefault();
 
-    exitGame();
+  async function fetchGames() {
+    const url =
+      `${GAMES_URL}?t=${Date.now()}`;
 
-    return;
-  }
+    const response = await fetch(url, {
+      cache: "no-store",
+      credentials: "same-origin"
+    });
 
-  /*
-   * F
-   *
-   * Fullscreen active game.
-   */
-  if (
-    event.key.toLowerCase() ===
-      "f" &&
-    !isTyping &&
-    !gameView.hidden
-  ) {
-    event.preventDefault();
-
-    requestGameFullscreen();
-
-    return;
-  }
-
-  /*
-   * R
-   *
-   * Reload active game.
-   */
-  if (
-    event.key.toLowerCase() ===
-      "r" &&
-    !isTyping &&
-    !gameView.hidden
-  ) {
-    event.preventDefault();
-
-    reloadGame();
-  }
-}
-
-/* -------------------------------------------------------
-   Events
-------------------------------------------------------- */
-
-document.addEventListener(
-  "click",
-  event => {
-    const target =
-      event.target.closest(
-        "[data-view]"
+    if (!response.ok) {
+      throw new Error(
+        `games.json failed with HTTP ${response.status}`
       );
+    }
 
-    if (!target) {
+    const data = await response.json();
+
+    return sanitizeGames(data);
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * GAME LOOKUP
+   * ------------------------------------------------------------
+   */
+
+  function selectedGame() {
+    return games.find(
+      game => game.id === state.selectedId
+    ) || null;
+  }
+
+  function getGameById(id) {
+    return games.find(
+      game => game.id === id
+    ) || null;
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * PREFERENCES
+   * ------------------------------------------------------------
+   */
+
+  function applyPreferences() {
+    const settings = state.settings || {};
+
+    document.documentElement.style.setProperty(
+      "--launcher-brightness",
+      `${Number(settings.brightness) || 100}%`
+    );
+
+    document.documentElement.classList.toggle(
+      "reduced-motion",
+      Boolean(settings.reducedMotion)
+    );
+
+    document.documentElement.classList.toggle(
+      "compact-mode",
+      Boolean(settings.compact)
+    );
+
+    const remember =
+      $("#settingRemember");
+
+    if (remember) {
+      remember.checked =
+        Boolean(settings.remember);
+    }
+
+    const autoFullscreen =
+      $("#settingAutoFullscreen");
+
+    if (autoFullscreen) {
+      autoFullscreen.checked =
+        Boolean(settings.autoFullscreen);
+    }
+
+    const confirmExit =
+      $("#settingConfirmExit");
+
+    if (confirmExit) {
+      confirmExit.checked =
+        Boolean(settings.confirmExit);
+    }
+
+    const reducedMotion =
+      $("#settingReducedMotion");
+
+    if (reducedMotion) {
+      reducedMotion.checked =
+        Boolean(settings.reducedMotion);
+    }
+
+    const compact =
+      $("#settingCompact");
+
+    if (compact) {
+      compact.checked =
+        Boolean(settings.compact);
+    }
+
+    const brightness =
+      $("#settingBrightness");
+
+    if (brightness) {
+      brightness.value =
+        settings.brightness;
+    }
+
+    const launch =
+      $("#settingLaunch");
+
+    if (launch) {
+      launch.value =
+        settings.launch;
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * SELECT GAME
+   * ------------------------------------------------------------
+   */
+
+  function selectGame(id, options = {}) {
+    const game = getGameById(id);
+
+    if (!game) {
       return;
     }
 
-    changeView(
-      target.dataset.view
+    state.selectedId = game.id;
+
+    if (options.remember !== false) {
+      saveState();
+    }
+
+    renderAll();
+
+    if (options.scroll !== false) {
+      const card =
+        document.querySelector(
+          `[data-game-id="${CSS.escape(game.id)}"]`
+        );
+
+      if (card) {
+        card.scrollIntoView({
+          behavior:
+            state.settings.reducedMotion
+              ? "auto"
+              : "smooth",
+          block: "center"
+        });
+      }
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * FAVORITES
+   * ------------------------------------------------------------ */
+
+  function isFavorite(id) {
+    return state.favorites.includes(id);
+  }
+
+  function toggleFavorite(id) {
+    if (isFavorite(id)) {
+      state.favorites =
+        state.favorites.filter(
+          value => value !== id
+        );
+
+      toast("Removed from favorites.");
+    } else {
+      state.favorites.push(id);
+
+      toast("Added to favorites.");
+    }
+
+    saveState();
+    renderAll();
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * RECENT
+   * ------------------------------------------------------------ */
+
+  function addRecent(id) {
+    state.recent =
+      state.recent.filter(
+        value => value !== id
+      );
+
+    state.recent.unshift(id);
+
+    state.recent =
+      state.recent.slice(0, 12);
+
+    saveState();
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * FILTERING
+   * ------------------------------------------------------------ */
+
+  function gameMatchesSearch(game) {
+    if (!searchTerm) {
+      return true;
+    }
+
+    const haystack = [
+      game.name,
+      game.subtitle,
+      game.description,
+      game.platform,
+      game.status,
+      game.category,
+      ...game.tags
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return haystack.includes(
+      searchTerm.toLowerCase()
     );
   }
-);
 
-$("#gameSearch")
-  ?.addEventListener(
-    "input",
-    () => {
-      if (
-        activeView !==
-        "library"
-      ) {
-        activeView =
-          "library";
-      }
+  function gameMatchesFilter(game) {
+    switch (activeFilter) {
+      case "favorites":
+        return isFavorite(game.id);
 
-      renderView();
-    }
-  );
+      case "recent":
+        return state.recent.includes(game.id);
 
-$("#fullscreenLauncher")
-  ?.addEventListener(
-    "click",
-    () => {
-      if (
-        document.fullscreenElement
-      ) {
-        document
-          .exitFullscreen
-          ?.()
-          .catch(() => {});
+      case "featured":
+        return Boolean(game.featured);
 
-        return;
-      }
-
-      document.documentElement
-        .requestFullscreen?.()
-        .catch(() => {
-          toast(
-            "Fullscreen is not available."
-          );
-        });
-    }
-  );
-
-$("#gameFullscreen")
-  ?.addEventListener(
-    "click",
-    requestGameFullscreen
-  );
-
-$("#reloadGame")
-  ?.addEventListener(
-    "click",
-    reloadGame
-  );
-
-$("#gameInfo")
-  ?.addEventListener(
-    "click",
-    () => {
-      if (pendingGame) {
-        showGameInformation(
-          pendingGame
+      case "3d":
+        return game.tags.some(
+          tag =>
+            tag.toLowerCase() === "3d"
         );
-      }
+
+      case "arcade":
+        return game.tags.some(
+          tag =>
+            tag.toLowerCase() === "arcade"
+        );
+
+      default:
+        return true;
     }
-  );
+  }
 
-$("#exitGame")
-  ?.addEventListener(
-    "click",
-    exitGame
-  );
+  function filteredGames() {
+    return games.filter(
+      game =>
+        gameMatchesSearch(game) &&
+        gameMatchesFilter(game)
+    );
+  }
 
-$("#mobileMenu")
-  ?.addEventListener(
-    "click",
-    toggleMobileNavigation
-  );
+  /*
+   * ------------------------------------------------------------
+   * GAME CARD
+   * ------------------------------------------------------------
+   */
 
-document.addEventListener(
-  "keydown",
-  handleKeyboard
-);
+  function createGameCard(game) {
+    const card =
+      el("article", "game-card");
 
-/* -------------------------------------------------------
-   Browser Back Button / Hash Navigation
-------------------------------------------------------- */
+    card.dataset.gameId = game.id;
 
-window.addEventListener(
-  "hashchange",
-  () => {
-    const view =
-      location.hash.replace(
-        "#",
+    if (state.selectedId === game.id) {
+      card.classList.add("selected");
+    }
+
+    const media =
+      el("div", "game-card-media");
+
+    if (game.image) {
+      const image =
+        document.createElement("img");
+
+      image.src = game.image;
+      image.alt = game.name;
+      image.loading = "lazy";
+
+      image.addEventListener(
+        "error",
+        () => {
+          image.remove();
+          media.classList.add(
+            "fallback-media"
+          );
+        }
+      );
+
+      media.appendChild(image);
+    } else {
+      const icon =
+        el(
+          "div",
+          "game-card-icon",
+          game.icon || "VF"
+        );
+
+      media.appendChild(icon);
+    }
+
+    const content =
+      el("div", "game-card-content");
+
+    const title =
+      el("h3", "game-card-title", game.name);
+
+    const subtitle =
+      el(
+        "p",
+        "game-card-subtitle",
+        game.subtitle
+      );
+
+    const description =
+      el(
+        "p",
+        "game-card-description",
+        game.description
+      );
+
+    const meta =
+      el("div", "game-card-meta");
+
+    if (game.version) {
+      meta.appendChild(
+        el(
+          "span",
+          "game-meta-item",
+          `v${game.version}`
+        )
+      );
+    }
+
+    if (game.platform) {
+      meta.appendChild(
+        el(
+          "span",
+          "game-meta-item",
+          game.platform
+        )
+      );
+    }
+
+    if (game.status) {
+      meta.appendChild(
+        el(
+          "span",
+          "game-meta-item",
+          game.status
+        )
+      );
+    }
+
+    const tags =
+      el("div", "game-card-tags");
+
+    game.tags
+      .slice(0, 4)
+      .forEach(tag => {
+        tags.appendChild(
+          el("span", "game-tag", tag)
+        );
+      });
+
+    const actions =
+      el("div", "game-card-actions");
+
+    const launchButton =
+      button(
+        "Launch",
+        "game-launch-button",
+        event => {
+          event.stopPropagation();
+
+          selectGame(game.id, {
+            scroll: false
+          });
+
+          launch(game);
+        }
+      );
+
+    const favoriteButton =
+      button(
+        isFavorite(game.id)
+          ? "★"
+          : "☆",
+        "game-favorite-button",
+        event => {
+          event.stopPropagation();
+
+          toggleFavorite(game.id);
+        }
+      );
+
+    favoriteButton.setAttribute(
+      "aria-label",
+      isFavorite(game.id)
+        ? `Remove ${game.name} from favorites`
+        : `Add ${game.name} to favorites`
+    );
+
+    actions.appendChild(
+      launchButton
+    );
+
+    actions.appendChild(
+      favoriteButton
+    );
+
+    content.appendChild(title);
+
+    if (game.subtitle) {
+      content.appendChild(subtitle);
+    }
+
+    if (game.description) {
+      content.appendChild(description);
+    }
+
+    if (meta.children.length) {
+      content.appendChild(meta);
+    }
+
+    if (tags.children.length) {
+      content.appendChild(tags);
+    }
+
+    content.appendChild(actions);
+
+    card.appendChild(media);
+    card.appendChild(content);
+
+    card.addEventListener(
+      "click",
+      () => {
+        selectGame(game.id);
+      }
+    );
+
+    card.addEventListener(
+      "dblclick",
+      () => {
+        launch(game);
+      }
+    );
+
+    return card;
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * HERO
+   * ------------------------------------------------------------
+   */
+
+  function renderHero() {
+    const game =
+      selectedGame() ||
+      games.find(
+        item => item.featured
+      ) ||
+      games[0];
+
+    const title =
+      $("#heroTitle");
+
+    const subtitle =
+      $("#heroSubtitle");
+
+    const description =
+      $("#heroDescription");
+
+    const launchButton =
+      $("#heroLaunch");
+
+    const favoriteButton =
+      $("#heroFavorite");
+
+    if (!game) {
+      setText(
+        title,
+        "No games available"
+      );
+
+      setText(
+        subtitle,
         ""
       );
 
-    if (
-      [
-        "library",
-        "discover",
-        "updates",
-        "settings",
-        "about"
-      ].includes(view)
-    ) {
-      activeView = view;
-
-      renderView();
-    }
-  }
-);
-
-/* -------------------------------------------------------
-   Initialization
-------------------------------------------------------- */
-
-async function initialize() {
-  applyPreferences();
-
-  /*
-   * Mobile navigation starts closed.
-   */
-  const mobileNav =
-    $(".mobile-nav");
-
-  if (mobileNav) {
-    mobileNav.hidden = true;
-  }
-
-  /*
-   * Load games.json.
-   */
-  try {
-    await fetchGames();
-
-    setText(
-      $("#connectionStatus"),
-      "Launcher ready"
-    );
-
-    console.info(
-      `[VoidForge] Loaded ${games.length} game(s).`
-    );
-
-    games.forEach(game => {
-      try {
-        console.info(
-          `[VoidForge] ${game.name}: ${gameDisplayPath(
-            game
-          )}`
-        );
-      } catch {
-        // Ignore malformed entries.
-      }
-    });
-  } catch (error) {
-    games = [];
-
-    setText(
-      $("#connectionStatus"),
-      "Registry unavailable"
-    );
-
-    console.error(
-      "[VoidForge] Initialization failed:",
-      error
-    );
-
-    toast(
-      error.message
-    );
-  }
-
-  /*
-   * Render launcher.
-   */
-  renderView();
-
-  /*
-   * Service worker is optional.
-   *
-   * Failure must never stop the
-   * launcher or games.
-   */
-  if (
-    "serviceWorker" in
-    navigator
-  ) {
-    const swUrl =
-      new URL(
-        "sw.js",
-        document.baseURI
+      setText(
+        description,
+        "Add games to games.json."
       );
 
-    navigator.serviceWorker
-      .register(
-        swUrl.href
-      )
-      .then(() => {
-        console.info(
-          "[VoidForge] Service worker registered."
+      if (launchButton) {
+        launchButton.disabled = true;
+      }
+
+      return;
+    }
+
+    state.selectedId = game.id;
+
+    setText(
+      title,
+      game.name
+    );
+
+    setText(
+      subtitle,
+      game.subtitle
+    );
+
+    setText(
+      description,
+      game.description
+    );
+
+    if (launchButton) {
+      launchButton.disabled = false;
+
+      launchButton.onclick = () => {
+        launch(game);
+      };
+    }
+
+    if (favoriteButton) {
+      favoriteButton.textContent =
+        isFavorite(game.id)
+          ? "★ Favorited"
+          : "☆ Favorite";
+
+      favoriteButton.onclick = () => {
+        toggleFavorite(game.id);
+      };
+    }
+
+    const heroImage =
+      $("#heroImage");
+
+    if (heroImage) {
+      if (game.image) {
+        heroImage.src = game.image;
+        heroImage.alt = game.name;
+        heroImage.hidden = false;
+      } else {
+        heroImage.removeAttribute(
+          "src"
         );
-      })
-      .catch(error => {
-        console.warn(
-          "[VoidForge] Service worker unavailable:",
-          error
+
+        heroImage.hidden = true;
+      }
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * LIBRARY
+   * ------------------------------------------------------------
+   */
+
+  function renderLibrary() {
+    const grid =
+      $("#gameGrid");
+
+    if (!grid) {
+      return;
+    }
+
+    grid.replaceChildren();
+
+    renderHero();
+
+    const visible =
+      filteredGames();
+
+    if (!visible.length) {
+      const empty =
+        el(
+          "div",
+          "empty-state"
+        );
+
+      const heading =
+        el(
+          "h3",
+          "",
+          "No games found"
+        );
+
+      const text =
+        el(
+          "p",
+          "",
+          searchTerm
+            ? "Try a different search."
+            : "No games match this filter."
+        );
+
+      empty.appendChild(heading);
+      empty.appendChild(text);
+
+      grid.appendChild(empty);
+
+      return;
+    }
+
+    visible.forEach(game => {
+      grid.appendChild(
+        createGameCard(game)
+      );
+    });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * RECENT
+   * ------------------------------------------------------------
+   */
+
+  function recentGames() {
+    return state.recent
+      .map(id => getGameById(id))
+      .filter(Boolean);
+  }
+
+  function renderRecent() {
+    const container =
+      $("#recentGames");
+
+    if (!container) {
+      return;
+    }
+
+    container.replaceChildren();
+
+    recentGames()
+      .slice(0, 6)
+      .forEach(game => {
+        container.appendChild(
+          createGameCard(game)
         );
       });
   }
-}
 
-/* -------------------------------------------------------
-   Start
-------------------------------------------------------- */
+  /*
+   * ------------------------------------------------------------
+   * FAVORITES
+   * ------------------------------------------------------------
+   */
 
-initialize();
+  function renderFavorites() {
+    const container =
+      $("#favoriteGames");
+
+    if (!container) {
+      return;
+    }
+
+    container.replaceChildren();
+
+    games
+      .filter(game =>
+        isFavorite(game.id)
+      )
+      .forEach(game => {
+        container.appendChild(
+          createGameCard(game)
+        );
+      });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * DISCOVER
+   * ------------------------------------------------------------
+   */
+
+  function renderDiscover() {
+    const container =
+      $("#discoverGrid");
+
+    if (!container) {
+      return;
+    }
+
+    container.replaceChildren();
+
+    games
+      .filter(game =>
+        game.featured
+      )
+      .forEach(game => {
+        container.appendChild(
+          createGameCard(game)
+        );
+      });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * UPDATES
+   * ------------------------------------------------------------
+   */
+
+  function renderUpdates() {
+    const container =
+      $("#updatesList");
+
+    if (!container) {
+      return;
+    }
+
+    container.replaceChildren();
+
+    games.forEach(game => {
+      const item =
+        el("div", "update-item");
+
+      const title =
+        el(
+          "h3",
+          "",
+          game.name
+        );
+
+      const version =
+        el(
+          "span",
+          "",
+          game.version
+            ? `v${game.version}`
+            : "Current"
+        );
+
+      const description =
+        el(
+          "p",
+          "",
+          game.description ||
+            "No update notes available."
+        );
+
+      item.appendChild(title);
+      item.appendChild(version);
+      item.appendChild(description);
+
+      container.appendChild(item);
+    });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * SETTINGS
+   * ------------------------------------------------------------
+   */
+
+  function setupSettings() {
+    const remember =
+      $("#settingRemember");
+
+    if (remember) {
+      remember.addEventListener(
+        "change",
+        () => {
+          state.settings.remember =
+            remember.checked;
+
+          saveState();
+        }
+      );
+    }
+
+    const autoFullscreen =
+      $("#settingAutoFullscreen");
+
+    if (autoFullscreen) {
+      autoFullscreen.addEventListener(
+        "change",
+        () => {
+          state.settings.autoFullscreen =
+            autoFullscreen.checked;
+
+          saveState();
+        }
+      );
+    }
+
+    const confirmExit =
+      $("#settingConfirmExit");
+
+    if (confirmExit) {
+      confirmExit.addEventListener(
+        "change",
+        () => {
+          state.settings.confirmExit =
+            confirmExit.checked;
+
+          saveState();
+        }
+      );
+    }
+
+    const reducedMotion =
+      $("#settingReducedMotion");
+
+    if (reducedMotion) {
+      reducedMotion.addEventListener(
+        "change",
+        () => {
+          state.settings.reducedMotion =
+            reducedMotion.checked;
+
+          saveState();
+          applyPreferences();
+        }
+      );
+    }
+
+    const compact =
+      $("#settingCompact");
+
+    if (compact) {
+      compact.addEventListener(
+        "change",
+        () => {
+          state.settings.compact =
+            compact.checked;
+
+          saveState();
+          applyPreferences();
+        }
+      );
+    }
+
+    const brightness =
+      $("#settingBrightness");
+
+    if (brightness) {
+      brightness.addEventListener(
+        "input",
+        () => {
+          state.settings.brightness =
+            Number(brightness.value);
+
+          applyPreferences();
+        }
+      );
+
+      brightness.addEventListener(
+        "change",
+        () => {
+          saveState();
+        }
+      );
+    }
+
+    const launch =
+      $("#settingLaunch");
+
+    if (launch) {
+      launch.addEventListener(
+        "change",
+        () => {
+          state.settings.launch =
+            launch.value;
+
+          saveState();
+        }
+      );
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * SEARCH
+   * ------------------------------------------------------------
+   */
+
+  function setupSearch() {
+    const search =
+      $("#gameSearch");
+
+    if (!search) {
+      return;
+    }
+
+    search.addEventListener(
+      "input",
+      () => {
+        searchTerm =
+          search.value.trim();
+
+        renderLibrary();
+      }
+    );
+
+    search.addEventListener(
+      "keydown",
+      event => {
+        if (event.key === "Escape") {
+          search.value = "";
+          searchTerm = "";
+
+          renderLibrary();
+        }
+      }
+    );
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * FILTER BUTTONS
+   * ------------------------------------------------------------
+   */
+
+  function setupFilters() {
+    $$(".filter-button")
+      .forEach(buttonElement => {
+        buttonElement.addEventListener(
+          "click",
+          () => {
+            activeFilter =
+              buttonElement.dataset.filter ||
+              "all";
+
+            $$(".filter-button")
+              .forEach(item => {
+                item.classList.toggle(
+                  "active",
+                  item === buttonElement
+                );
+              });
+
+            renderLibrary();
+          }
+        );
+      });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * PAGE NAVIGATION
+   * ------------------------------------------------------------
+   */
+
+  function showPage(page) {
+    currentPage = page;
+
+    $$(".page").forEach(pageElement => {
+      pageElement.hidden =
+        pageElement.dataset.page !== page;
+    });
+
+    $$(".nav-link").forEach(link => {
+      link.classList.toggle(
+        "active",
+        link.dataset.page === page
+      );
+    });
+
+    if (page === "library") {
+      renderLibrary();
+    }
+
+    if (page === "discover") {
+      renderDiscover();
+    }
+
+    if (page === "updates") {
+      renderUpdates();
+    }
+
+    if (page === "settings") {
+      applyPreferences();
+    }
+  }
+
+  function setupNavigation() {
+    $$(".nav-link").forEach(link => {
+      link.addEventListener(
+        "click",
+        event => {
+          event.preventDefault();
+
+          const page =
+            link.dataset.page;
+
+          if (!page) {
+            return;
+          }
+
+          showPage(page);
+
+          history.replaceState(
+            null,
+            "",
+            `#${page}`
+          );
+        }
+      );
+    });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * LAUNCHING
+   * ------------------------------------------------------------
+   */
+
+  function setGameLoading(value) {
+    gameLoading = value;
+
+    if (gameView) {
+      gameView.classList.toggle(
+        "loading",
+        value
+      );
+    }
+
+    if (gameLoader) {
+      gameLoader.hidden = !value;
+    }
+  }
+
+  function clearGameError() {
+    if (!gameError) {
+      return;
+    }
+
+    gameError.hidden = true;
+    gameError.replaceChildren();
+  }
+
+  function showGameFailure(game, error) {
+    setGameLoading(false);
+
+    if (!gameError) {
+      toast(
+        `Unable to load ${game.name}.`
+      );
+
+      console.error(error);
+
+      return;
+    }
+
+    gameError.hidden = false;
+
+    gameError.replaceChildren();
+
+    const title =
+      el(
+        "h2",
+        "",
+        "Unable to load game"
+      );
+
+    const message =
+      el(
+        "p",
+        "",
+        `${game.name} could not be loaded.`
+      );
+
+    const path =
+      el(
+        "code",
+        "",
+        gameUrl(game)
+      );
+
+    const actions =
+      el(
+        "div",
+        "game-error-actions"
+      );
+
+    const retry =
+      button(
+        "Retry",
+        "",
+        () => {
+          reloadGame();
+        }
+      );
+
+    const exit =
+      button(
+        "Back to Library",
+        "",
+        () => {
+          exitGame(false);
+        }
+      );
+
+    actions.appendChild(retry);
+    actions.appendChild(exit);
+
+    gameError.appendChild(title);
+    gameError.appendChild(message);
+    gameError.appendChild(path);
+    gameError.appendChild(actions);
+
+    console.error(
+      "Game loading error:",
+      error
+    );
+  }
+
+  function launch(game) {
+    if (!game) {
+      toast("No game selected.");
+      return;
+    }
+
+    let relativeUrl;
+
+    try {
+      relativeUrl =
+        gameUrl(game);
+    } catch (error) {
+      showGameFailure(
+        game,
+        error
+      );
+
+      return;
+    }
+
+    previousFocus =
+      document.activeElement;
+
+    pendingGame = game;
+
+    gameStartedAt =
+      Date.now();
+
+    addRecent(game.id);
+
+    clearGameError();
+
+    setText(
+      $("#gameTitle"),
+      game.name
+    );
+
+    setText(
+      $("#gameStatus"),
+      `Loading ${game.name}…`
+    );
+
+    if (gameView) {
+      gameView.hidden = false;
+    }
+
+    document.body.classList.add(
+      "game-open"
+    );
+
+    setGameLoading(true);
+
+    /*
+     * ----------------------------------------------------------
+     * CRITICAL:
+     *
+     * Do not do:
+     *
+     *   frame.src = new URL(...).href
+     *
+     * because that creates an absolute URL.
+     *
+     * Instead:
+     *
+     *   frame.setAttribute("src", relativeUrl)
+     *
+     * This keeps the DOM attribute as:
+     *
+     *   src="minecraft/index.html"
+     * ----------------------------------------------------------
+     */
+
+    if (frame) {
+      frame.setAttribute(
+        "src",
+        relativeUrl
+      );
+    }
+
+    /*
+     * Auto fullscreen after load.
+     */
+
+    if (
+      state.settings.autoFullscreen
+    ) {
+      window.setTimeout(() => {
+        requestGameFullscreen();
+      }, 800);
+    }
+
+    /*
+     * Update URL hash without
+     * exposing the actual game path.
+     */
+
+    try {
+      history.pushState(
+        {
+          game: game.id
+        },
+        "",
+        `#game/${encodeURIComponent(
+          game.id
+        )}`
+      );
+    } catch {
+      // Ignore history errors.
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * GAME FRAME EVENTS
+   * ------------------------------------------------------------
+   */
+
+  function handleGameLoad() {
+    setGameLoading(false);
+
+    if (!pendingGame) {
+      return;
+    }
+
+    setText(
+      $("#gameStatus"),
+      `${pendingGame.name} is running`
+    );
+
+    /*
+     * Optional diagnostics.
+     */
+
+    if (frame) {
+      console.debug(
+        "Game iframe src attribute:",
+        frame.getAttribute("src")
+      );
+
+      console.debug(
+        "Game iframe resolved src:",
+        frame.src
+      );
+    }
+  }
+
+  function handleGameError(event) {
+    if (!pendingGame) {
+      return;
+    }
+
+    showGameFailure(
+      pendingGame,
+      event
+    );
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * FULLSCREEN
+   * ------------------------------------------------------------
+   */
+
+  async function requestGameFullscreen() {
+    if (!gameView) {
+      return;
+    }
+
+    try {
+      if (
+        document.fullscreenElement
+      ) {
+        return;
+      }
+
+      if (
+        gameView.requestFullscreen
+      ) {
+        await gameView.requestFullscreen();
+      }
+    } catch (error) {
+      console.warn(
+        "Fullscreen request failed:",
+        error
+      );
+    }
+  }
+
+  async function exitFullscreen() {
+    try {
+      if (
+        document.fullscreenElement
+      ) {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.warn(
+        "Unable to exit fullscreen:",
+        error
+      );
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * RELOAD
+   * ------------------------------------------------------------
+   */
+
+  function reloadGame() {
+    if (!pendingGame || !frame) {
+      return;
+    }
+
+    let relativeUrl;
+
+    try {
+      relativeUrl =
+        gameUrl(pendingGame);
+    } catch (error) {
+      showGameFailure(
+        pendingGame,
+        error
+      );
+
+      return;
+    }
+
+    clearGameError();
+
+    setGameLoading(true);
+
+    setText(
+      $("#gameStatus"),
+      `Reloading ${pendingGame.name}…`
+    );
+
+    /*
+     * Resetting the attribute first forces
+     * browsers to create a fresh navigation.
+     */
+
+    frame.setAttribute(
+      "src",
+      "about:blank"
+    );
+
+    window.setTimeout(() => {
+      if (!frame || !pendingGame) {
+        return;
+      }
+
+      frame.setAttribute(
+        "src",
+        relativeUrl
+      );
+    }, 30);
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * EXIT GAME
+   * ------------------------------------------------------------
+   */
+
+  async function exitGame(force = false) {
+    if (
+      !force &&
+      state.settings.confirmExit &&
+      pendingGame
+    ) {
+      const confirmed =
+        window.confirm(
+          `Exit ${pendingGame.name}?`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    await exitFullscreen();
+
+    /*
+     * Stop the game completely.
+     */
+
+    if (frame) {
+      frame.setAttribute(
+        "src",
+        "about:blank"
+      );
+    }
+
+    pendingGame = null;
+    gameLoading = false;
+
+    clearGameError();
+
+    setGameLoading(false);
+
+    if (gameView) {
+      gameView.hidden = true;
+    }
+
+    document.body.classList.remove(
+      "game-open"
+    );
+
+    setText(
+      $("#gameTitle"),
+      "Game"
+    );
+
+    setText(
+      $("#gameStatus"),
+      ""
+    );
+
+    /*
+     * Return focus to the element
+     * that launched the game.
+     */
+
+    if (
+      previousFocus &&
+      typeof previousFocus.focus ===
+        "function"
+    ) {
+      try {
+        previousFocus.focus();
+      } catch {
+        // Ignore focus errors.
+      }
+    }
+
+    previousFocus = null;
+
+    try {
+      history.replaceState(
+        null,
+        "",
+        "#library"
+      );
+    } catch {
+      // Ignore history errors.
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * GAME VIEW BUTTONS
+   * ------------------------------------------------------------
+   */
+
+  function setupGameControls() {
+    const close =
+      $("#gameClose");
+
+    if (close) {
+      close.addEventListener(
+        "click",
+        () => {
+          exitGame(false);
+        }
+      );
+    }
+
+    const reload =
+      $("#gameReload");
+
+    if (reload) {
+      reload.addEventListener(
+        "click",
+        () => {
+          reloadGame();
+        }
+      );
+    }
+
+    const fullscreen =
+      $("#gameFullscreen");
+
+    if (fullscreen) {
+      fullscreen.addEventListener(
+        "click",
+        () => {
+          requestGameFullscreen();
+        }
+      );
+    }
+
+    if (frame) {
+      frame.addEventListener(
+        "load",
+        handleGameLoad
+      );
+
+      frame.addEventListener(
+        "error",
+        handleGameError
+      );
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * KEYBOARD SHORTCUTS
+   * ------------------------------------------------------------
+   */
+
+  function setupKeyboard() {
+    document.addEventListener(
+      "keydown",
+      event => {
+        /*
+         * Escape
+         */
+
+        if (
+          event.key === "Escape"
+        ) {
+          if (pendingGame) {
+            exitGame(false);
+            return;
+          }
+        }
+
+        /*
+         * Ctrl/Cmd + K
+         * Focus search.
+         */
+
+        if (
+          (event.ctrlKey ||
+            event.metaKey) &&
+          event.key.toLowerCase() === "k"
+        ) {
+          event.preventDefault();
+
+          const search =
+            $("#gameSearch");
+
+          if (search) {
+            search.focus();
+          }
+
+          return;
+        }
+
+        /*
+         * R while playing
+         */
+
+        if (
+          pendingGame &&
+          event.key.toLowerCase() === "r" &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !event.altKey
+        ) {
+          const target =
+            event.target;
+
+          const typing =
+            target &&
+            (
+              target.tagName === "INPUT" ||
+              target.tagName === "TEXTAREA" ||
+              target.isContentEditable
+            );
+
+          if (!typing) {
+            event.preventDefault();
+            reloadGame();
+          }
+        }
+      }
+    );
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * HASH ROUTING
+   * ------------------------------------------------------------
+   */
+
+  function handleHash() {
+    const hash =
+      window.location.hash
+        .replace(/^#/, "");
+
+    if (!hash) {
+      showPage("library");
+      return;
+    }
+
+    if (
+      hash.startsWith("game/")
+    ) {
+      const id =
+        decodeURIComponent(
+          hash.slice(5)
+        );
+
+      const game =
+        getGameById(id);
+
+      if (game) {
+        launch(game);
+        return;
+      }
+
+      showPage("library");
+      return;
+    }
+
+    const allowedPages = new Set([
+      "library",
+      "discover",
+      "updates",
+      "settings",
+      "about"
+    ]);
+
+    if (
+      allowedPages.has(hash)
+    ) {
+      showPage(hash);
+    } else {
+      showPage("library");
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * ABOUT
+   * ------------------------------------------------------------
+   */
+
+  function renderAbout() {
+    setText(
+      $("#gameCount"),
+      games.length
+    );
+
+    setText(
+      $("#favoriteCount"),
+      state.favorites.length
+    );
+
+    setText(
+      $("#recentCount"),
+      state.recent.length
+    );
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * GLOBAL RENDER
+   * ------------------------------------------------------------
+   */
+
+  function renderAll() {
+    renderLibrary();
+    renderRecent();
+    renderFavorites();
+    renderDiscover();
+    renderUpdates();
+    renderAbout();
+    applyPreferences();
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * LOADING / EMPTY STATE
+   * ------------------------------------------------------------
+   */
+
+  function showLauncherError(error) {
+    console.error(
+      "VoidForge launcher error:",
+      error
+    );
+
+    if (viewRoot) {
+      viewRoot.innerHTML = "";
+
+      const wrapper =
+        el(
+          "div",
+          "launcher-error"
+        );
+
+      const title =
+        el(
+          "h2",
+          "",
+          "VoidForge could not load"
+        );
+
+      const message =
+        el(
+          "p",
+          "",
+          error.message ||
+            "Unknown launcher error."
+        );
+
+      const retry =
+        button(
+          "Retry",
+          "",
+          () => {
+            window.location.reload();
+          }
+        );
+
+      wrapper.appendChild(title);
+      wrapper.appendChild(message);
+      wrapper.appendChild(retry);
+
+      viewRoot.appendChild(wrapper);
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * SERVICE WORKER
+   * ------------------------------------------------------------
+   */
+
+  async function registerServiceWorker() {
+    if (
+      !("serviceWorker" in navigator)
+    ) {
+      return;
+    }
+
+    try {
+      await navigator.serviceWorker.register(
+        "./sw.js"
+      );
+
+      console.debug(
+        "VoidForge service worker registered."
+      );
+    } catch (error) {
+      console.warn(
+        "Service worker registration failed:",
+        error
+      );
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * INIT
+   * ------------------------------------------------------------
+   */
+
+  async function init() {
+    try {
+      applyPreferences();
+
+      setupNavigation();
+      setupSearch();
+      setupFilters();
+      setupSettings();
+      setupGameControls();
+      setupKeyboard();
+
+      games =
+        await fetchGames();
+
+      /*
+       * If saved selected game no longer exists,
+       * select the first available game.
+       */
+
+      if (
+        state.selectedId &&
+        !getGameById(
+          state.selectedId
+        )
+      ) {
+        state.selectedId =
+          games[0]?.id || null;
+      }
+
+      /*
+       * Clean favorites.
+       */
+
+      state.favorites =
+        state.favorites.filter(
+          id => Boolean(
+            getGameById(id)
+          )
+        );
+
+      /*
+       * Clean recent games.
+       */
+
+      state.recent =
+        state.recent.filter(
+          id => Boolean(
+            getGameById(id)
+          )
+        );
+
+      saveState();
+
+      renderAll();
+
+      handleHash();
+
+      /*
+       * Don't register service worker
+       * when running from file://.
+       */
+
+      if (
+        location.protocol === "http:" ||
+        location.protocol === "https:"
+      ) {
+        registerServiceWorker();
+      }
+    } catch (error) {
+      showLauncherError(error);
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * BROWSER NAVIGATION
+   * ------------------------------------------------------------
+   */
+
+  window.addEventListener(
+    "popstate",
+    () => {
+      if (
+        pendingGame &&
+        !window.location.hash.startsWith(
+          "#game/"
+        )
+      ) {
+        exitGame(true);
+      }
+
+      handleHash();
+    }
+  );
+
+  window.addEventListener(
+    "hashchange",
+    () => {
+      handleHash();
+    }
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * START
+   * ------------------------------------------------------------
+   */
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      init,
+      {
+        once: true
+      }
+    );
+  } else {
+    init();
+  }
+
+})();
