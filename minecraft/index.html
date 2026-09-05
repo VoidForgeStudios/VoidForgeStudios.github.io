@@ -3,26 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>BlockWorld v0.1</title>
-  <link rel="stylesheet" href="./style.css">
+  <meta name="theme-color" content="#87ceeb">
+  <title>BlockWorld</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #87ceeb; font-family: Arial, sans-serif; user-select: none; touch-action: none; }
+    #game, #game canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+    #crosshair { position: fixed; inset: 50% auto auto 50%; z-index: 3; transform: translate(-50%, -50%); color: #fff; font-size: 25px; font-weight: 900; text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000; pointer-events: none; }
+    #status { position: fixed; z-index: 4; top: 14px; left: 14px; padding: 8px 11px; color: #fff; background: rgba(0,0,0,.68); border: 1px solid rgba(255,255,255,.2); border-radius: 8px; font-size: 13px; }
+    #hotbar { position: fixed; z-index: 4; left: 50%; bottom: 18px; display: flex; gap: 5px; padding: 6px; transform: translateX(-50%); background: rgba(12,12,12,.84); border: 2px solid #111; border-radius: 9px; pointer-events: auto; }
+    .slot { position: relative; width: 54px; height: 54px; display: grid; place-items: center; border: 2px solid #666; border-radius: 5px; background: #292929; color: #fff; cursor: pointer; }
+    .slot.selected { border-color: #fff; box-shadow: 0 0 0 2px #6fbd45, 0 0 12px rgba(255,255,255,.45); }
+    .swatch { width: 25px; height: 25px; border: 1px solid rgba(0,0,0,.45); box-shadow: inset 3px 3px rgba(255,255,255,.12); }
+    .slot span { position: absolute; right: 4px; bottom: 2px; font-size: 9px; }
+    #help { position: fixed; z-index: 4; left: 14px; bottom: 18px; max-width: 330px; padding: 10px 12px; color: rgba(255,255,255,.85); background: rgba(0,0,0,.54); border-radius: 7px; font-size: 12px; line-height: 1.5; pointer-events: none; }
+    #start { position: fixed; inset: 0; z-index: 5; display: grid; place-content: center; justify-items: center; color: #fff; text-align: center; background: rgba(5,15,20,.5); backdrop-filter: blur(3px); }
+    #start.hidden { display: none; }
+    #start h1 { margin: 0; font-size: clamp(44px, 9vw, 88px); letter-spacing: -.06em; text-shadow: 0 5px 25px rgba(0,0,0,.45); }
+    #start p { margin: 12px 0 24px; color: rgba(255,255,255,.8); }
+    #play { padding: 12px 28px; border: 0; border-radius: 6px; color: #16300f; background: #9de66c; font-weight: 800; cursor: pointer; }
+    @media (max-width: 620px) { #help { left: 10px; bottom: 92px; font-size: 10px; } #hotbar { bottom: 12px; transform: translateX(-50%) scale(.86); transform-origin: bottom center; } }
+  </style>
 </head>
 <body>
-  <div id="game"></div>
-  <div id="crosshair">+</div>
-  <div id="hud">
-    <div id="status">BlockWorld v0.1</div>
-    <div id="hotbar"></div>
-  </div>
-  <div id="help">
-    <b>BlockWorld v0.1</b><br>
-    Click to play • WASD move • Space jump • Left click break • Right click place<br>
-    1–4 select block • Esc unlock mouse
-  </div>
-  <div id="start">
-    <h1>BlockWorld</h1>
-    <p>Minecraft-style voxel prototype</p>
-    <button id="play">PLAY</button>
-  </div>
-  <script type="module" src="./game.js"></script>
+  <div id="game"></div><div id="crosshair">+</div><div id="status">BlockWorld v1.0</div><div id="hotbar"></div>
+  <div id="help"><b>BlockWorld</b><br>Click to play · WASD move · Space jump<br>Left click break · Right click place<br>1–4 select block · Esc unlock mouse</div>
+  <div id="start"><div><h1>BlockWorld</h1><p>Self-contained voxel sandbox</p><button id="play" type="button">PLAY</button></div></div>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.181.1/build/three.module.js";
+    const game=document.querySelector("#game"),start=document.querySelector("#start"),play=document.querySelector("#play"),status=document.querySelector("#status");
+    const blocks={grass:{name:"Grass",color:0x59a83b,top:0x6fbd45,bottom:0x79502f},dirt:{name:"Dirt",color:0x79502f},stone:{name:"Stone",color:0x888888},wood:{name:"Wood",color:0x9a6a3a}},hotbar=["grass","dirt","stone","wood"],world=new Map(),worldSize=40,worldHeight=24,key=(x,y,z)=>`${x},${y},${z}`,getBlock=(x,y,z)=>world.get(key(x,y,z)),setBlock=(x,y,z,type)=>type?world.set(key(x,y,z),type):world.delete(key(x,y,z)),noise=(x,z)=>{const n=Math.sin(x*12.9898+z*78.233)*43758.5453;return n-Math.floor(n)},heightAt=(x,z)=>Math.max(1,Math.min(12,Math.floor(7+Math.sin(x*.32)*1.5+Math.cos(z*.27)*1.5+Math.sin((x+z)*.12)*2+noise(x,z)*1.4)));
+    for(let x=-worldSize/2;x<worldSize/2;x++)for(let z=-worldSize/2;z<worldSize/2;z++){const h=heightAt(x,z);for(let y=0;y<=h;y++)setBlock(x,y,z,y===h?"grass":y>h-3?"dirt":"stone");if(noise(x*3,z*7)>.96&&h<10&&Math.abs(x)>3&&Math.abs(z)>3){for(let y=h+1;y<h+5;y++)setBlock(x,y,z,"wood");for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let dy=4;dy<=5;dy++)if(Math.abs(dx)+Math.abs(dz)<3)setBlock(x+dx,h+dy,z+dz,"grass");}}
+    const scene=new THREE.Scene();scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,18,55);const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.05,100),renderer=new THREE.WebGLRenderer({antialias:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;game.append(renderer.domElement);scene.add(new THREE.HemisphereLight(0xbfe8ff,0x5b4632,2));const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(20,35,10);scene.add(sun);
+    const faces=[{dir:[1,0,0],corners:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]]},{dir:[-1,0,0],corners:[[0,0,1],[0,1,1],[0,1,0],[0,0,0]]},{dir:[0,1,0],corners:[[0,1,1],[1,1,1],[1,1,0],[0,1,0]]},{dir:[0,-1,0],corners:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]]},{dir:[0,0,1],corners:[[0,0,1],[1,0,1],[1,1,1],[0,1,1]]},{dir:[0,0,-1],corners:[[1,0,0],[0,0,0],[0,1,0],[1,1,0]]}],faceColor=(type,dir)=>dir[1]===1&&blocks[type].top!==undefined?blocks[type].top:dir[1]===-1&&blocks[type].bottom!==undefined?blocks[type].bottom:blocks[type].color;
+    function rebuild(){for(const child of [...scene.children])if(child.userData.blockMesh){child.geometry.dispose();child.material.dispose();scene.remove(child);}const groups=new Map();for(const [position,type] of world){const [x,y,z]=position.split(",").map(Number);for(const face of faces){if(getBlock(x+face.dir[0],y+face.dir[1],z+face.dir[2]))continue;const groupKey=`${type}:${faceColor(type,face.dir)}`;if(!groups.has(groupKey))groups.set(groupKey,{color:faceColor(type,face.dir),faces:[]});groups.get(groupKey).faces.push({face,x,y,z});}}for(const group of groups.values()){const positions=[],normals=[],indices=[];let offset=0;for(const item of group.faces){for(const corner of item.face.corners){positions.push(item.x+corner[0],item.y+corner[1],item.z+corner[2]);normals.push(...item.face.dir);}indices.push(offset,offset+1,offset+2,offset,offset+2,offset+3);offset+=4;}const geometry=new THREE.BufferGeometry();geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute("normal",new THREE.Float32BufferAttribute(normals,3));geometry.setIndex(indices);const mesh=new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({color:group.color}));mesh.userData.blockMesh=true;scene.add(mesh);}}
+    rebuild();let selected=0;const hotbarElement=document.querySelector("#hotbar");function drawHotbar(){hotbarElement.innerHTML=hotbar.map((type,index)=>`<div class="slot${index===selected?" selected":""}" data-slot="${index}"><div class="swatch" style="background:#${blocks[type].color.toString(16).padStart(6,"0")}"></div><span>${index+1} ${blocks[type].name}</span></div>`).join("");hotbarElement.querySelectorAll(".slot").forEach(slot=>slot.addEventListener("click",()=>{selected=Number(slot.dataset.slot);drawHotbar();}));}drawHotbar();
+    const player={position:new THREE.Vector3(.5,15,.5),velocity:new THREE.Vector3(),width:.6,height:1.8,eyeHeight:1.62,yaw:0,pitch:0,onGround:false,keys:new Set()};function collides(position){const minX=position.x-player.width/2,maxX=position.x+player.width/2,minY=position.y,maxY=position.y+player.height,minZ=position.z-player.width/2,maxZ=position.z+player.width/2;for(let x=Math.floor(minX);x<=Math.floor(maxX-.001);x++)for(let y=Math.floor(minY);y<=Math.floor(maxY-.001);y++)for(let z=Math.floor(minZ);z<=Math.floor(maxZ-.001);z++)if(y<0||getBlock(x,y,z))return true;return false;}function moveAxis(axis,amount){if(!amount)return;const next=player.position.clone();next[axis]+=amount;if(!collides(next)){player.position[axis]=next[axis];return;}const steps=Math.max(1,Math.ceil(Math.abs(amount)/.05)),step=amount/steps;for(let i=0;i<steps;i++){const test=player.position.clone();test[axis]+=step;if(collides(test)){if(axis==="y"&&amount<0)player.onGround=true;player.velocity[axis]=0;break;}player.position[axis]=test[axis];}}
+    function updatePlayer(dt){const forward=new THREE.Vector3(-Math.sin(player.yaw),0,-Math.cos(player.yaw)),right=new THREE.Vector3(Math.cos(player.yaw),0,-Math.sin(player.yaw)),direction=new THREE.Vector3();if(player.keys.has("KeyW"))direction.add(forward);if(player.keys.has("KeyS"))direction.sub(forward);if(player.keys.has("KeyD"))direction.add(right);if(player.keys.has("KeyA"))direction.sub(right);if(direction.lengthSq())direction.normalize();const speed=player.keys.has("ShiftLeft")||player.keys.has("ShiftRight")?8:5;player.velocity.x=THREE.MathUtils.damp(player.velocity.x,direction.x*speed,player.onGround?14:7,dt);player.velocity.z=THREE.MathUtils.damp(player.velocity.z,direction.z*speed,player.onGround?14:7,dt);if(player.keys.has("Space")&&player.onGround){player.velocity.y=8;player.onGround=false;}player.velocity.y-=22*dt;player.onGround=false;moveAxis("x",player.velocity.x*dt);moveAxis("z",player.velocity.z*dt);moveAxis("y",player.velocity.y*dt);if(player.position.y<-20)player.position.set(.5,15,.5);camera.position.set(player.position.x,player.position.y+player.eyeHeight,player.position.z);camera.rotation.order="YXZ";camera.rotation.y=player.yaw;camera.rotation.x=player.pitch;}
+    window.addEventListener("keydown",event=>{player.keys.add(event.code);if(["KeyW","KeyA","KeyS","KeyD","Space","ShiftLeft","ShiftRight"].includes(event.code))event.preventDefault();const number=Number(event.key);if(number>=1&&number<=4){selected=number-1;drawHotbar();}});window.addEventListener("keyup",event=>player.keys.delete(event.code));renderer.domElement.addEventListener("click",()=>renderer.domElement.requestPointerLock());document.addEventListener("mousemove",event=>{if(document.pointerLockElement!==renderer.domElement)return;player.yaw-=event.movementX*.002;player.pitch=Math.max(-Math.PI/2+.01,Math.min(Math.PI/2-.01,player.pitch-event.movementY*.002));});document.addEventListener("pointerlockchange",()=>start.classList.toggle("hidden",document.pointerLockElement===renderer.domElement));
+    const raycaster=new THREE.Raycaster();window.addEventListener("mousedown",event=>{if(document.pointerLockElement!==renderer.domElement)return;raycaster.setFromCamera(new THREE.Vector2(0,0),camera);const hit=raycaster.intersectObjects(scene.children.filter(child=>child.userData.blockMesh),false)[0];if(!hit)return;const point=hit.point.clone().addScaledVector(hit.face.normal,event.button===0?-.5:.5),x=Math.floor(point.x),y=Math.floor(point.y),z=Math.floor(point.z);if(event.button===0&&y>0&&getBlock(x,y,z)){setBlock(x,y,z,null);rebuild();}if(event.button===2&&y>=0&&y<worldHeight&&!getBlock(x,y,z)){setBlock(x,y,z,hotbar[selected]);rebuild();}});renderer.domElement.addEventListener("contextmenu",event=>event.preventDefault());play.addEventListener("click",()=>renderer.domElement.requestPointerLock());let last=performance.now(),frames=0;function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;updatePlayer(dt);if(++frames%30===0)status.textContent=`BlockWorld v1.0 · Blocks: ${world.size}`;renderer.render(scene,camera);}requestAnimationFrame(animate);addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  </script>
 </body>
 </html>
