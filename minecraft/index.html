@@ -1286,6 +1286,15 @@ button, input, select {
   .tg-actions button { width:100%; }
 }
 
+
+/* Play controls respect iOS safe areas. */
+@supports (padding: env(safe-area-inset-bottom)) {
+  #joystick { left: calc(24px + env(safe-area-inset-left)); bottom: calc(34px + env(safe-area-inset-bottom)); }
+  #jumpButton { right: calc(24px + env(safe-area-inset-right)); bottom: calc(150px + env(safe-area-inset-bottom)); }
+  #breakButton { right: calc(25px + env(safe-area-inset-right)); bottom: calc(75px + env(safe-area-inset-bottom)); }
+  #placeButton { right: calc(94px + env(safe-area-inset-right)); bottom: calc(25px + env(safe-area-inset-bottom)); }
+  #sprintButton { right: calc(94px + env(safe-area-inset-right)); bottom: calc(88px + env(safe-area-inset-bottom)); }
+}
 </style>
 </head>
 
@@ -1370,7 +1379,7 @@ button, input, select {
 
           <div class="tg-checks">
             <label class="tg-check"><input id="tgTrees" type="checkbox" checked> Trees</label>
-            <label class="tg-check"><input id="tgWater" type="checkbox" checked> Water</label>
+            <label class="tg-check"><input id="tgWaterEnabled" type="checkbox" checked> Water</label>
             <label class="tg-check"><input id="tgCaves" type="checkbox"> Caves</label>
             <label class="tg-check"><input id="tgIslands" type="checkbox"> Extra islands</label>
           </div>
@@ -1425,6 +1434,10 @@ button, input, select {
         PLAY CURRENT WORLD
       </button>
 
+      <button id="terrainGeneratorBtn" class="button">
+        TERRAIN GENERATOR
+      </button>
+
       <button id="settingsButton" class="button">
         SETTINGS
       </button>
@@ -1456,19 +1469,6 @@ button, input, select {
           value="My World"
           maxlength="32"
         >
-      </div>
-
-      <div class="option">
-        <label for="worldSize">
-          World Size
-        </label>
-
-        <select id="worldSize">
-          <option value="32">Small — 32 × 32</option>
-          <option value="48" selected>Medium — 48 × 48</option>
-          <option value="64">Large — 64 × 64</option>
-          <option value="80">Huge — 80 × 80</option>
-        </select>
       </div>
 
       <div class="option">
@@ -1513,7 +1513,7 @@ button, input, select {
         id="generateButton"
         class="button primary"
       >
-        GENERATE WORLD
+        TERRAIN GENERATOR
       </button>
 
       <button
@@ -1666,30 +1666,15 @@ button, input, select {
   </div>
 
 
-<script type="module">
+<script src="https://cdn.jsdelivr.net/npm/three@0.181.1/build/three.min.js" onerror="document.getElementById('errorMessage').textContent='Three.js could not be loaded. Check your internet connection.';document.getElementById('errorScreen').classList.add('visible');"></script>
+<script>
 
-/* =========================================================
-   THREE.JS
-========================================================= */
-
-let THREE;
-
-try {
-
-  THREE = await import(
-    "https://cdn.jsdelivr.net/npm/three@0.181.1/build/three.module.js"
-  );
-
-} catch (error) {
-
-  showError(
-    "Three.js could not be loaded.\\n\\n" +
-    "Check your internet connection and make sure " +
-    "the page is being opened through a web server."
-  );
-
-  throw error;
-
+/* Three.js is loaded as a classic script so it also works when opened via file://. */
+const THREE = window.THREE;
+if (!THREE) {
+  document.getElementById("errorMessage").textContent = "Three.js could not be loaded. Check your connection and try a local web server.";
+  document.getElementById("errorScreen").classList.add("visible");
+  throw new Error("Three.js is unavailable");
 }
 
 
@@ -1719,7 +1704,6 @@ const backSettingsButton = $("#backSettingsButton");
 
 const randomSeedButton = $("#randomSeed");
 
-const worldSizeInput = $("#worldSize");
 const terrainInput = $("#terrainType");
 const seedInput = $("#seed");
 
@@ -1746,6 +1730,9 @@ function showError(message) {
 
   errorMessage.textContent = message;
 
+  document.getElementById("loadingScreen")?.classList.add("hidden");
+  document.getElementById("terrainGenerator")?.classList.remove("active");
+  document.querySelectorAll(".screen").forEach(screen => screen.classList.add("hidden"));
   errorScreen.classList.add("visible");
 
 }
@@ -1841,6 +1828,10 @@ let worldSeed = 1;
 let currentTerrain = "normal";
 
 const WATER_LEVEL = 5;
+let generationOptions = {
+  terrainHeight: 32, mountainHeight: 70, roughness: 55,
+  waterLevel: 5, trees: true, caves: false, extraIslands: false
+};
 
 function blockKey(x, y, z) {
 
@@ -1991,121 +1982,30 @@ function smoothNoise(x, z, scale, seed) {
 ========================================================= */
 
 function terrainHeight(x, z, type, seed) {
-
-  const half =
-    Math.max(
-      1,
-      worldSize / 2
-    );
-
-  const nx = x / half;
-  const nz = z / half;
-
-  const large =
-    smoothNoise(
-      x,
-      z,
-      .035,
-      seed
-    );
-
-  const medium =
-    smoothNoise(
-      x,
-      z,
-      .085,
-      seed + 91
-    );
-
-  const small =
-    smoothNoise(
-      x,
-      z,
-      .20,
-      seed + 177
-    );
-
-  let height = 6;
-
+  const options = generationOptions;
+  const half = Math.max(1, worldSize / 2);
+  const nx = x / half, nz = z / half;
+  const large = smoothNoise(x, z, .035, seed);
+  const medium = smoothNoise(x, z, .085, seed + 91);
+  const small = smoothNoise(x, z, .20, seed + 177);
+  const roughness = options.roughness / 100;
+  const base = Math.max(4, options.terrainHeight * .23);
+  let height;
   switch (type) {
-
-    case "flat":
-
-      height =
-        5 +
-        medium * 2;
-
-      break;
-
-    case "mountains":
-
-      height =
-        4 +
-        large * 16 +
-        medium * 8 +
-        small * 2;
-
-      break;
-
+    case "flat": height = base; break;
+    case "mountains": height = base + large * options.terrainHeight * (0.55 + options.mountainHeight / 100) + medium * 10 * roughness + small * 3; break;
     case "islands": {
-
-      const distance =
-        Math.sqrt(
-          nx * nx +
-          nz * nz
-        );
-
-      const island =
-        Math.max(
-          0,
-          1 - distance
-        );
-
-      height =
-        2 +
-        island * 12 +
-        large * 5;
-
+      const edge = Math.sqrt(nx * nx + nz * nz);
+      const island = Math.max(0, 1 - Math.pow(edge, 1.45));
+      height = options.waterLevel - 3 + island * options.terrainHeight * .65 + large * 5;
+      if (options.extraIslands) height += Math.max(0, medium - .7) * 16;
       break;
     }
-
-    case "desert":
-
-      height =
-        5 +
-        large * 6 +
-        medium * 2;
-
-      break;
-
-    case "snow":
-
-      height =
-        6 +
-        large * 10 +
-        medium * 5 +
-        small * 2;
-
-      break;
-
-    default:
-
-      height =
-        5 +
-        large * 8 +
-        medium * 4 +
-        small * 2;
-
+    case "desert": height = base + large * options.terrainHeight * .28 + medium * 4 * roughness; break;
+    case "snow": height = base + large * options.terrainHeight * .48 + medium * 8 * roughness + small * 3; break;
+    default: height = base + large * options.terrainHeight * .36 + medium * 7 * roughness + small * 2;
   }
-
-  return Math.max(
-    1,
-    Math.min(
-      worldHeight - 5,
-      Math.floor(height)
-    )
-  );
-
+  return Math.max(1, Math.min(worldHeight - 7, Math.floor(height)));
 }
 
 
@@ -2187,17 +2087,14 @@ function generateTree(x, y, z) {
    WORLD GENERATOR
 ========================================================= */
 
-async function generateWorld(
-  size,
-  type,
-  seed
-) {
-
+async function generateWorld(size = 48, type = "normal", seed = 1, options = {}) {
+  generationOptions = { ...generationOptions, ...options };
   world.clear();
-
-  worldSize = size;
+  worldSize = 48;
+  worldHeight = Math.max(40, Math.ceil(generationOptions.terrainHeight * 1.8) + 12);
   currentTerrain = type;
   worldSeed = seed;
+  size = worldSize;
 
   const half =
     Math.floor(
@@ -2270,7 +2167,7 @@ async function generateWorld(
 
         } else if (
           type === "islands" &&
-          height <= WATER_LEVEL
+          height <= generationOptions.waterLevel
         ) {
 
           if (
@@ -2297,26 +2194,22 @@ async function generateWorld(
 
         }
 
-        setBlock(
-          x,
-          y,
-          z,
-          blockType
-        );
+        if (!(generationOptions.caves && y > 2 && y < height - 2 && random2D(x * 31 + y, z * 37 + y, seed + 911) > .985)) {
+          setBlock(x, y, z, blockType);
+        }
 
       }
 
       /* Water */
 
       if (
-        height < WATER_LEVEL &&
-        type !== "desert" &&
-        type !== "snow"
+        height < generationOptions.waterLevel &&
+        generationOptions.water && type !== "desert" && type !== "snow"
       ) {
 
         for (
           let y = height + 1;
-          y <= WATER_LEVEL;
+          y <= generationOptions.waterLevel;
           y++
         ) {
 
@@ -2341,11 +2234,10 @@ async function generateWorld(
         );
 
       const treeAllowed =
-        type === "normal" ||
-        type === "mountains";
+        type === "normal" || type === "mountains" || type === "snow";
 
       if (
-        treeAllowed &&
+        generationOptions.trees && treeAllowed &&
         height >= 5 &&
         treeRandom > .965 &&
         Math.abs(x) > 3 &&
@@ -2445,11 +2337,16 @@ const camera =
     150
   );
 
-const renderer =
-  new THREE.WebGLRenderer({
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({
     antialias: false,
     powerPreference: "high-performance"
   });
+} catch (error) {
+  showError("WebGL could not be initialized. Update your browser or enable hardware acceleration.\n\n" + error.message);
+  throw error;
+}
 
 renderer.setPixelRatio(
   Math.min(
@@ -2463,7 +2360,7 @@ renderer.setSize(
   innerHeight
 );
 
-game.appendChild(
+document.getElementById("game").appendChild(
   renderer.domElement
 );
 
@@ -3952,38 +3849,43 @@ $("#placeButton").addEventListener(
 ========================================================= */
 
 function hideAllMenus() {
-
-  mainMenu.classList.add(
-    "hidden"
-  );
-
-  worldMenu.classList.add(
-    "hidden"
-  );
-
-  settingsMenu.classList.add(
-    "hidden"
-  );
-
+  mainMenu.classList.add("hidden");
+  worldMenu.classList.add("hidden");
+  settingsMenu.classList.add("hidden");
+  terrainGenerator?.classList.remove("active");
 }
 
-
+function showLoading(text = "Loading...") {
+  hideAllMenus();
+  loadingScreen.classList.remove("hidden");
+  setLoading(0, text);
+}
 function showMainMenu() {
-
+  loadingScreen.classList.add("hidden");
   hideAllMenus();
-
-  mainMenu.classList.remove(
-    "hidden"
-  );
-
+  mainMenu.classList.remove("hidden");
 }
-
-
+function showWorldMenu() {
+  loadingScreen.classList.add("hidden");
+  hideAllMenus();
+  worldMenu.classList.remove("hidden");
+}
+function showTerrainGenerator() {
+  loadingScreen.classList.add("hidden");
+  hideAllMenus();
+  terrainGenerator.classList.add("active");
+  updateTerrainPreview();
+}
+function showSettings() {
+  loadingScreen.classList.add("hidden");
+  hideAllMenus();
+  settingsMenu.classList.remove("hidden");
+}
 function showGame() {
-
+  loadingScreen.classList.add("hidden");
   hideAllMenus();
-
 }
+
 
 
 function isMobile() {
@@ -4006,13 +3908,7 @@ newWorldButton.addEventListener(
   "click",
   () => {
 
-    mainMenu.classList.add(
-      "hidden"
-    );
-
-    worldMenu.classList.remove(
-      "hidden"
-    );
+    showWorldMenu();
 
   }
 );
@@ -4038,68 +3934,12 @@ randomSeedButton.addEventListener(
 );
 
 
-generateButton.addEventListener(
-  "click",
-  async () => {
-
-    let seed =
-      Number(
-        seedInput.value
-      );
-
-    if (
-      !Number.isFinite(seed)
-    ) {
-
-      seed =
-        Math.floor(
-          Math.random() *
-          2000000000
-        );
-
-      seedInput.value =
-        seed;
-
-    }
-
-    hideAllMenus();
-
-    loadingScreen.classList.remove(
-      "hidden"
-    );
-
-    try {
-
-      await generateWorld(
-        Number(
-          worldSizeInput.value
-        ),
-        terrainInput.value,
-        seed
-      );
-
-      loadingScreen.classList.add(
-        "hidden"
-      );
-
-      showGame();
-
-      status.textContent =
-        `BlockWorld · ${worldSize}×${worldSize}`;
-
-    } catch (error) {
-
-      console.error(error);
-
-      showError(
-        "World generation failed.\\n\\n" +
-        error.message
-      );
-
-    }
-
-  }
-);
+generateButton.addEventListener("click", () => {
+  tgSeed.value = seedInput.value || String(Math.floor(Math.random() * 2000000000));
+  selectedTerrainPreset = terrainInput.value;
+  document.querySelectorAll(".tg-preset").forEach(button => button.classList.toggle("selected", button.dataset.terrain === selectedTerrainPreset));
+  showTerrainGenerator();
+});
 
 
 /* =========================================================
@@ -4114,13 +3954,7 @@ continueButton.addEventListener(
       world.size === 0
     ) {
 
-      worldMenu.classList.remove(
-        "hidden"
-      );
-
-      mainMenu.classList.add(
-        "hidden"
-      );
+      showWorldMenu();
 
       return;
 
@@ -4149,13 +3983,7 @@ settingsButton.addEventListener(
   "click",
   () => {
 
-    mainMenu.classList.add(
-      "hidden"
-    );
-
-    settingsMenu.classList.remove(
-      "hidden"
-    );
+    showSettings();
 
   }
 );
@@ -4268,13 +4096,13 @@ window.addEventListener(
 
     camera.updateProjectionMatrix();
 
-    renderer.setSize(
-      innerWidth,
-      innerHeight
-    );
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
 
   }
 );
+window.visualViewport?.addEventListener("resize", () => window.dispatchEvent(new Event("resize")));
+window.addEventListener("webglcontextlost", event => { event.preventDefault(); showError("WebGL context was lost. Reload BlockWorld to continue."); }, false);
 
 
 /* =========================================================
@@ -4440,6 +4268,7 @@ function openTerrainGenerator(){
 function closeTerrainGenerator(){
   if(!terrainGenerator) return;
   terrainGenerator.classList.remove("active");
+  if (!world.size) showMainMenu();
 }
 
 terrainGeneratorBtn?.addEventListener("click", openTerrainGenerator);
@@ -4559,44 +4388,30 @@ tgGenerate?.addEventListener("click", async () => {
   const seed = Number(tgSeed?.value || 1);
   const water = Number(tgWaterLevel?.value || 5);
 
-  closeTerrainGenerator();
-
   try {
-    hideAllMenus();
-    loadingScreen.classList.remove("hidden");
-    setProgress(5, "Starting terrain generator...");
+    showLoading("Starting terrain generator...");
+    setLoading(5, "Starting terrain generator...");
     await new Promise(r => setTimeout(r, 80));
 
-    // Update the game's existing world object.
-    if (typeof world !== "undefined" && world) {
-      world.size = size;
-      world.height = height;
-      world.seed = seed;
-      world.terrain = selectedTerrainPreset;
-    }
+    const options = {
+      terrainHeight: height,
+      mountainHeight: Number(tgMountain.value),
+      roughness: Number(tgRoughness.value),
+      waterLevel: water,
+      water: document.getElementById("tgWaterEnabled").checked,
+      trees: document.getElementById("tgTrees").checked,
+      caves: document.getElementById("tgCaves").checked,
+      extraIslands: document.getElementById("tgIslands").checked
+    };
+    setLoading(25, "Building terrain...");
+    await generateWorld(size, selectedTerrainPreset, seed, options);
 
-    setProgress(25, "Building terrain...");
-
-    // IMPORTANT:
-    // Call the existing generator using the game's actual function.
-    // The original generator uses the global world settings, so no
-    // extra parameters are passed here.
-    if (typeof generateWorld === "function") {
-      const result = generateWorld();
-      if (result && typeof result.then === "function") {
-        await result;
-      }
-    } else {
-      throw new Error("generateWorld() was not found.");
-    }
-
-    setProgress(80, "Building world mesh...");
+    setLoading(80, "Building world mesh...");
     await new Promise(r => setTimeout(r, 80));
 
-    // Force a render/resize after generation where those functions exist.
-    if (typeof onResize === "function") onResize();
+    window.dispatchEvent(new Event("resize"));
 
-    setProgress(100, "World ready!");
+    setLoading(100, "World ready!");
     await new Promise(r => setTimeout(r, 180));
     loadingScreen.classList.add("hidden");
 
