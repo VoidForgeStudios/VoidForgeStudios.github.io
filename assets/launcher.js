@@ -346,10 +346,18 @@
     );
 
     /*
-     * Return ONLY a relative path.
+     * Return ONLY a relative path starting with ./.
+     *
+     * Examples:
+     *
+     *   minecraft
+     *   -> ./minecraft/index.html
+     *
+     *   games/minecraft
+     *   -> ./games/minecraft/index.html
      */
 
-    return `${folder}/index.html`;
+    return `./${folder}/index.html`;
   }
 
   /*
