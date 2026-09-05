@@ -1862,7 +1862,7 @@
 </div>
 
 <script
-  src="https://cdn.jsdelivr.net/npm/three@0.181.1/build/three.min.js"
+  src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"
   onerror="
     document.getElementById('errorMessage').textContent =
       'Three.js could not be loaded. Check your internet connection.';
@@ -3153,65 +3153,11 @@ function rebuildWorld() {
         );
 
       /*
-       * Water is transparent.
-       *
-       * A solid block next to water keeps its face.
-       * A water block next to another water block hides
-       * its internal face.
-       */
-
-      if (
-        neighbor &&
-        (
-          type !== "water" ||
-          neighbor !== "water"
-        )
-      ) {
-
-        if (
-          type !== "water" ||
-          neighbor !== "water"
-        ) {
-
-          /*
-           * Solid-solid faces are hidden.
-           * Water-solid faces remain visible.
-           */
-          if (
-            type !== "water" &&
-            neighbor !== "water"
-          ) {
-            continue;
-          }
-
-          if (
-            type === "water" &&
-            neighbor === "water"
-          ) {
-            continue;
-          }
-
-          /*
-           * If current block is solid and neighbor is water,
-           * keep the face.
-           *
-           * If current block is water and neighbor is solid,
-           * hide the water face to avoid an interior-looking
-           * duplicate.
-           */
-          if (
-            type === "water" &&
-            neighbor !== "water"
-          ) {
-            continue;
-          }
-
-        }
-
-      }
-
-      /*
-       * Simpler explicit visibility rules.
+       * Face visibility rules:
+       * - solid next to solid: hidden
+       * - water next to water: hidden
+       * - water next to solid: hidden (occluded from outside)
+       * - solid next to water: visible (seen through the water)
        */
       if (
         neighbor
