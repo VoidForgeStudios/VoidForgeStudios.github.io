@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VoidForge Studios</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    user-select:none;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#030305;
+    font-family:Arial,Helvetica,sans-serif;
+    color:white;
+}
+
+canvas{
+    position:fixed;
+    inset:0;
+    z-index:0;
+}
+
+/* ================= INTRO ================= */
+
+#intro{
+    position:fixed;
+    inset:0;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        radial-gradient(circle at center,#15151d 0%,#050507 45%,#010102 100%);
+    transition:opacity 1.2s ease;
+}
+
+.intro-content{
+    text-align:center;
+    animation:introZoom 2.8s ease forwards;
+}
+
+.void{
+    font-size:clamp(55px,12vw,130px);
+    font-weight:900;
+    letter-spacing:18px;
+    background:linear-gradient(90deg,#fff,#8e8e9b,#fff);
+    -webkit-background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 25px rgba(255,255,255,.18));
+}
+
+.forge{
+    font-size:clamp(18px,3vw,32px);
+    letter-spacing:14px;
+    margin-top:8px;
+    color:#858591;
+}
+
+.studios{
+    margin-top:22px;
+    font-size:13px;
+    letter-spacing:8px;
+    color:#555560;
+}
+
+.intro-line{
+    width:0;
+    height:1px;
+    margin:30px auto 0;
+    background:white;
+    animation:lineGrow 1.8s 1s ease forwards;
+}
+
+@keyframes introZoom{
+    0%{
+        opacity:0;
+        transform:scale(.75);
+        filter:blur(12px);
+    }
+    25%{
+        opacity:1;
+        filter:blur(0);
+    }
+    100%{
+        transform:scale(1);
+    }
+}
+
+@keyframes lineGrow{
+    to{width:280px}
+}
+
+/* ================= MAIN MENU ================= */
+
+#menu{
+    position:fixed;
+    inset:0;
+    z-index:5;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 1s ease;
+}
+
+#menu.active{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.menu-overlay{
+    position:absolute;
+    inset:0;
+    background:
+        linear-gradient(90deg,
+            rgba(0,0,0,.88) 0%,
+            rgba(0,0,0,.55) 45%,
+            rgba(0,0,0,.15) 100%);
+}
+
+.menu-content{
+    position:absolute;
+    left:8%;
+    top:50%;
+    transform:translateY(-50%);
+}
+
+.menu-title{
+    font-size:clamp(45px,7vw,90px);
+    font-weight:900;
+    letter-spacing:8px;
+}
+
+.menu-subtitle{
+    margin-top:5px;
+    color:#777783;
+    letter-spacing:7px;
+    font-size:13px;
+}
+
+.buttons{
+    margin-top:55px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    width:270px;
+}
+
+.menu-btn{
+    position:relative;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.035);
+    color:#ddd;
+    padding:18px 25px;
+    text-align:left;
+    font-size:14px;
+    letter-spacing:4px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:.25s;
+    backdrop-filter:blur(8px);
+}
+
+.menu-btn::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:3px;
+    height:100%;
+    background:white;
+    transform:scaleY(0);
+    transition:.25s;
+}
+
+.menu-btn:hover{
+    background:rgba(255,255,255,.11);
+    transform:translateX(8px);
+    color:white;
+}
+
+.menu-btn:hover::before{
+    transform:scaleY(1);
+}
+
+.footer{
+    position:absolute;
+    bottom:28px;
+    left:8%;
+    color:#44444d;
+    font-size:10px;
+    letter-spacing:3px;
+}
+
+.version{
+    position:absolute;
+    right:30px;
+    bottom:28px;
+    color:#44444d;
+    font-size:10px;
+    letter-spacing:2px;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.75);
+    backdrop-filter:blur(12px);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.panel{
+    width:min(600px,90%);
+    padding:40px;
+    background:rgba(12,12,17,.92);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 0 80px rgba(0,0,0,.8);
+}
+
+.panel h2{
+    letter-spacing:5px;
+    margin-bottom:20px;
+}
+
+.panel p{
+    color:#888892;
+    line-height:1.7;
+}
+
+.close{
+    margin-top:25px;
+    padding:12px 20px;
+    background:white;
+    border:0;
+    cursor:pointer;
+    letter-spacing:3px;
+}
+
+/* SOUND */
+
+.sound{
+    position:absolute;
+    right:30px;
+    top:28px;
+    z-index:30;
+    color:#666670;
+    font-size:11px;
+    letter-spacing:2px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- ================= INTRO ================= -->
+
+<section id="intro">
+    <div class="intro-content">
+        <div class="void">VOID</div>
+        <div class="forge">FORGE</div>
+        <div class="studios">STUDIOS</div>
+        <div class="intro-line"></div>
+    </div>
+</section>
+
+<!-- ================= MAIN MENU ================= -->
+
+<section id="menu">
+
+    <div class="menu-overlay"></div>
+
+    <div class="sound" id="soundBtn">
+        SOUND: ON
+    </div>
+
+    <div class="menu-content">
+
+        <div class="menu-title">VOIDFORGE</div>
+        <div class="menu-subtitle">STUDIOS</div>
+
+        <div class="buttons">
+
+            <button class="menu-btn" onclick="playGame()">
+                PLAY
+            </button>
+
+            <button class="menu-btn" onclick="openPanel('games')">
+                GAMES
+            </button>
+
+            <button class="menu-btn" onclick="openPanel('about')">
+                ABOUT
+            </button>
+
+            <button class="menu-btn" onclick="openPanel('settings')">
+                SETTINGS
+            </button>
+
+            <button class="menu-btn" onclick="openPanel('credits')">
+                CREDITS
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+        CRAFTING WORLDS BEYOND THE VOID
+    </div>
+
+    <div class="version">
+        VOIDFORGE // 0.1
+    </div>
+
+</section>
+
+<!-- ================= MODAL ================= -->
+
+<div class="modal" id="modal">
+
+    <div class="panel">
+
+        <h2 id="panelTitle">VOIDFORGE</h2>
+
+        <p id="panelText">
+            Welcome to VoidForge Studios.
+        </p>
+
+        <button class="close" onclick="closePanel()">
+            CLOSE
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ================= INTRO ================= */
+
+const intro = document.getElementById("intro");
+const menu = document.getElementById("menu");
+
+setTimeout(() => {
+
+    intro.style.opacity = "0";
+
+    setTimeout(() => {
+        intro.style.display = "none";
+        menu.classList.add("active");
+    },1200);
+
+},4200);
+
+
+/* ================= PARTICLES ================= */
+
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+let particles = [];
+
+function resize(){
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+}
+
+resize();
+window.addEventListener("resize",resize);
+
+for(let i=0;i<130;i++){
+
+    particles.push({
+        x:Math.random()*innerWidth,
+        y:Math.random()*innerHeight,
+        size:Math.random()*2,
+        speed:Math.random()*.35+.05,
+        opacity:Math.random()*.6+.1
+    });
+
+}
+
+function animateParticles(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    for(const p of particles){
+
+        p.y -= p.speed;
+
+        if(p.y < 0){
+            p.y = canvas.height;
+            p.x = Math.random()*canvas.width;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+
+        ctx.fillStyle =
+            `rgba(255,255,255,${p.opacity})`;
+
+        ctx.fill();
+    }
+
+    requestAnimationFrame(animateParticles);
+}
+
+animateParticles();
+
+
+/* ================= MENU ================= */
+
+function playGame(){
+
+    alert("Game launching...");
+
+    // Replace this with:
+    // window.location.href = "game.html";
+}
+
+
+function openPanel(type){
+
+    const title = document.getElementById("panelTitle");
+    const text = document.getElementById("panelText");
+
+    if(type === "games"){
+
+        title.innerText = "OUR GAMES";
+
+        text.innerText =
+        "VoidForge Studios is building original worlds, games and experiences. More projects are coming.";
+
+    }
+
+    if(type === "about"){
+
+        title.innerText = "ABOUT VOIDFORGE";
+
+        text.innerText =
+        "VoidForge Studios is an independent game studio focused on creating immersive worlds, experimental gameplay and unique digital experiences.";
+
+    }
+
+    if(type === "settings"){
+
+        title.innerText = "SETTINGS";
+
+        text.innerText =
+        "Settings system ready. Graphics, audio, controls and accessibility options can be added here.";
+
+    }
+
+    if(type === "credits"){
+
+        title.innerText = "CREDITS";
+
+        text.innerText =
+        "VOIDFORGE STUDIOS\n\nCreated with passion, code and imagination.";
+
+    }
+
+    document.getElementById("modal").classList.add("show");
+}
+
+
+function closePanel(){
+
+    document.getElementById("modal")
+        .classList.remove("show");
+
+}
+
+
+/* ================= SOUND ================= */
+
+let soundOn = true;
+
+const soundBtn =
+    document.getElementById("soundBtn");
+
+soundBtn.onclick = () => {
+
+    soundOn = !soundOn;
+
+    soundBtn.innerText =
+        soundOn ? "SOUND: ON" : "SOUND: OFF";
+};
+
+
+/* ================= KEYBOARD ================= */
+
+document.addEventListener("keydown",(e)=>{
+
+    if(e.key === "Escape"){
+        closePanel();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
