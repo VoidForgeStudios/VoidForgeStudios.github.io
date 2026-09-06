@@ -5,10 +5,35 @@
      DOM HELPERS
   ========================================================= */
 
-  const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) => [
-    ...root.querySelectorAll(selector)
-  ];
+  const $ = (selector, root = document) =>
+    root.querySelector(selector);
+
+  const $$ = (selector, root = document) =>
+    [...root.querySelectorAll(selector)];
+
+  function createElement(tagName, className = "", text = null) {
+    const element = document.createElement(tagName);
+
+    if (className) {
+      element.className = className;
+    }
+
+    if (text !== null && text !== undefined) {
+      element.textContent = String(text);
+    }
+
+    return element;
+  }
+
+  function appendChildren(parent, ...children) {
+    children.forEach((child) => {
+      if (child) {
+        parent.appendChild(child);
+      }
+    });
+
+    return parent;
+  }
 
   /* =========================================================
      GAME VIEW
@@ -25,6 +50,7 @@
 
   const reloadButton = $("#reloadGame");
   const fullscreenButton = $("#gameFullscreen");
+
   const closeButton =
     $("#gameClose") ||
     $("#gameCloseButton") ||
@@ -45,13 +71,12 @@
     let toast = $("#vfToast");
 
     if (!toast) {
-      toast = document.createElement("div");
+      toast = createElement("div", "vf-toast");
       toast.id = "vfToast";
-      toast.className = "vf-toast";
       document.body.appendChild(toast);
     }
 
-    toast.textContent = message;
+    toast.textContent = String(message ?? "");
     toast.classList.add("show");
 
     clearTimeout(toast._timeout);
@@ -66,13 +91,44 @@
   ========================================================= */
 
   function normalizeFolder(entry) {
-    if (!entry) return "";
+    if (!entry) {
+      return "";
+    }
 
-    return String(entry)
-      .trim()
+    let value = String(entry).trim();
+
+    /*
+     * Game entries are local directories. Do not allow:
+     *
+     *   javascript:
+     *   data:
+     *   https://...
+     *   //external-site...
+     *   /absolute/path
+     *   ../outside
+     *
+     * This keeps the launcher constrained to its own game folders.
+     */
+
+    value = value
       .replace(/^\.\/+/, "")
       .replace(/^\/+/, "")
       .replace(/\/+$/, "");
+
+    if (!value) {
+      return "";
+    }
+
+    if (
+      value.includes("\\") ||
+      value.includes("..") ||
+      value.includes(":") ||
+      value.startsWith("//")
+    ) {
+      return "";
+    }
+
+    return value;
   }
 
   function gameUrl(game) {
@@ -86,20 +142,28 @@
   }
 
   function setText(element, value) {
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     element.textContent =
-      value === undefined || value === null ? "" : String(value);
+      value === undefined || value === null
+        ? ""
+        : String(value);
   }
 
   function showLoader(show) {
-    if (!gameLoader) return;
+    if (!gameLoader) {
+      return;
+    }
 
     gameLoader.hidden = !show;
   }
 
   function showError(message) {
-    if (!gameError) return;
+    if (!gameError) {
+      return;
+    }
 
     gameError.hidden = false;
 
@@ -109,32 +173,57 @@
       $("p", gameError);
 
     if (messageElement) {
-      messageElement.textContent = message;
-    } else {
-      gameError.textContent = message;
+      messageElement.textContent = String(message ?? "");
+      return;
     }
+
+    /*
+     * Use textContent rather than innerHTML.
+     */
+    gameError.textContent = String(message ?? "");
   }
 
   function hideError() {
-    if (!gameError) return;
+    if (!gameError) {
+      return;
+    }
 
     gameError.hidden = true;
   }
 
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  /* =========================================================
+     SAFE URL HELPERS
+  ========================================================= */
+
+  function getSafeImageUrl(value) {
+    if (!value) {
+      return "";
+    }
+
+    try {
+      const url = new URL(
+        String(value),
+        document.baseURI
+      );
+
+      /*
+       * Only permit normal web/local resources.
+       */
+      if (
+        url.protocol !== "http:" &&
+        url.protocol !== "https:"
+      ) {
+        return "";
+      }
+
+      return url.href;
+    } catch {
+      return "";
+    }
   }
 
   /* =========================================================
      GAME REGISTRY
-     
-     Primary source:
-       ./games.json (or #embeddedGameRegistry)
   ========================================================= */
 
   function validateGames(data) {
@@ -145,15 +234,21 @@
         : null;
 
     if (!list) {
-      throw new Error("games.json must contain an array of games.");
+      throw new Error(
+        "games.json must contain an array of games."
+      );
     }
 
     return list.filter((game) => {
       return (
         game &&
         typeof game === "object" &&
-        game.id &&
-        game.entry
+        game.id !== undefined &&
+        game.id !== null &&
+        String(game.id).trim() !== "" &&
+        game.entry !== undefined &&
+        game.entry !== null &&
+        normalizeFolder(game.entry) !== ""
       );
     });
   }
@@ -166,10 +261,15 @@
     }
 
     try {
-      const parsed = JSON.parse(embedded.textContent.trim());
+      const parsed = JSON.parse(
+        embedded.textContent.trim()
+      );
 
-      if (typeof parsed === "string" && parsed.trim()) {
-        return parsed;
+      if (
+        typeof parsed === "string" &&
+        parsed.trim()
+      ) {
+        return sanitizeRegistryPath(parsed);
       }
 
       if (
@@ -179,25 +279,64 @@
         typeof parsed.source === "string" &&
         parsed.source.trim()
       ) {
-        return parsed.source;
+        return sanitizeRegistryPath(parsed.source);
       }
     } catch {
-      // The default path below also keeps the launcher usable when this
-      // optional configuration is malformed.
+      /*
+       * Fall back to the default registry.
+       */
     }
 
     return "./games.json";
   }
 
+  function sanitizeRegistryPath(value) {
+    const path = String(value).trim();
+
+    /*
+     * The registry should be local to the launcher.
+     *
+     * Allow:
+     *   ./games.json
+     *   games.json
+     *   ./config/games.json
+     *
+     * Reject:
+     *   javascript:
+     *   data:
+     *   https://...
+     *   //
+     */
+    if (
+      !path ||
+      path.includes("\\") ||
+      path.includes("..") ||
+      path.includes(":") ||
+      path.startsWith("//")
+    ) {
+      return "./games.json";
+    }
+
+    return path.startsWith("./")
+      ? path
+      : `./${path.replace(/^\/+/, "")}`;
+  }
+
   function getEmbeddedGames() {
     const embedded = $("#embeddedGameRegistry");
 
-    if (!embedded) return null;
+    if (!embedded) {
+      return null;
+    }
 
     try {
-      const parsed = JSON.parse(embedded.textContent.trim());
+      const parsed = JSON.parse(
+        embedded.textContent.trim()
+      );
 
-      return Array.isArray(parsed) ? validateGames(parsed) : null;
+      return Array.isArray(parsed)
+        ? validateGames(parsed)
+        : null;
     } catch {
       return null;
     }
@@ -206,6 +345,7 @@
   async function loadGames() {
     try {
       const registryPath = getRegistryPath();
+
       const response = await fetch(registryPath, {
         cache: "no-cache"
       });
@@ -228,17 +368,20 @@
 
       return games;
     } catch (error) {
-      console.error("[VoidForge] Failed to load the game registry:", error);
+      console.error(
+        "[VoidForge] Failed to load the game registry:",
+        error
+      );
 
       /*
-       * Backwards-compatible fallback.
-       *
-       * This only works if #embeddedGameRegistry contains
-       * an actual JSON array of games.
+       * Backwards-compatible embedded registry fallback.
        */
       const fallbackGames = getEmbeddedGames();
 
-      if (fallbackGames && fallbackGames.length) {
+      if (
+        fallbackGames &&
+        fallbackGames.length
+      ) {
         games = fallbackGames;
 
         console.warn(
@@ -258,10 +401,296 @@
 
       renderGames();
 
-      showToast("Unable to load the game library.");
+      showToast(
+        "Unable to load the game library."
+      );
 
       return [];
     }
+  }
+
+  /* =========================================================
+     GAME CARD CREATION
+     
+     IMPORTANT:
+     No dynamic innerHTML is used here.
+     All game-controlled values are assigned with textContent,
+     attributes, or dataset.
+  ========================================================= */
+
+  function createGameCard(game) {
+    const title =
+      game.name ||
+      game.title ||
+      game.id ||
+      "Game";
+
+    const subtitle =
+      game.subtitle ||
+      game.description ||
+      "";
+
+    const status =
+      game.status ||
+      "Available";
+
+    const platform =
+      game.platform ||
+      "Browser";
+
+    const card = createElement(
+      "article",
+      "game-card"
+    );
+
+    card.dataset.gameId = String(game.id);
+
+    /* -------------------------------------------------------
+       IMAGE
+    ------------------------------------------------------- */
+
+    const imageWrapper = createElement(
+      "div",
+      "game-card-image"
+    );
+
+    const imageSource = getSafeImageUrl(
+      game.image ||
+      game.thumbnail ||
+      game.cover
+    );
+
+    if (imageSource) {
+      const image = document.createElement("img");
+
+      image.src = imageSource;
+      image.alt = String(title);
+      image.loading = "lazy";
+
+      /*
+       * Prevent broken images from making the card ugly.
+       */
+      image.addEventListener(
+        "error",
+        () => {
+          image.remove();
+
+          imageWrapper.classList.add(
+            "game-card-placeholder"
+          );
+
+          if (!imageWrapper.firstElementChild) {
+            imageWrapper.appendChild(
+              createElement(
+                "span",
+                "",
+                String(title)
+                  .charAt(0)
+                  .toUpperCase()
+              )
+            );
+          }
+        },
+        { once: true }
+      );
+
+      imageWrapper.appendChild(image);
+    } else {
+      imageWrapper.classList.add(
+        "game-card-placeholder"
+      );
+
+      imageWrapper.appendChild(
+        createElement(
+          "span",
+          "",
+          String(title)
+            .charAt(0)
+            .toUpperCase()
+        )
+      );
+    }
+
+    /* -------------------------------------------------------
+       CONTENT
+    ------------------------------------------------------- */
+
+    const content = createElement(
+      "div",
+      "game-card-content"
+    );
+
+    const header = createElement(
+      "div",
+      "game-card-header"
+    );
+
+    const headingGroup = createElement(
+      "div"
+    );
+
+    const titleElement = createElement(
+      "h3",
+      "game-card-title",
+      title
+    );
+
+    headingGroup.appendChild(titleElement);
+
+    if (subtitle) {
+      headingGroup.appendChild(
+        createElement(
+          "p",
+          "game-card-subtitle",
+          subtitle
+        )
+      );
+    }
+
+    header.appendChild(headingGroup);
+
+    header.appendChild(
+      createElement(
+        "span",
+        "game-status",
+        status
+      )
+    );
+
+    content.appendChild(header);
+
+    /* -------------------------------------------------------
+       DESCRIPTION
+    ------------------------------------------------------- */
+
+    if (game.description) {
+      content.appendChild(
+        createElement(
+          "p",
+          "game-card-description",
+          game.description
+        )
+      );
+    }
+
+    /* -------------------------------------------------------
+       TAGS
+    ------------------------------------------------------- */
+
+    const tags = Array.isArray(game.tags)
+      ? game.tags
+      : [];
+
+    if (tags.length) {
+      const tagContainer = createElement(
+        "div",
+        "game-tags"
+      );
+
+      tags.forEach((tag) => {
+        if (
+          tag === undefined ||
+          tag === null
+        ) {
+          return;
+        }
+
+        tagContainer.appendChild(
+          createElement(
+            "span",
+            "game-tag",
+            tag
+          )
+        );
+      });
+
+      content.appendChild(tagContainer);
+    }
+
+    /* -------------------------------------------------------
+       FOOTER
+    ------------------------------------------------------- */
+
+    const footer = createElement(
+      "div",
+      "game-card-footer"
+    );
+
+    footer.appendChild(
+      createElement(
+        "span",
+        "game-platform",
+        platform
+      )
+    );
+
+    const playButton = createElement(
+      "button",
+      "play-game",
+      "Play now"
+    );
+
+    playButton.type = "button";
+    playButton.dataset.gameId =
+      String(game.id);
+
+    playButton.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+        launchGame(game.id);
+      }
+    );
+
+    footer.appendChild(playButton);
+
+    content.appendChild(footer);
+    card.appendChild(imageWrapper);
+    card.appendChild(content);
+
+    /*
+     * Double-click remains supported.
+     */
+    card.addEventListener(
+      "dblclick",
+      () => {
+        launchGame(game.id);
+      }
+    );
+
+    return card;
+  }
+
+  /* =========================================================
+     EMPTY STATE
+  ========================================================= */
+
+  function createEmptyState(
+    title,
+    message
+  ) {
+    const emptyState = createElement(
+      "div",
+      "empty-state"
+    );
+
+    emptyState.appendChild(
+      createElement(
+        "h3",
+        "",
+        title
+      )
+    );
+
+    emptyState.appendChild(
+      createElement(
+        "p",
+        "",
+        message
+      )
+    );
+
+    return emptyState;
   }
 
   /* =========================================================
@@ -281,194 +710,84 @@
       return;
     }
 
-    containers.forEach((container) => {
+    /*
+     * Avoid rendering the same DOM element twice
+     * if multiple selectors happen to match it.
+     */
+    const uniqueContainers = [
+      ...new Set(containers)
+    ];
+
+    uniqueContainers.forEach((container) => {
       renderGameList(container);
     });
   }
 
-  function renderGameList(container, searchTerm = "") {
-    if (!container) return;
+  function renderGameList(
+    container,
+    searchTerm = ""
+  ) {
+    if (!container) {
+      return;
+    }
 
     const query = String(searchTerm || "")
       .trim()
       .toLowerCase();
 
-    const filteredGames = games.filter((game) => {
-      if (!query) return true;
+    const filteredGames = games.filter(
+      (game) => {
+        if (!query) {
+          return true;
+        }
 
-      const searchable = [
-        game.name,
-        game.title,
-        game.subtitle,
-        game.description,
-        game.category,
-        game.platform,
-        ...(Array.isArray(game.tags) ? game.tags : [])
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        const searchable = [
+          game.name,
+          game.title,
+          game.subtitle,
+          game.description,
+          game.category,
+          game.platform,
+          ...(Array.isArray(game.tags)
+            ? game.tags
+            : [])
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-      return searchable.includes(query);
-    });
+        return searchable.includes(query);
+      }
+    );
+
+    /*
+     * Remove previous content without HTML parsing.
+     */
+    container.replaceChildren();
 
     if (!filteredGames.length) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <h3>No games found</h3>
-          <p>
-            ${
-              query
-                ? "Try a different search."
-                : "No games are currently available."
-            }
-          </p>
-        </div>
-      `;
+      container.appendChild(
+        createEmptyState(
+          "No games found",
+          query
+            ? "Try a different search."
+            : "No games are currently available."
+        )
+      );
 
       return;
     }
 
-    container.innerHTML = filteredGames
-      .map((game) => {
-        const tags = Array.isArray(game.tags)
-          ? game.tags
-          : [];
+    const fragment =
+      document.createDocumentFragment();
 
-        const title =
-          game.name ||
-          game.title ||
-          game.id;
-
-        const subtitle =
-          game.subtitle ||
-          game.description ||
-          "";
-
-        const status =
-          game.status ||
-          "Available";
-
-        const platform =
-          game.platform ||
-          "Browser";
-
-        const id = escapeHtml(game.id);
-
-        return `
-          <article
-            class="game-card"
-            data-game-id="${id}"
-          >
-            ${
-              game.image || game.thumbnail || game.cover
-                ? `
-                  <div class="game-card-image">
-                    <img
-                      src="${escapeHtml(
-                        game.image ||
-                        game.thumbnail ||
-                        game.cover
-                      )}"
-                      alt="${escapeHtml(title)}"
-                      loading="lazy"
-                    >
-                  </div>
-                `
-                : `
-                  <div class="game-card-image game-card-placeholder">
-                    <span>
-                      ${escapeHtml(title.charAt(0).toUpperCase())}
-                    </span>
-                  </div>
-                `
-            }
-
-            <div class="game-card-content">
-              <div class="game-card-header">
-                <div>
-                  <h3 class="game-card-title">
-                    ${escapeHtml(title)}
-                  </h3>
-
-                  ${
-                    subtitle
-                      ? `
-                        <p class="game-card-subtitle">
-                          ${escapeHtml(subtitle)}
-                        </p>
-                      `
-                      : ""
-                  }
-                </div>
-
-                <span class="game-status">
-                  ${escapeHtml(status)}
-                </span>
-              </div>
-
-              ${
-                game.description
-                  ? `
-                    <p class="game-card-description">
-                      ${escapeHtml(game.description)}
-                    </p>
-                  `
-                  : ""
-              }
-
-              ${
-                tags.length
-                  ? `
-                    <div class="game-tags">
-                      ${tags
-                        .map(
-                          (tag) => `
-                            <span class="game-tag">
-                              ${escapeHtml(tag)}
-                            </span>
-                          `
-                        )
-                        .join("")}
-                    </div>
-                  `
-                  : ""
-              }
-
-              <div class="game-card-footer">
-                <span class="game-platform">
-                  ${escapeHtml(platform)}
-                </span>
-
-                <button
-                  type="button"
-                  class="play-game"
-                  data-game-id="${id}"
-                >
-                  Play now
-                </button>
-              </div>
-            </div>
-          </article>
-        `;
-      })
-      .join("");
-
-    $$(".play-game", container).forEach((button) => {
-      button.addEventListener("click", () => {
-        const gameId = button.dataset.gameId;
-
-        launchGame(gameId);
-      });
+    filteredGames.forEach((game) => {
+      fragment.appendChild(
+        createGameCard(game)
+      );
     });
 
-    $$(".game-card", container).forEach((card) => {
-      card.addEventListener("dblclick", () => {
-        const gameId = card.dataset.gameId;
-
-        launchGame(gameId);
-      });
-    });
+    container.appendChild(fragment);
   }
 
   /* =========================================================
@@ -483,7 +802,9 @@
       typeof gameOrId === "number"
     ) {
       game = games.find(
-        (item) => String(item.id) === String(gameOrId)
+        (item) =>
+          String(item.id) ===
+          String(gameOrId)
       );
     }
 
@@ -495,7 +816,9 @@
     const url = gameUrl(game);
 
     if (!url) {
-      showToast("This game does not have a valid entry path.");
+      showToast(
+        "This game does not have a valid entry path."
+      );
       return;
     }
 
@@ -511,25 +834,33 @@
 
     setText(
       gameStatus,
-      game.status || "Available"
+      game.status ||
+        "Available"
     );
 
     if (gameInfo) {
       const infoParts = [];
 
       if (game.subtitle) {
-        infoParts.push(game.subtitle);
+        infoParts.push(
+          String(game.subtitle)
+        );
       }
 
       if (game.version) {
-        infoParts.push(`v${game.version}`);
+        infoParts.push(
+          `v${String(game.version)}`
+        );
       }
 
       if (game.platform) {
-        infoParts.push(game.platform);
+        infoParts.push(
+          String(game.platform)
+        );
       }
 
-      gameInfo.textContent = infoParts.join(" • ");
+      gameInfo.textContent =
+        infoParts.join(" • ");
     }
 
     hideError();
@@ -540,16 +871,41 @@
       gameView.classList.add("active");
     }
 
-    document.body.classList.add("game-open");
+    document.body.classList.add(
+      "game-open"
+    );
 
     if (gameFrame) {
-      gameFrame.src = url;
+      /*
+       * Reset first when launching the exact
+       * same URL again so the browser definitely
+       * starts a fresh document.
+       */
+      if (
+        gameFrame.getAttribute("src") === url
+      ) {
+        gameFrame.src = "about:blank";
+
+        requestAnimationFrame(() => {
+          if (
+            currentGame === game &&
+            gameFrame
+          ) {
+            gameFrame.src = url;
+          }
+        });
+      } else {
+        gameFrame.src = url;
+      }
     }
 
     window.dispatchEvent(
-      new CustomEvent("voidforge:game-launch", {
-        detail: game
-      })
+      new CustomEvent(
+        "voidforge:game-launch",
+        {
+          detail: game
+        }
+      )
     );
   }
 
@@ -565,17 +921,23 @@
     }
 
     if (gameView) {
-      gameView.classList.remove("active");
+      gameView.classList.remove(
+        "active"
+      );
       gameView.hidden = true;
     }
 
-    document.body.classList.remove("game-open");
+    document.body.classList.remove(
+      "game-open"
+    );
 
     showLoader(false);
     hideError();
 
     window.dispatchEvent(
-      new CustomEvent("voidforge:game-close")
+      new CustomEvent(
+        "voidforge:game-close"
+      )
     );
   }
 
@@ -588,10 +950,14 @@
       return;
     }
 
-    const url = gameUrl(currentGame);
+    const url = gameUrl(
+      currentGame
+    );
 
     if (!url) {
-      showToast("Unable to reload this game.");
+      showToast(
+        "Unable to reload this game."
+      );
       return;
     }
 
@@ -599,9 +965,15 @@
     showLoader(true);
 
     /*
-     * Reassigning src forces the iframe to reload.
+     * Force a clean navigation.
      */
-    gameFrame.src = url;
+    gameFrame.src = "about:blank";
+
+    requestAnimationFrame(() => {
+      if (currentGame) {
+        gameFrame.src = url;
+      }
+    });
   }
 
   /* =========================================================
@@ -610,60 +982,100 @@
 
   function setupGameEvents() {
     if (gameFrame) {
-      gameFrame.addEventListener("load", () => {
-        showLoader(false);
-        hideError();
-      });
+      gameFrame.addEventListener(
+        "load",
+        () => {
+          /*
+           * about:blank is also a successful load.
+           * Only hide the loader when an actual game
+           * is currently being displayed.
+           */
+          if (
+            gameFrame.src !==
+              "about:blank" &&
+            currentGame
+          ) {
+            showLoader(false);
+            hideError();
+          }
+        }
+      );
 
-      gameFrame.addEventListener("error", () => {
-        showLoader(false);
+      gameFrame.addEventListener(
+        "error",
+        () => {
+          showLoader(false);
 
-        showError(
-          "The game could not be loaded. Please check the game folder and try again."
-        );
-      });
+          showError(
+            "The game could not be loaded. Please check the game folder and try again."
+          );
+        }
+      );
     }
 
     if (closeButton) {
-      closeButton.addEventListener("click", closeGame);
+      closeButton.addEventListener(
+        "click",
+        closeGame
+      );
     }
 
     if (reloadButton) {
-      reloadButton.addEventListener("click", reloadGame);
+      reloadButton.addEventListener(
+        "click",
+        reloadGame
+      );
     }
 
     if (fullscreenButton) {
-      fullscreenButton.addEventListener("click", async () => {
-        if (!gameFrame) return;
-
-        try {
-          if (document.fullscreenElement) {
-            await document.exitFullscreen();
-          } else {
-            await gameFrame.requestFullscreen();
+      fullscreenButton.addEventListener(
+        "click",
+        async () => {
+          if (!gameFrame) {
+            return;
           }
-        } catch (error) {
-          console.error(
-            "[VoidForge] Fullscreen error:",
-            error
-          );
 
-          showToast("Fullscreen is not available.");
+          try {
+            if (
+              document.fullscreenElement
+            ) {
+              await document.exitFullscreen();
+            } else {
+              await gameFrame.requestFullscreen();
+            }
+          } catch (error) {
+            console.error(
+              "[VoidForge] Fullscreen error:",
+              error
+            );
+
+            showToast(
+              "Fullscreen is not available."
+            );
+          }
         }
-      });
+      );
     }
 
     if (gameInfo) {
-      gameInfo.addEventListener("click", () => {
-        if (!currentGame) return;
+      gameInfo.addEventListener(
+        "click",
+        () => {
+          if (!currentGame) {
+            return;
+          }
 
-        const description =
-          currentGame.description ||
-          currentGame.subtitle ||
-          "No additional information is available.";
+          const description =
+            currentGame.description ||
+            currentGame.subtitle ||
+            "No additional information is available.";
 
-        showToast(description, 5000);
-      });
+          showToast(
+            description,
+            5000
+          );
+        }
+      );
     }
   }
 
@@ -672,54 +1084,66 @@
   ========================================================= */
 
   function setupKeyboardEvents() {
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        if (document.fullscreenElement) {
-          document.exitFullscreen().catch(() => {});
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key === "Escape") {
+          if (document.fullscreenElement) {
+            document
+              .exitFullscreen()
+              .catch(() => {});
+
+            return;
+          }
+
+          if (
+            currentGame &&
+            gameView &&
+            !gameView.hidden
+          ) {
+            closeGame();
+          }
+
           return;
         }
 
+        /*
+         * "/" focuses search when the user
+         * isn't already typing.
+         */
         if (
-          currentGame &&
-          gameView &&
-          !gameView.hidden
+          event.key === "/" &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !event.altKey
         ) {
-          closeGame();
-        }
-      }
+          const activeElement =
+            document.activeElement;
 
-      /*
-       * "/" focuses search when the user isn't typing.
-       */
-      if (
-        event.key === "/" &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !event.altKey
-      ) {
-        const activeElement = document.activeElement;
+          const isTyping =
+            activeElement &&
+            (
+              activeElement.tagName ===
+                "INPUT" ||
+              activeElement.tagName ===
+                "TEXTAREA" ||
+              activeElement.isContentEditable
+            );
 
-        const isTyping =
-          activeElement &&
-          (
-            activeElement.tagName === "INPUT" ||
-            activeElement.tagName === "TEXTAREA" ||
-            activeElement.isContentEditable
-          );
+          if (!isTyping) {
+            const searchInput =
+              $("#searchInput") ||
+              $("#gameSearch") ||
+              $('input[type="search"]');
 
-        if (!isTyping) {
-          const searchInput =
-            $("#searchInput") ||
-            $("#gameSearch") ||
-            $('input[type="search"]');
-
-          if (searchInput) {
-            event.preventDefault();
-            searchInput.focus();
+            if (searchInput) {
+              event.preventDefault();
+              searchInput.focus();
+            }
           }
         }
       }
-    });
+    );
   }
 
   /* =========================================================
@@ -732,32 +1156,100 @@
     );
 
     navItems.forEach((item) => {
-      item.addEventListener("click", () => {
-        const view =
-          item.dataset.view ||
-          item.dataset.nav;
+      item.addEventListener(
+        "click",
+        () => {
+          const view =
+            item.dataset.view ||
+            item.dataset.nav;
 
-        if (!view) return;
+          if (!view) {
+            return;
+          }
 
-        navItems.forEach((nav) => {
-          nav.classList.remove("active", "is-active");
-          nav.setAttribute("aria-current", "false");
-        });
+          navItems.forEach((nav) => {
+            nav.classList.remove(
+              "active",
+              "is-active"
+            );
 
-        item.classList.add("active", "is-active");
-        item.setAttribute("aria-current", "page");
+            nav.setAttribute(
+              "aria-current",
+              "false"
+            );
+          });
 
-        renderView(view);
-      });
+          item.classList.add(
+            "active",
+            "is-active"
+          );
+
+          item.setAttribute(
+            "aria-current",
+            "page"
+          );
+
+          renderView(view);
+        }
+      );
     });
+  }
+
+  function createViewHeading(
+    title,
+    subtitle
+  ) {
+    const heading = createElement(
+      "div",
+      "view-heading"
+    );
+
+    const inner = createElement(
+      "div"
+    );
+
+    inner.appendChild(
+      createElement(
+        "h1",
+        "",
+        title
+      )
+    );
+
+    if (subtitle) {
+      inner.appendChild(
+        createElement(
+          "p",
+          "",
+          subtitle
+        )
+      );
+    }
+
+    heading.appendChild(inner);
+
+    return heading;
+  }
+
+  function createLauncherView(
+    className = ""
+  ) {
+    return createElement(
+      "section",
+      `launcher-view${className ? ` ${className}` : ""}`
+    );
   }
 
   function renderView(view) {
     const viewRoot = $("#viewRoot");
 
-    if (!viewRoot) return;
+    if (!viewRoot) {
+      return;
+    }
 
-    switch (String(view).toLowerCase()) {
+    switch (
+      String(view).toLowerCase()
+    ) {
       case "library":
       case "home":
         renderLibraryView(viewRoot);
@@ -785,108 +1277,182 @@
     }
   }
 
+  /* =========================================================
+     LIBRARY VIEW
+  ========================================================= */
+
   function renderLibraryView(root) {
-    root.innerHTML = `
-      <section class="launcher-view library-view">
-        <div class="view-heading">
-          <div>
-            <h1>Library</h1>
-            <p>Your VoidForge games.</p>
-          </div>
-        </div>
+    const section =
+      createLauncherView(
+        "library-view"
+      );
 
-        <div
-          id="gamesGrid"
-          class="games-grid"
-        ></div>
-      </section>
-    `;
+    section.appendChild(
+      createViewHeading(
+        "Library",
+        "Your VoidForge games."
+      )
+    );
 
-    renderGames();
+    const grid = createElement(
+      "div",
+      "games-grid"
+    );
+
+    grid.id = "gamesGrid";
+
+    section.appendChild(grid);
+
+    root.replaceChildren(section);
+
+    renderGameList(grid);
   }
+
+  /* =========================================================
+     DISCOVER VIEW
+  ========================================================= */
 
   function renderDiscoverView(root) {
-    root.innerHTML = `
-      <section class="launcher-view discover-view">
-        <div class="view-heading">
-          <div>
-            <h1>Discover</h1>
-            <p>Explore the games available in VoidForge.</p>
-          </div>
-        </div>
+    const section =
+      createLauncherView(
+        "discover-view"
+      );
 
-        <div
-          id="gamesGrid"
-          class="games-grid"
-        ></div>
-      </section>
-    `;
+    section.appendChild(
+      createViewHeading(
+        "Discover",
+        "Explore the games available in VoidForge."
+      )
+    );
 
-    renderGames();
+    const grid = createElement(
+      "div",
+      "games-grid"
+    );
+
+    grid.id = "gamesGrid";
+
+    section.appendChild(grid);
+
+    root.replaceChildren(section);
+
+    renderGameList(grid);
   }
+
+  /* =========================================================
+     UPDATES VIEW
+  ========================================================= */
 
   function renderUpdatesView(root) {
-    root.innerHTML = `
-      <section class="launcher-view">
-        <div class="view-heading">
-          <div>
-            <h1>Updates</h1>
-            <p>Latest VoidForge updates.</p>
-          </div>
-        </div>
+    const section =
+      createLauncherView();
 
-        <div class="empty-state">
-          <h3>You're up to date</h3>
-          <p>
-            No new launcher updates are available.
-          </p>
-        </div>
-      </section>
-    `;
+    section.appendChild(
+      createViewHeading(
+        "Updates",
+        "Latest VoidForge updates."
+      )
+    );
+
+    section.appendChild(
+      createEmptyState(
+        "You're up to date",
+        "No new launcher updates are available."
+      )
+    );
+
+    root.replaceChildren(section);
   }
+
+  /* =========================================================
+     ABOUT VIEW
+  ========================================================= */
 
   function renderAboutView(root) {
-    root.innerHTML = `
-      <section class="launcher-view">
-        <div class="view-heading">
-          <div>
-            <h1>About VoidForge</h1>
-            <p>VoidForge Studios browser game launcher.</p>
-          </div>
-        </div>
+    const section =
+      createLauncherView();
 
-        <div class="about-content">
-          <p>
-            VoidForge is a browser-based game launcher
-            built for VoidForge Studios.
-          </p>
+    section.appendChild(
+      createViewHeading(
+        "About VoidForge",
+        "VoidForge Studios browser game launcher."
+      )
+    );
 
-          <p>
-            Games are loaded dynamically from
-            <code>/games.json</code>.
-          </p>
-        </div>
-      </section>
-    `;
+    const content = createElement(
+      "div",
+      "about-content"
+    );
+
+    content.appendChild(
+      createElement(
+        "p",
+        "",
+        "VoidForge is a browser-based game launcher built for VoidForge Studios."
+      )
+    );
+
+    const registryParagraph =
+      createElement("p");
+
+    registryParagraph.appendChild(
+      document.createTextNode(
+        "Games are loaded dynamically from "
+      )
+    );
+
+    registryParagraph.appendChild(
+      createElement(
+        "code",
+        "",
+        "/games.json"
+      )
+    );
+
+    registryParagraph.appendChild(
+      document.createTextNode(".")
+    );
+
+    content.appendChild(
+      registryParagraph
+    );
+
+    section.appendChild(content);
+
+    root.replaceChildren(section);
   }
 
-  function renderSettingsView(root) {
-    root.innerHTML = `
-      <section class="launcher-view">
-        <div class="view-heading">
-          <div>
-            <h1>Settings</h1>
-            <p>Launcher settings.</p>
-          </div>
-        </div>
+  /* =========================================================
+     SETTINGS VIEW
+  ========================================================= */
 
-        <div class="settings-content">
-          <p>
-            Launcher settings will appear here.
-          </p>
-        </div>
-      </section>
-    `;
+  function renderSettingsView(root) {
+    const section =
+      createLauncherView();
+
+    section.appendChild(
+      createViewHeading(
+        "Settings",
+        "Launcher settings."
+      )
+    );
+
+    const content = createElement(
+      "div",
+      "settings-content"
+    );
+
+    content.appendChild(
+      createElement(
+        "p",
+        "",
+        "Launcher settings will appear here."
+      )
+    );
+
+    section.appendChild(content);
+
+    root.replaceChildren(section);
   }
 
   /* =========================================================
@@ -899,21 +1465,38 @@
       $("#gameSearch") ||
       $('input[type="search"]');
 
-    if (!searchInput) return;
+    if (!searchInput) {
+      return;
+    }
 
-    searchInput.addEventListener("input", () => {
-      const value = searchInput.value;
+    searchInput.addEventListener(
+      "input",
+      () => {
+        const value =
+          searchInput.value;
 
-      const grids = [
-        $("#gamesGrid"),
-        $("#gameGrid"),
-        $("#libraryGrid")
-      ].filter(Boolean);
+        const grids = [
+          $("#gamesGrid"),
+          $("#gameGrid"),
+          $("#libraryGrid"),
+          $(".games-grid"),
+          $(".game-grid")
+        ].filter(Boolean);
 
-      grids.forEach((grid) => {
-        renderGameList(grid, value);
-      });
-    });
+        const uniqueGrids = [
+          ...new Set(grids)
+        ];
+
+        uniqueGrids.forEach(
+          (grid) => {
+            renderGameList(
+              grid,
+              value
+            );
+          }
+        );
+      }
+    );
   }
 
   /* =========================================================
@@ -926,24 +1509,29 @@
     );
 
     buttons.forEach((button) => {
-      button.addEventListener("click", async () => {
-        try {
-          if (document.fullscreenElement) {
-            await document.exitFullscreen();
-          } else {
-            await document.documentElement.requestFullscreen();
-          }
-        } catch (error) {
-          console.error(
-            "[VoidForge] Launcher fullscreen error:",
-            error
-          );
+      button.addEventListener(
+        "click",
+        async () => {
+          try {
+            if (
+              document.fullscreenElement
+            ) {
+              await document.exitFullscreen();
+            } else {
+              await document.documentElement.requestFullscreen();
+            }
+          } catch (error) {
+            console.error(
+              "[VoidForge] Launcher fullscreen error:",
+              error
+            );
 
-          showToast(
-            "Launcher fullscreen is not available."
-          );
+            showToast(
+              "Launcher fullscreen is not available."
+            );
+          }
         }
-      });
+      );
     });
   }
 
@@ -962,28 +1550,59 @@
       $("#sidebar") ||
       $(".sidebar");
 
-    if (!menuButton || !sidebar) {
+    if (
+      !menuButton ||
+      !sidebar
+    ) {
       return;
     }
 
-    menuButton.addEventListener("click", () => {
-      document.body.classList.toggle("nav-open");
+    /*
+     * Make the initial ARIA state explicit.
+     */
+    menuButton.setAttribute(
+      "aria-expanded",
+      document.body.classList.contains(
+        "nav-open"
+      )
+        ? "true"
+        : "false"
+    );
 
-      menuButton.setAttribute(
-        "aria-expanded",
-        document.body.classList.contains("nav-open")
-          ? "true"
-          : "false"
-      );
-    });
+    menuButton.addEventListener(
+      "click",
+      () => {
+        const isOpen =
+          document.body.classList.toggle(
+            "nav-open"
+          );
+
+        menuButton.setAttribute(
+          "aria-expanded",
+          isOpen
+            ? "true"
+            : "false"
+        );
+      }
+    );
 
     $$(
       "[data-view], [data-nav]",
       sidebar
     ).forEach((item) => {
-      item.addEventListener("click", () => {
-        document.body.classList.remove("nav-open");
-      });
+      item.addEventListener(
+        "click",
+        () => {
+          document.body.classList.remove(
+            "nav-open"
+          );
+
+          menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        }
+      );
     });
   }
 
@@ -992,23 +1611,40 @@
   ========================================================= */
 
   function setupConnectionStatus() {
-    const updateConnectionStatus = () => {
-      const statusElements = $$(
-        "#connectionStatus, .connection-status, [data-connection-status]"
-      );
+    const updateConnectionStatus =
+      () => {
+        const statusElements = $$(
+          "#connectionStatus, .connection-status, [data-connection-status]"
+        );
 
-      statusElements.forEach((element) => {
-        if (navigator.onLine) {
-          element.textContent = "Online";
-          element.classList.remove("offline");
-          element.classList.add("online");
-        } else {
-          element.textContent = "Offline";
-          element.classList.remove("online");
-          element.classList.add("offline");
-        }
-      });
-    };
+        statusElements.forEach(
+          (element) => {
+            if (navigator.onLine) {
+              element.textContent =
+                "Online";
+
+              element.classList.remove(
+                "offline"
+              );
+
+              element.classList.add(
+                "online"
+              );
+            } else {
+              element.textContent =
+                "Offline";
+
+              element.classList.remove(
+                "online"
+              );
+
+              element.classList.add(
+                "offline"
+              );
+            }
+          }
+        );
+      };
 
     window.addEventListener(
       "online",
@@ -1028,7 +1664,21 @@
   ========================================================= */
 
   async function registerServiceWorker() {
-    if (!("serviceWorker" in navigator)) {
+    if (
+      !("serviceWorker" in navigator)
+    ) {
+      return;
+    }
+
+    /*
+     * Service workers require a secure context.
+     * localhost is also allowed by browsers.
+     */
+    if (
+      location.protocol !== "https:" &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1"
+    ) {
       return;
     }
 
@@ -1054,9 +1704,11 @@
      GLOBAL API
   ========================================================= */
 
-  window.launchGame = launchGame;
+  window.launchGame =
+    launchGame;
 
-  window.launch = launchGame;
+  window.launch =
+    launchGame;
 
   window.VoidForge = {
     get games() {
@@ -1088,16 +1740,22 @@
     setupConnectionStatus();
 
     /*
-     * Load the registry from:
+     * Load:
      *
-     * ./games.json (or the source declared in #embeddedGameRegistry)
+     *   ./games.json
+     *
+     * or the local registry configured by
+     * #embeddedGameRegistry.
      */
     await loadGames();
 
-    registerServiceWorker();
+    await registerServiceWorker();
   }
 
-  if (document.readyState === "loading") {
+  if (
+    document.readyState ===
+    "loading"
+  ) {
     document.addEventListener(
       "DOMContentLoaded",
       init,
@@ -1107,3 +1765,4 @@
     init();
   }
 })();
+
