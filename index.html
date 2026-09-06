@@ -1,113 +1,470 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0820">
-  <meta name="description" content="VoidForge Studios browser game launcher">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="assets/voidforge-mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/launcher.css">
+
+  <meta
+    name="theme-color"
+    content="#0b0820"
+  >
+
+  <meta
+    name="description"
+    content="VoidForge Studios browser game launcher"
+  >
+
+  <link
+    rel="manifest"
+    href="manifest.webmanifest"
+  >
+
+  <link
+    rel="icon"
+    href="assets/voidforge-mark.svg"
+    type="image/svg+xml"
+  >
+
+  <link
+    rel="stylesheet"
+    href="assets/launcher.css"
+  >
+
   <title>VoidForge — Game Launcher</title>
 </head>
+
 <body>
-  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <a class="skip-link" href="#main-content">
+    Skip to content
+  </a>
 
   <div class="app-shell" id="appShell">
-    <aside class="sidebar" aria-label="Launcher navigation">
-      <a class="brand" href="#library" aria-label="VoidForge Studios home">
-        <img src="assets/voidforge-mark.svg" alt="">
-        <span><strong>VoidForge</strong><small>STUDIOS · WEB LAUNCHER</small></span>
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside
+      class="sidebar"
+      aria-label="Launcher navigation"
+    >
+
+      <a
+        class="brand"
+        href="#library"
+        aria-label="VoidForge Studios home"
+      >
+        <img
+          src="assets/voidforge-mark.svg"
+          alt=""
+        >
+
+        <span>
+          <strong>VoidForge</strong>
+          <small>STUDIOS · WEB LAUNCHER</small>
+        </span>
       </a>
 
-      <nav class="nav-list" aria-label="Primary">
-        <button class="nav-item is-active" data-view="library"><span aria-hidden="true">▦</span> Library</button>
-        <button class="nav-item" data-view="discover"><span aria-hidden="true">◇</span> Discover</button>
-        <button class="nav-item" data-view="updates"><span aria-hidden="true">↻</span> Updates <i class="nav-pip" aria-label="Update status"></i></button>
-        <button class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> Settings</button>
-        <button class="nav-item" data-view="about"><span aria-hidden="true">ⓘ</span> About</button>
+      <nav
+        class="nav-list"
+        aria-label="Primary"
+      >
+
+        <button
+          class="nav-item is-active"
+          data-view="library"
+          type="button"
+        >
+          <span aria-hidden="true">▦</span>
+          Library
+        </button>
+
+        <button
+          class="nav-item"
+          data-view="discover"
+          type="button"
+        >
+          <span aria-hidden="true">◇</span>
+          Discover
+        </button>
+
+        <button
+          class="nav-item"
+          data-view="updates"
+          type="button"
+        >
+          <span aria-hidden="true">↻</span>
+          Updates
+          <i
+            class="nav-pip"
+            aria-label="Update status"
+          ></i>
+        </button>
+
+        <button
+          class="nav-item"
+          data-view="settings"
+          type="button"
+        >
+          <span aria-hidden="true">⚙</span>
+          Settings
+        </button>
+
+        <button
+          class="nav-item"
+          data-view="about"
+          type="button"
+        >
+          <span aria-hidden="true">ⓘ</span>
+          About
+        </button>
+
       </nav>
 
+      <!-- Sidebar footer -->
+
       <div class="sidebar-footer">
+
         <div class="connection">
-          <i></i>
-          <span><b id="connectionStatus">Checking connection</b><small>GitHub Pages web edition</small></span>
+
+          <i aria-hidden="true"></i>
+
+          <span>
+            <b id="connectionStatus">
+              Checking connection
+            </b>
+
+            <small>
+              GitHub Pages web edition
+            </small>
+          </span>
+
         </div>
-        <a class="support-link" href="https://github.com/VoidForgeStudios/VoidForgeStudios.github.io" target="_blank" rel="noopener noreferrer">↗ Project support</a>
+
+        <a
+          class="support-link"
+          href="https://github.com/VoidForgeStudios/VoidForgeStudios.github.io"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ↗ Project support
+        </a>
+
       </div>
+
     </aside>
 
-    <main id="main-content" class="main-content" tabindex="-1">
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+    <main
+      id="main-content"
+      class="main-content"
+      tabindex="-1"
+    >
+
+      <!-- Top bar -->
+
       <header class="topbar">
-        <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation" aria-expanded="false">☰</button>
+
+        <button
+          class="mobile-menu icon-button"
+          id="mobileMenu"
+          type="button"
+          aria-label="Open navigation"
+          aria-expanded="false"
+        >
+          ☰
+        </button>
+
+
+        <!-- Search -->
 
         <label class="search-box">
+
           <span aria-hidden="true">⌕</span>
-          <input id="gameSearch" type="search" autocomplete="off" placeholder="Search your library" aria-label="Search games">
+
+          <input
+            id="gameSearch"
+            type="search"
+            autocomplete="off"
+            placeholder="Search your library"
+            aria-label="Search games"
+          >
+
           <kbd>/</kbd>
+
         </label>
 
+
+        <!-- Top actions -->
+
         <div class="top-actions">
-          <button class="icon-button" id="fullscreenLauncher" aria-label="Toggle launcher fullscreen" title="Fullscreen">⛶</button>
-          <button class="profile-button" data-view="settings" aria-label="Open settings">
-            <span>VF</span><b>Player</b><small>Web edition</small>
+
+          <button
+            class="icon-button"
+            id="fullscreenLauncher"
+            type="button"
+            aria-label="Toggle launcher fullscreen"
+            title="Fullscreen"
+          >
+            ⛶
           </button>
+
+
+          <button
+            class="profile-button"
+            data-view="settings"
+            type="button"
+            aria-label="Open settings"
+          >
+
+            <span>VF</span>
+
+            <b>Player</b>
+
+            <small>
+              Web edition
+            </small>
+
+          </button>
+
         </div>
+
       </header>
 
+
+      <!-- Dynamic launcher views -->
+
       <div id="viewRoot"></div>
+
     </main>
+
   </div>
 
-  <nav class="mobile-nav" aria-label="Mobile navigation">
-    <button class="nav-item is-active" data-view="library">▦<span>Library</span></button>
-    <button class="nav-item" data-view="discover">◇<span>Discover</span></button>
-    <button class="nav-item" data-view="updates">↻<span>Updates</span></button>
-    <button class="nav-item" data-view="settings">⚙<span>Settings</span></button>
+
+  <!-- =======================================================
+       MOBILE NAVIGATION
+       ======================================================= -->
+
+  <nav
+    class="mobile-nav"
+    aria-label="Mobile navigation"
+  >
+
+    <button
+      class="nav-item is-active"
+      data-view="library"
+      type="button"
+    >
+      <span aria-hidden="true">▦</span>
+      <span>Library</span>
+    </button>
+
+    <button
+      class="nav-item"
+      data-view="discover"
+      type="button"
+    >
+      <span aria-hidden="true">◇</span>
+      <span>Discover</span>
+    </button>
+
+    <button
+      class="nav-item"
+      data-view="updates"
+      type="button"
+    >
+      <span aria-hidden="true">↻</span>
+      <span>Updates</span>
+    </button>
+
+    <button
+      class="nav-item"
+      data-view="settings"
+      type="button"
+    >
+      <span aria-hidden="true">⚙</span>
+      <span>Settings</span>
+    </button>
+
   </nav>
 
-  <section class="game-view" id="gameView" aria-label="Game player" hidden>
+
+  <!-- =======================================================
+       GAME VIEW
+       ======================================================= -->
+
+  <section
+    class="game-view"
+    id="gameView"
+    aria-label="Game player"
+    hidden
+  >
+
+    <!-- Game toolbar -->
+
     <header class="game-toolbar">
-      <div>
-        <span class="live-indicator"></span>
-        <strong id="gameTitle">Loading game</strong>
-        <small id="gameStatus">Checking game files…</small>
-      </div>
 
       <div>
-        <button class="toolbar-button" id="gameInfo">Game info</button>
-        <button class="toolbar-button" id="reloadGame">↻ Reload</button>
-        <button class="toolbar-button" id="gameFullscreen">⛶ Fullscreen</button>
-        <button class="toolbar-button danger" id="gameClose">Exit game <kbd>Esc</kbd></button>
+
+        <span
+          class="live-indicator"
+          aria-hidden="true"
+        ></span>
+
+        <strong id="gameTitle">
+          Loading game
+        </strong>
+
+        <small id="gameStatus">
+          Checking game files…
+        </small>
+
       </div>
+
+
+      <div>
+
+        <button
+          class="toolbar-button"
+          id="gameInfo"
+          type="button"
+        >
+          Game info
+        </button>
+
+        <button
+          class="toolbar-button"
+          id="reloadGame"
+          type="button"
+        >
+          ↻ Reload
+        </button>
+
+        <button
+          class="toolbar-button"
+          id="gameFullscreen"
+          type="button"
+        >
+          ⛶ Fullscreen
+        </button>
+
+        <button
+          class="toolbar-button danger"
+          id="gameClose"
+          type="button"
+        >
+          Exit game
+          <kbd>Esc</kbd>
+        </button>
+
+      </div>
+
     </header>
 
+
+    <!-- Game stage -->
+
     <div class="game-stage">
-      <div class="loading-panel" id="gameLoader">
-        <div class="loader-orbit"></div>
-        <p class="eyebrow">VoidForge launching</p>
-        <h2 id="loadingStep">Checking game</h2>
-        <p id="loadingDetail">Verifying the browser entry point.</p>
-        <div class="indeterminate"><i></i></div>
+
+      <!-- Loading screen -->
+
+      <div
+        class="loading-panel"
+        id="gameLoader"
+      >
+
+        <div
+          class="loader-orbit"
+          aria-hidden="true"
+        ></div>
+
+        <p class="eyebrow">
+          VoidForge launching
+        </p>
+
+        <h2 id="loadingStep">
+          Checking game
+        </h2>
+
+        <p id="loadingDetail">
+          Verifying the browser entry point.
+        </p>
+
+        <div
+          class="indeterminate"
+          aria-hidden="true"
+        >
+          <i></i>
+        </div>
+
       </div>
 
-      <div class="game-error" id="gameError" hidden></div>
+
+      <!-- Game error -->
+
+      <div
+        class="game-error"
+        id="gameError"
+        hidden
+      ></div>
+
+
+      <!-- Game iframe -->
 
       <iframe
         id="gameFrame"
         title="VoidForge game"
         allow="fullscreen; gamepad; autoplay"
-        referrerpolicy="strict-origin-when-cross-origin">
-      </iframe>
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+
     </div>
+
   </section>
 
-  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Used when games.json cannot be fetched (for example, when opened from file://). -->
-  <script id="embeddedGameRegistry" type="application/json">
-  "/games.json"
-</script>
-  <script type="module" src="assets/launcher.js"></script>
+  <!-- =======================================================
+       TOAST NOTIFICATIONS
+       ======================================================= -->
+
+  <div
+    class="toast-region"
+    id="toastRegion"
+    aria-live="polite"
+    aria-atomic="true"
+  ></div>
+
+
+  <!-- =======================================================
+       EMBEDDED GAME REGISTRY FALLBACK
+       ======================================================= -->
+
+  <!--
+    Used when games.json cannot be fetched,
+    for example when opened directly using file://.
+  -->
+
+  <script
+    id="embeddedGameRegistry"
+    type="application/json"
+  >
+    "/games.json"
+  </script>
+
+
+  <!-- Launcher JavaScript -->
+
+  <script
+    type="module"
+    src="assets/launcher.js"
+  ></script>
+
 </body>
 </html>
+```
