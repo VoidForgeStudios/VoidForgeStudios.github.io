@@ -190,10 +190,15 @@
         document.baseURI
       );
 
-      if (
-        url.protocol !== "http:" &&
-        url.protocol !== "https:"
-      ) {
+      const isRemoteImage =
+        url.protocol === "http:" ||
+        url.protocol === "https:";
+
+      const isLocalImage =
+        document.location.protocol === "file:" &&
+        url.protocol === "file:";
+
+      if (!isRemoteImage && !isLocalImage) {
         return "";
       }
 
