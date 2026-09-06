@@ -1,0 +1,619 @@
+name: VoidForge Checks
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: VoidForge Full Check
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      packages: read
+
+    steps:
+      # ============================================================
+      # SETUP
+      # ============================================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      # ============================================================
+      # REPOSITORY HEALTH
+      # ============================================================
+
+      - name: Check required files
+        shell: bash
+        run: |
+          set -e
+
+          required_files=(
+            "index.html"
+            "index.original.html"
+            "games.json"
+            "manifest.webmanifest"
+            "sw.js"
+            "assets/launcher.js"
+            "minecraft/index.html"
+          )
+
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "::error::Missing required file: $file"
+              exit 1
+            fi
+
+            echo "PASS: $file"
+          done
+
+      - name: Check for empty files
+        shell: bash
+        run: |
+          set -e
+
+          failed=0
+
+          while IFS= read -r -d '' file; do
+            if [ ! -s "$file" ]; then
+              echo "::error::Empty file: $file"
+              failed=1
+            fi
+          done < <(
+            find . \
+              -type f \
+              -not -path "./.git/*" \
+              -print0
+          )
+
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+
+          echo "PASS: No empty files."
+
+      - name: Check for oversized files
+        shell: bash
+        run: |
+          set -e
+
+          max_size=$((25 * 1024 * 1024))
+          failed=0
+
+          while IFS= read -r -d '' file; do
+            size=$(stat -c%s "$file")
+
+            if [ "$size" -gt "$max_size" ]; then
+              echo "::error::File exceeds 25 MB: $file"
+              failed=1
+            fi
+          done < <(
+            find . \
+              -type f \
+              -not -path "./.git/*" \
+              -print0
+          )
+
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+
+          echo "PASS: No files exceed 25 MB."
+
+      - name: Check Git repository integrity
+        run: |
+          git fsck --no-progress --full
+
+      # ============================================================
+      # JSON / GAME REGISTRY
+      # ============================================================
+
+      - name: Validate games.json
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("games.json")
+
+          try:
+              games = json.loads(
+                  path.read_text(encoding="utf-8")
+              )
+          except Exception as exc:
+              raise SystemExit(
+                  f"games.json is invalid: {exc}"
+              )
+
+          if not isinstance(games, list):
+              raise SystemExit(
+                  "games.json must contain a JSON array"
+              )
+
+          ids = set()
+
+          for index, game in enumerate(games, start=1):
+              if not isinstance(game, dict):
+                  raise SystemExit(
+                      f"Game #{index} must be an object"
+                  )
+
+              game_id = game.get("id")
+              entry = game.get("entry")
+
+              if not game_id:
+                  raise SystemExit(
+                      f"Game #{index} is missing 'id'"
+                  )
+
+              if game_id in ids:
+                  raise SystemExit(
+                      f"Duplicate game id: {game_id}"
+                  )
+
+              ids.add(game_id)
+
+              if not entry:
+                  raise SystemExit(
+                      f"Game '{game_id}' is missing 'entry'"
+                  )
+
+              entry_file = Path(entry) / "index.html"
+
+              if not entry_file.is_file():
+                  raise SystemExit(
+                      f"Game '{game_id}' points to "
+                      f"'{entry}', but '{entry_file}' "
+                      f"does not exist"
+                  )
+
+              print(
+                  f"PASS: {game_id} -> {entry_file}"
+              )
+
+          print()
+          print(
+              f"PASS: Validated {len(games)} game(s)."
+          )
+          PY
+
+      - name: Validate manifest
+        run: |
+          python3 -m json.tool manifest.webmanifest > /dev/null
+          echo "PASS: manifest.webmanifest"
+
+      # ============================================================
+      # HTML
+      # ============================================================
+
+      - name: Find HTML files
+        run: |
+          find . \
+            -type f \
+            -iname "*.html" \
+            -not -path "./.git/*" \
+            > html-files.txt
+
+          echo "HTML files:"
+          cat html-files.txt
+
+      - name: Validate HTML
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+
+          files = Path("html-files.txt").read_text().splitlines()
+
+          if not files:
+              raise SystemExit("No HTML files found.")
+
+          class Validator(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.stack = []
+                  self.ids = set()
+                  self.errors = []
+
+              def handle_starttag(self, tag, attrs):
+                  tag = tag.lower()
+                  attrs = dict(attrs)
+
+                  if "id" in attrs:
+                      element_id = attrs["id"]
+
+                      if element_id in self.ids:
+                          self.errors.append(
+                              f"Duplicate id: {element_id}"
+                          )
+
+                      self.ids.add(element_id)
+
+                  void_tags = {
+                      "area", "base", "br", "col",
+                      "embed", "hr", "img", "input",
+                      "link", "meta", "param", "source",
+                      "track", "wbr"
+                  }
+
+                  if tag not in void_tags:
+                      self.stack.append(tag)
+
+              def handle_startendtag(self, tag, attrs):
+                  pass
+
+              def handle_endtag(self, tag):
+                  tag = tag.lower()
+
+                  if not self.stack:
+                      self.errors.append(
+                          f"Unexpected closing tag </{tag}>"
+                      )
+                      return
+
+                  if self.stack[-1] == tag:
+                      self.stack.pop()
+                      return
+
+                  self.errors.append(
+                      f"Incorrect nesting around </{tag}>"
+                  )
+
+                  if tag in self.stack:
+                      while self.stack and self.stack[-1] != tag:
+                          self.stack.pop()
+
+                      if self.stack:
+                          self.stack.pop()
+
+          failed = False
+
+          for filename in files:
+              path = Path(filename)
+
+              text = path.read_text(
+                  encoding="utf-8",
+                  errors="replace"
+              )
+
+              parser = Validator()
+
+              try:
+                  parser.feed(text)
+                  parser.close()
+              except Exception as exc:
+                  print(
+                      f"FAIL: {filename}: {exc}"
+                  )
+                  failed = True
+                  continue
+
+              lower = text.lower()
+
+              for required in (
+                  "<html",
+                  "<head",
+                  "<body",
+                  "</html>",
+              ):
+                  if required not in lower:
+                      parser.errors.append(
+                          f"Missing {required}"
+                      )
+
+              if "<title" not in lower:
+                  parser.errors.append(
+                      "Missing <title>"
+                  )
+
+              if parser.stack:
+                  parser.errors.append(
+                      "Unclosed tags: " +
+                      ", ".join(parser.stack)
+                  )
+
+              if parser.errors:
+                  print(f"\nFAIL: {filename}")
+
+                  for error in parser.errors:
+                      print(f"  - {error}")
+
+                  failed = True
+              else:
+                  print(f"PASS: {filename}")
+
+          if failed:
+              raise SystemExit(
+                  "HTML validation failed."
+              )
+
+          print("\nPASS: All HTML files.")
+          PY
+
+      # ============================================================
+      # CSS
+      # ============================================================
+
+      - name: Find CSS files
+        run: |
+          find . \
+            -type f \
+            -iname "*.css" \
+            -not -path "./.git/*" \
+            > css-files.txt
+
+          echo "CSS files:"
+          cat css-files.txt
+
+      - name: Validate CSS
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files = Path("css-files.txt").read_text().splitlines()
+
+          if not files:
+              print("No CSS files found.")
+              raise SystemExit(0)
+
+          failed = False
+
+          for filename in files:
+              text = Path(filename).read_text(
+                  encoding="utf-8",
+                  errors="replace"
+              )
+
+              stack = []
+              quote = None
+              comment = False
+              escaped = False
+              errors = []
+
+              pairs = {
+                  "{": "}",
+                  "(": ")",
+                  "[": "]",
+              }
+
+              closing = {
+                  "}": "{",
+                  ")": "(",
+                  "]": "[",
+              }
+
+              i = 0
+
+              while i < len(text):
+                  char = text[i]
+                  nxt = (
+                      text[i + 1]
+                      if i + 1 < len(text)
+                      else ""
+                  )
+
+                  if comment:
+                      if char == "*" and nxt == "/":
+                          comment = False
+                          i += 2
+                          continue
+
+                      i += 1
+                      continue
+
+                  if quote:
+                      if escaped:
+                          escaped = False
+                      elif char == "\\":
+                          escaped = True
+                      elif char == quote:
+                          quote = None
+
+                      i += 1
+                      continue
+
+                  if char == "/" and nxt == "*":
+                      comment = True
+                      i += 2
+                      continue
+
+                  if char in ("'", '"'):
+                      quote = char
+                      i += 1
+                      continue
+
+                  if char in pairs:
+                      stack.append(char)
+
+                  elif char in closing:
+                      if not stack:
+                          errors.append(
+                              f"Unexpected '{char}'"
+                          )
+                      elif stack[-1] != closing[char]:
+                          errors.append(
+                              f"Mismatched '{char}'"
+                          )
+                          stack.pop()
+                      else:
+                          stack.pop()
+
+                  i += 1
+
+              if comment:
+                  errors.append(
+                      "Unterminated comment"
+                  )
+
+              if quote:
+                  errors.append(
+                      f"Unterminated string ({quote})"
+                  )
+
+              if stack:
+                  errors.append(
+                      "Unclosed brackets: " +
+                      "".join(stack)
+                  )
+
+              if errors:
+                  print(f"\nFAIL: {filename}")
+
+                  for error in errors:
+                      print(f"  - {error}")
+
+                  failed = True
+              else:
+                  print(f"PASS: {filename}")
+
+          if failed:
+              raise SystemExit(
+                  "CSS validation failed."
+              )
+
+          print("\nPASS: All CSS files.")
+          PY
+
+      # ============================================================
+      # JAVASCRIPT
+      # ============================================================
+
+      - name: Find JavaScript files
+        run: |
+          find . \
+            -type f \
+            -iname "*.js" \
+            -not -path "./.git/*" \
+            > js-files.txt
+
+          echo "JavaScript files:"
+          cat js-files.txt
+
+      - name: Validate JavaScript
+        shell: bash
+        run: |
+          set -e
+
+          if [ ! -s js-files.txt ]; then
+            echo "No JavaScript files found."
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            echo "Checking $file"
+            node --check "$file"
+          done < js-files.txt
+
+          echo "PASS: All JavaScript files."
+
+      # ============================================================
+      # VOIDFORGE ASSETS
+      # ============================================================
+
+      - name: Validate launcher references
+        shell: bash
+        run: |
+          set -e
+
+          test -f "assets/launcher.js"
+          test -f "games.json"
+          test -f "sw.js"
+
+          grep -q "games.json" assets/launcher.js || {
+            echo "::error::launcher.js does not reference games.json"
+            exit 1
+          }
+
+          grep -q "sw.js" assets/launcher.js || {
+            echo "::error::launcher.js does not reference sw.js"
+            exit 1
+          }
+
+          echo "PASS: Launcher references."
+
+      - name: Validate game entry points
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          games = json.loads(
+              Path("games.json").read_text()
+          )
+
+          for game in games:
+              entry = Path(game["entry"]) / "index.html"
+
+              if not entry.is_file():
+                  raise SystemExit(
+                      f"Missing game entry: {entry}"
+                  )
+
+              print(
+                  f"PASS: {game['id']} -> {entry}"
+              )
+          PY
+
+      - name: Validate service worker
+        run: node --check sw.js
+
+      # ============================================================
+      # CODEQL
+      # ============================================================
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Analyze with CodeQL
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+      # ============================================================
+      # FINAL RESULT
+      # ============================================================
+
+      - name: VoidForge checks passed
+        run: |
+          echo "========================================"
+          echo "       VOIDFORGE CHECKS PASSED"
+          echo "========================================"
+          echo
+          echo "Repository health     PASS"
+          echo "games.json            PASS"
+          echo "Manifest              PASS"
+          echo "HTML                  PASS"
+          echo "CSS                   PASS"
+          echo "JavaScript            PASS"
+          echo "Assets                PASS"
+          echo "Game entries          PASS"
+          echo "Service worker        PASS"
+          echo "CodeQL                PASS"
+          echo
+          echo "VoidForge is ready."
