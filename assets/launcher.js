@@ -1791,6 +1791,16 @@
     setupMobileMenu();
     setupConnectionStatus();
 
+    /*
+     * FIX: renderView() was previously only ever triggered by a
+     * nav-item click. On first load nothing rendered the initial
+     * view, so #viewRoot stayed empty until the user clicked a
+     * nav item. Render the default "library" view up front so
+     * there's something in the DOM for loadGames()/renderGames()
+     * to fill in once the registry has loaded.
+     */
+    renderView("library");
+
     await loadGames();
 
     await registerServiceWorker();
