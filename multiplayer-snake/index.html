@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
+<meta name="theme-color" content="#060b14">
+<title>Snake Arena</title>
+
+<style>
+:root {
+  --bg: #060b14;
+  --panel: rgba(13, 22, 37, .88);
+  --panel-2: rgba(255, 255, 255, .055);
+  --border: rgba(255, 255, 255, .11);
+  --text: #f2f7ff;
+  --muted: #8da0b7;
+  --green: #35e99a;
+  --blue: #5ba9ff;
+  --yellow: #ffd166;
+  --red: #ff5c75;
+  --purple: #b681ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  color: var(--text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      #17365d 0,
+      transparent 45%
+    ),
+    var(--bg);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+.app {
+  width: min(1250px, 100%);
+  min-height: 100vh;
+  margin: auto;
+  padding: 16px;
+
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 12px;
+}
+
+.topbar,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, .35);
+
+  backdrop-filter: blur(18px);
+}
+
+.topbar {
+  min-height: 60px;
+  padding: 12px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+
+  display: grid;
+  place-items: center;
+
+  color: #04100a;
+  font-weight: 900;
+
+  background: var(--green);
+  box-shadow: 0 0 25px rgba(53, 233, 154, .35);
+}
+
+.title {
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.connection {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.connection.online {
+  color: var(--green);
+}
+
+.main {
+  min-height: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 12px;
+}
+
+.arena {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+
+  display: grid;
+  place-items: center;
+
+  padding: 6px;
+
+  border: 1px solid var(--border);
+  border-radius: 22px;
+
+  background: #030810;
+  box-shadow:
+    inset 0 0 70px rgba(0, 0, 0, .5),
+    0 30px 100px rgba(0, 0, 0, .45);
+}
+
+canvas {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  border-radius: 16px;
+}
+
+.sidebar {
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel {
+  padding: 14px;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  color: var(--muted);
+}
+
+.leaderboard {
+  display: grid;
+  gap: 7px;
+}
+
+.player {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 8px;
+  align-items: center;
+
+  padding: 9px;
+
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+
+.player.dead {
+  opacity: .38;
+}
+
+.rank {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.player-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.player-score {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.effect {
+  padding: 4px 7px;
+  border-radius: 7px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  background: var(--panel-2);
+}
+
+.help {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.overlay {
+  position: absolute;
+  inset: 6px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 16px;
+
+  background: rgba(3, 8, 16, .82);
+  backdrop-filter: blur(12px);
+
+  z-index: 5;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.card {
+  width: min(430px, 90%);
+
+  padding: 30px;
+
+  border-radius: 20px;
+
+  text-align: center;
+
+  border: 1px solid var(--border);
+  background: var(--panel);
+
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
+}
+
+.card h1 {
+  margin: 5px 0 10px;
+  font-size: 30px;
+}
+
+.card p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.form {
+  display: flex;
+  gap: 7px;
+  margin-top: 20px;
+}
+
+input {
+  min-width: 0;
+  flex: 1;
+
+  padding: 12px 13px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  outline: 0;
+
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+}
+
+input:focus {
+  border-color: var(--green);
+}
+
+.primary {
+  padding: 12px 17px;
+
+  color: #04100a;
+  font-weight: 800;
+
+  border-radius: 10px;
+  cursor: pointer;
+
+  background: var(--green);
+}
+
+.secondary {
+  margin-top: 8px;
+
+  padding: 9px 13px;
+
+  color: var(--text);
+  font-weight: 700;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: var(--panel-2);
+  cursor: pointer;
+}
+
+#mobileControls {
+  display: none;
+}
+
+@media (max-width: 850px) {
+  body {
+    overflow: auto;
+  }
+
+  .app {
+    min-height: 100svh;
+  }
+
+  .main {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(400px, 1fr) auto;
+  }
+
+  .sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .panel:last-child {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .app {
+    padding: 8px;
+  }
+
+  .topbar {
+    min-height: 52px;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .main {
+    grid-template-rows: minmax(330px, 60vh) auto;
+  }
+
+  .sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  #mobileControls {
+    display: grid;
+
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(2, 48px);
+
+    justify-content: center;
+    gap: 5px;
+
+    margin-top: 8px;
+  }
+
+  #mobileControls button {
+    color: var(--text);
+    border-radius: 10px;
+    background: rgba(255,255,255,.08);
+  }
+
+  #mobileControls button:nth-child(1) {
+    grid-column: 2;
+  }
+
+  #mobileControls button:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  #mobileControls button:nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  #mobileControls button:nth-child(4) {
+    grid-column: 3;
+    grid-row: 2;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">S</div>
+
+      <div>
+        <div class="title">Snake Arena</div>
+        <div class="subtitle">
+          Server-authoritative multiplayer
+        </div>
+      </div>
+    </div>
+
+    <div id="connection" class="connection">
+      Connecting…
+    </div>
+  </header>
+
+  <main class="main">
+
+    <section class="arena">
+
+      <canvas id="game"></canvas>
+
+      <div id="overlay" class="overlay">
+        <div class="card">
+
+          <div class="subtitle">
+            GLOBAL ARENA
+          </div>
+
+          <h1 id="overlayTitle">
+            Enter the arena
+          </h1>
+
+          <p id="overlayText">
+            Choose a username to join the live multiplayer game.
+          </p>
+
+          <form id="joinForm" class="form">
+            <input
+              id="username"
+              maxlength="16"
+              autocomplete="nickname"
+              placeholder="Username"
+              required
+            >
+
+            <button class="primary">
+              Join
+            </button>
+          </form>
+
+          <button
+            id="retry"
+            class="secondary"
+            hidden
+          >
+            Retry
+          </button>
+
+        </div>
+      </div>
+
+      <div id="mobileControls">
+        <button data-direction="up">▲</button>
+        <button data-direction="left">◀</button>
+        <button data-direction="down">▼</button>
+        <button data-direction="right">▶</button>
+      </div>
+
+    </section>
+
+    <aside class="sidebar">
+
+      <section class="panel">
+        <h2>Leaderboard</h2>
+        <div id="leaderboard" class="leaderboard"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Controls</h2>
+
+        <div class="help">
+          <strong>Move</strong><br>
+          WASD / Arrow Keys
+          <br><br>
+
+          <strong>Power-ups</strong><br>
+          ⚡ Speed<br>
+          ◇ Reverse controls<br>
+          ✦ 2× points
+        </div>
+      </section>
+
+    </aside>
+
+  </main>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+"use strict";
+
+const socket = io({
+  transports: ["websocket", "polling"]
+});
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d", {
+  alpha: false,
+  desynchronized: true
+});
+
+const overlay = document.getElementById("overlay");
+const overlayTitle = document.getElementById("overlayTitle");
+const overlayText = document.getElementById("overlayText");
+
+const joinForm = document.getElementById("joinForm");
+const usernameInput = document.getElementById("username");
+const retryButton = document.getElementById("retry");
+
+const connection = document.getElementById("connection");
+const leaderboard = document.getElementById("leaderboard");
+
+const state = {
+  id: null,
+  username: null,
+
+  grid: {
+    width: 80,
+    height: 50
+  },
+
+  snakes: new Map(),
+  food: new Map(),
+  powerups: new Map(),
+
+  leaderboard: [],
+
+  lastServerTick: 0,
+  renderTime: 0,
+
+  cellSize: 10,
+  offsetX: 0,
+  offsetY: 0
+};
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+
+  const dpr = Math.min(
+    window.devicePixelRatio || 1,
+    2
+  );
+
+  canvas.width = Math.floor(rect.width * dpr);
+  canvas.height = Math.floor(rect.height * dpr);
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+  const width = rect.width;
+  const height = rect.height;
+
+  state.cellSize = Math.max(
+    4,
+    Math.min(
+      width / state.grid.width,
+      height / state.grid.height
+    )
+  );
+
+  state.offsetX =
+    (width - state.grid.width * state.cellSize) / 2;
+
+  state.offsetY =
+    (height - state.grid.height * state.cellSize) / 2;
+}
+
+new ResizeObserver(resizeCanvas)
+  .observe(canvas);
+
+window.addEventListener(
+  "resize",
+  resizeCanvas
+);
+
+function setOverlay(
+  title,
+  text,
+  showForm = false
+) {
+  overlayTitle.textContent = title;
+  overlayText.textContent = text;
+
+  joinForm.hidden = !showForm;
+  retryButton.hidden = showForm;
+
+  overlay.classList.remove("hidden");
+}
+
+function hideOverlay() {
+  overlay.classList.add("hidden");
+}
+
+function setConnection(online) {
+  connection.textContent =
+    online ? "● Connected" : "○ Disconnected";
+
+  connection.classList.toggle(
+    "online",
+    online
+  );
+}
+
+socket.on("connect", () => {
+  setConnection(true);
+
+  if (state.username) {
+    socket.emit("join", {
+      username: state.username
+    });
+  } else {
+    setOverlay(
+      "Enter the arena",
+      "Choose a username to join the live multiplayer game.",
+      true
+    );
+  }
+});
+
+socket.on("disconnect", () => {
+  setConnection(false);
+
+  setOverlay(
+    "Connection lost",
+    "The connection to the game server was lost.",
+    false
+  );
+
+  retryButton.hidden = false;
+});
+
+socket.on("connect_error", () => {
+  setConnection(false);
+
+  setOverlay(
+    "Server unavailable",
+    "Unable to connect to the multiplayer server.",
+    false
+  );
+
+  retryButton.hidden = false;
+});
+
+socket.on("hello", data => {
+  if (data.grid) {
+    state.grid = data.grid;
+    resizeCanvas();
+  }
+});
+
+socket.on("joinError", data => {
+  setOverlay(
+    "Unable to join",
+    data.message || "Unable to join the arena.",
+    true
+  );
+});
+
+socket.on("joined", data => {
+  state.id = data.id;
+  state.username = data.username;
+
+  hideOverlay();
+});
+
+socket.on("state", packet => {
+  applyState(packet);
+});
+
+function applyState(packet) {
+  if (packet.full) {
+    const snapshot = packet.state;
+
+    state.lastServerTick =
+      snapshot.tick;
+
+    state.grid =
+      snapshot.grid;
+
+    replaceCollection(
+      state.snakes,
+      snapshot.snakes,
+      snake => snake.id
+    );
+
+    replaceCollection(
+      state.food,
+      snapshot.food,
+      item => item.id
+    );
+
+    replaceCollection(
+      state.powerups,
+      snapshot.powerups,
+      item => item.id
+    );
+
+    state.leaderboard =
+      snapshot.leaderboard;
+
+    resizeCanvas();
+    updateLeaderboard();
+
+    return;
+  }
+
+  state.lastServerTick =
+    packet.tick;
+
+  replaceCollection(
+    state.snakes,
+    packet.snakes,
+    snake => snake.id
+  );
+
+  replaceCollection(
+    state.food,
+    packet.food,
+    item => item.id
+  );
+
+  replaceCollection(
+    state.powerups,
+    packet.powerups,
+    item => item.id
+  );
+
+  state.leaderboard =
+    packet.leaderboard;
+
+  updateLeaderboard();
+
+  const me = state.snakes.get(state.id);
+
+  if (
+    state.id &&
+    me &&
+    !me.alive
+  ) {
+    setOverlay(
+      "You crashed",
+      `Final score: ${me.score}. Reconnect to play again.`,
+      false
+    );
+  }
+}
+
+function replaceCollection(
+  map,
+  array,
+  getId
+) {
+  const nextIds = new Set();
+
+  for (const item of array || []) {
+    const id = getId(item);
+
+    nextIds.add(id);
+    map.set(id, item);
+  }
+
+  for (const id of map.keys()) {
+    if (!nextIds.has(id)) {
+      map.delete(id);
+    }
+  }
+}
+
+function updateLeaderboard() {
+  leaderboard.innerHTML = "";
+
+  for (
+    let i = 0;
+    i < state.leaderboard.length;
+    i++
+  ) {
+    const player =
+      state.leaderboard[i];
+
+    const row =
+      document.createElement("div");
+
+    row.className =
+      "player" +
+      (player.alive ? "" : " dead");
+
+    const rank =
+      document.createElement("div");
+
+    rank.className = "rank";
+    rank.textContent =
+      `#${i + 1}`;
+
+    const name =
+      document.createElement("div");
+
+    name.className =
+      "player-name";
+
+    name.textContent =
+      player.username +
+      (player.bot ? " · BOT" : "");
+
+    const score =
+      document.createElement("div");
+
+    score.className =
+      "player-score";
+
+    score.textContent =
+      player.score;
+
+    row.append(
+      rank,
+      name,
+      score
+    );
+
+    leaderboard.appendChild(row);
+  }
+}
+
+function sendDirection(direction) {
+  if (!socket.connected) return;
+
+  socket.emit("input", {
+    direction
+  });
+}
+
+const keyMap = {
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+
+  w: "up",
+  W: "up",
+  s: "down",
+  S: "down",
+  a: "left",
+  A: "left",
+  d: "right",
+  D: "right"
+};
+
+window.addEventListener("keydown", event => {
+  const direction =
+    keyMap[event.key];
+
+  if (!direction) return;
+
+  event.preventDefault();
+
+  sendDirection(direction);
+});
+
+document
+  .querySelectorAll("#mobileControls button")
+  .forEach(button => {
+    button.addEventListener(
+      "pointerdown",
+      event => {
+        event.preventDefault();
+
+        sendDirection(
+          button.dataset.direction
+        );
+      }
+    );
+  });
+
+joinForm.addEventListener(
+  "submit",
+  event => {
+    event.preventDefault();
+
+    const username =
+      usernameInput.value
+        .trim()
+        .slice(0, 16);
+
+    if (!username) {
+      usernameInput.focus();
+      return;
+    }
+
+    state.username = username;
+
+    socket.emit("join", {
+      username
+    });
+  }
+);
+
+retryButton.addEventListener(
+  "click",
+  () => {
+    if (!socket.connected) {
+      socket.connect();
+    } else if (state.username) {
+      socket.emit("join", {
+        username: state.username
+      });
+    }
+  }
+);
+
+function roundRect(
+  x,
+  y,
+  width,
+  height,
+  radius
+) {
+  ctx.beginPath();
+
+  ctx.roundRect(
+    x,
+    y,
+    width,
+    height,
+    radius
+  );
+
+  ctx.fill();
+}
+
+function drawBackground(
+  width,
+  height
+) {
+  ctx.fillStyle = "#030810";
+  ctx.fillRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+  const {
+    cellSize,
+    offsetX,
+    offsetY
+  } = state;
+
+  ctx.strokeStyle =
+    "rgba(255,255,255,.035)";
+
+  ctx.lineWidth = 1;
+
+  for (
+    let x = 0;
+    x <= state.grid.width;
+    x++
+  ) {
+    ctx.beginPath();
+
+    ctx.moveTo(
+      offsetX + x * cellSize,
+      offsetY
+    );
+
+    ctx.lineTo(
+      offsetX + x * cellSize,
+      offsetY +
+        state.grid.height *
+        cellSize
+    );
+
+    ctx.stroke();
+  }
+
+  for (
+    let y = 0;
+    y <= state.grid.height;
+    y++
+  ) {
+    ctx.beginPath();
+
+    ctx.moveTo(
+      offsetX,
+      offsetY + y * cellSize
+    );
+
+    ctx.lineTo(
+      offsetX +
+        state.grid.width *
+        cellSize,
+      offsetY + y * cellSize
+    );
+
+    ctx.stroke();
+  }
+}
+
+function drawFood() {
+  const {
+    cellSize,
+    offsetX,
+    offsetY
+  } = state;
+
+  ctx.save();
+
+  for (const food of state.food.values()) {
+    const x =
+      offsetX +
+      (food.x + .5) * cellSize;
+
+    const y =
+      offsetY +
+      (food.y + .5) * cellSize;
+
+    ctx.fillStyle =
+      "#ff5c75";
+
+    ctx.shadowColor =
+      "#ff5c75";
+
+    ctx.shadowBlur =
+      Math.min(20, cellSize);
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      cellSize * .23,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawPowerups() {
+  const {
+    cellSize,
+    offsetX,
+    offsetY
+  } = state;
+
+  const colors = {
+    speed: "#b681ff",
+    reverse: "#5ba9ff",
+    multiplier: "#ffd166"
+  };
+
+  const glyphs = {
+    speed: "⚡",
+    reverse: "↺",
+    multiplier: "2×"
+  };
+
+  ctx.save();
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font =
+    `800 ${Math.max(9, cellSize * .48)}px system-ui`;
+
+  for (const power of state.powerups.values()) {
+    const x =
+      offsetX +
+      (power.x + .5) *
+      cellSize;
+
+    const y =
+      offsetY +
+      (power.y + .5) *
+      cellSize;
+
+    ctx.fillStyle =
+      colors[power.type];
+
+    ctx.shadowColor =
+      colors[power.type];
+
+    ctx.shadowBlur =
+      Math.min(16, cellSize);
+
+    roundRect(
+      offsetX +
+        power.x * cellSize +
+        cellSize * .18,
+
+      offsetY +
+        power.y * cellSize +
+        cellSize * .18,
+
+      cellSize * .64,
+      cellSize * .64,
+      cellSize * .12
+    );
+
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#07101c";
+
+    ctx.fillText(
+      glyphs[power.type],
+      x,
+      y
+    );
+  }
+
+  ctx.restore();
+}
+
+function drawSnakes() {
+  const {
+    cellSize,
+    offsetX,
+    offsetY
+  } = state;
+
+  const colors = {
+    p1: "#35e99a",
+    p2: "#5ba9ff",
+    bot: "#ffd166"
+  };
+
+  for (const snake of state.snakes.values()) {
+    const color =
+      colors[
+        snake.bot
+          ? "bot"
+          : snake.id === state.id
+            ? "p1"
+            : "p2"
+      ] || "#fff";
+
+    ctx.save();
+
+    ctx.globalAlpha =
+      snake.alive ? 1 : .25;
+
+    for (
+      let i = snake.body.length - 1;
+      i >= 0;
+      i--
+    ) {
+      const segment =
+        snake.body[i];
+
+      const isHead =
+        i === 0;
+
+      const padding =
+        isHead
+          ? cellSize * .08
+          : cellSize * .13;
+
+      ctx.fillStyle = color;
+
+      ctx.shadowColor =
+        color;
+
+      ctx.shadowBlur =
+        isHead
+          ? Math.min(15, cellSize)
+          : Math.min(7, cellSize);
+
+      roundRect(
+        offsetX +
+          segment.x * cellSize +
+          padding,
+
+        offsetY +
+          segment.y * cellSize +
+          padding,
+
+        cellSize -
+          padding * 2,
+
+        cellSize -
+          padding * 2,
+
+        isHead
+          ? cellSize * .2
+          : cellSize * .13
+      );
+    }
+
+    if (
+      snake.effects &&
+      snake.effects.speed > 0
+    ) {
+      ctx.strokeStyle =
+        "#b681ff";
+
+      ctx.lineWidth = 2;
+
+      const h = snake.body[0];
+
+      ctx.beginPath();
+
+      ctx.arc(
+        offsetX +
+          (h.x + .5) *
+          cellSize,
+
+        offsetY +
+          (h.y + .5) *
+          cellSize,
+
+        cellSize * .48,
+
+        0,
+        Math.PI * 2
+      );
+
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+}
+
+function render() {
+  const rect =
+    canvas.getBoundingClientRect();
+
+  const width = rect.width;
+  const height = rect.height;
+
+  drawBackground(
+    width,
+    height
+  );
+
+  drawFood();
+  drawPowerups();
+  drawSnakes();
+}
+
+function animationLoop(time) {
+  state.renderTime = time;
+
+  render();
+
+  requestAnimationFrame(
+    animationLoop
+  );
+}
+
+resizeCanvas();
+requestAnimationFrame(animationLoop);
+</script>
+
+</body>
+</html>
