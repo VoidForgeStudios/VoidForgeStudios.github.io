@@ -209,7 +209,12 @@ img {
   background: var(--panel-light);
 }
 
-.nav-item.is-active {
+/*
+ * The launcher toggles both "active" and "is-active" when switching
+ * views via setupNavigation() — support both.
+ */
+.nav-item.is-active,
+.nav-item.active {
   color: var(--text);
   background: var(--panel-light);
   box-shadow: inset 3px 0 var(--accent);
@@ -273,6 +278,23 @@ img {
 .connection small {
   margin-top: 3px;
   font-size: 10px;
+}
+
+/*
+ * setupConnectionStatus() in the JS toggles "online"/"offline" on
+ * #connectionStatus, .connection-status or [data-connection-status] —
+ * give those states an actual color.
+ */
+#connectionStatus.online,
+.connection-status.online,
+[data-connection-status].online {
+  color: var(--accent);
+}
+
+#connectionStatus.offline,
+.connection-status.offline,
+[data-connection-status].offline {
+  color: var(--danger);
 }
 
 .support-link {
@@ -445,11 +467,16 @@ img {
   display: none;
 }
 
-/* =========================
-   LIBRARY VIEW
-   ========================= */
+/* =========================================================
+   LAUNCHER VIEWS
+   (renderView() always wraps the current view in a
+   <section class="launcher-view <name>-view">, e.g.
+   "launcher-view library-view" or "launcher-view discover-view".
+   Keep the shared layout on .launcher-view and let the modifier
+   classes hang off it without needing their own rules.)
+   ========================================================= */
 
-.library-view {
+.launcher-view {
   max-width: 1100px;
   margin: 0 auto;
 
@@ -478,6 +505,7 @@ img {
 
 h1,
 h2,
+h3,
 p {
   margin-top: 0;
 }
@@ -500,7 +528,7 @@ h1 {
    ========================= */
 
 .primary-button,
-.play-button {
+.play-game {
   border: 0;
   border-radius: 6px;
 
@@ -519,20 +547,21 @@ h1 {
 }
 
 .primary-button:hover,
-.play-button:hover {
+.play-game:hover {
   background: var(--accent-strong);
 }
 
 .primary-button:active,
-.play-button:active {
+.play-game:active {
   transform: translateY(1px);
 }
 
 /* =========================
    GAME GRID
+   (createLauncherView() builds <div class="games-grid" id="gamesGrid">)
    ========================= */
 
-.game-grid {
+.games-grid {
   display: grid;
   grid-template-columns: repeat(
     auto-fit,
@@ -542,6 +571,9 @@ h1 {
 }
 
 .game-card {
+  display: flex;
+  flex-direction: column;
+
   overflow: hidden;
 
   border: 1px solid var(--line);
@@ -562,17 +594,18 @@ h1 {
 }
 
 /* =========================
-   GAME ART
+   GAME CARD IMAGE
+   (wraps either a real <img> or, on load failure / when no
+   image is set, gets the "game-card-placeholder" modifier plus
+   a single-letter <span>)
    ========================= */
 
-.game-art {
+.game-card-image {
+  position: relative;
+
   min-height: 155px;
 
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-
-  padding: 18px;
+  overflow: hidden;
 
   background:
     linear-gradient(
@@ -583,7 +616,22 @@ h1 {
     );
 }
 
-.game-art span {
+.game-card-image img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.game-card-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-card-placeholder span {
   color: var(--accent-strong);
 
   font-size: 76px;
@@ -591,34 +639,58 @@ h1 {
   line-height: 0.8;
 }
 
-.game-art b {
+/* =========================
+   GAME CARD CONTENT
+   ========================= */
+
+.game-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  padding: 21px;
+}
+
+.game-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-card-title {
+  margin-bottom: 4px;
+
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.game-card-subtitle {
+  margin-top: 4px;
+
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.game-status {
+  flex: 0 0 auto;
+
   padding: 5px 9px;
 
   border: 1px solid rgba(182, 245, 217, 0.4);
   border-radius: 20px;
 
   color: var(--accent-strong);
+  background: rgba(115, 224, 178, 0.08);
 
   font-size: 10px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-/* =========================
-   GAME CARD BODY
-   ========================= */
+.game-card-description {
+  margin-top: 12px;
 
-.game-card-body {
-  padding: 21px;
-}
-
-.game-card h2 {
-  margin-bottom: 8px;
-
-  font-size: 24px;
-  line-height: 1.15;
-}
-
-.game-card p:not(.eyebrow) {
   min-height: 42px;
 
   color: var(--muted);
@@ -627,15 +699,19 @@ h1 {
   line-height: 1.5;
 }
 
-.tag-row {
+/* =========================
+   TAGS
+   ========================= */
+
+.game-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 
-  margin: 18px 0;
+  margin: 18px 0 0;
 }
 
-.tag-row span {
+.game-tag {
   padding: 4px 7px;
 
   border: 1px solid var(--line);
@@ -647,28 +723,33 @@ h1 {
 }
 
 /* =========================
-   PLAY BUTTON
+   GAME CARD FOOTER
    ========================= */
 
-.play-button {
-  width: 100%;
-
+.game-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 
-  padding: 11px 13px;
+  margin-top: auto;
+  padding-top: 18px;
+}
 
-  text-align: left;
+.game-platform {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.play-game {
+  padding: 9px 16px;
+
+  font-size: 13px;
 }
 
 /* =========================
-   SIMPLE / EMPTY VIEWS
+   EMPTY STATE
    ========================= */
-
-.simple-view {
-  padding-top: 100px;
-}
 
 .empty-state {
   grid-column: 1 / -1;
@@ -956,23 +1037,21 @@ h1 {
 }
 
 /* =========================
-   TOASTS
+   TOAST
+   (showToast() creates a single reusable <div id="vfToast"
+   class="vf-toast"> and toggles the "show" class — style that
+   element directly instead of the old, unused .toast-region
+   markup.)
    ========================= */
 
-.toast-region {
+.vf-toast {
   position: fixed;
   z-index: 50;
 
   right: 20px;
   bottom: 20px;
 
-  pointer-events: none;
-}
-
-.toast {
   max-width: min(360px, calc(100vw - 40px));
-
-  margin: 0 0 8px;
 
   padding: 12px 15px;
 
@@ -987,19 +1066,19 @@ h1 {
   font-size: 13px;
   line-height: 1.4;
 
-  animation: toast-in 0.2s ease-out;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+
+  transition:
+    opacity var(--transition),
+    transform var(--transition);
 }
 
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.vf-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 /* =========================================================
@@ -1016,7 +1095,7 @@ h1 {
     padding: 0 24px;
   }
 
-  .library-view {
+  .launcher-view {
     padding-right: 24px;
     padding-left: 24px;
   }
@@ -1119,9 +1198,9 @@ h1 {
     font-size: 10px;
   }
 
-  /* Library */
+  /* Launcher views */
 
-  .library-view {
+  .launcher-view {
     padding: 42px 20px 96px;
   }
 
@@ -1132,7 +1211,7 @@ h1 {
     margin-bottom: 24px;
   }
 
-  .game-grid {
+  .games-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1178,7 +1257,7 @@ h1 {
     display: none;
   }
 
-  .library-view {
+  .launcher-view {
     padding-right: 16px;
     padding-left: 16px;
   }
@@ -1187,11 +1266,11 @@ h1 {
     font-size: 40px;
   }
 
-  .game-art {
+  .game-card-image {
     min-height: 135px;
   }
 
-  .game-art span {
+  .game-card-placeholder span {
     font-size: 60px;
   }
 
