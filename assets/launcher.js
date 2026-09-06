@@ -440,7 +440,7 @@
 
     const card = createElement(
       "article",
-      "game-card"
+      "game-card-body"
     );
 
     card.dataset.gameId = String(game.id);
@@ -451,7 +451,7 @@
 
     const imageWrapper = createElement(
       "div",
-      "game-card-image"
+      "game-art"
     );
 
     const imageSource = getSafeImageUrl(
@@ -522,7 +522,7 @@
 
     const header = createElement(
       "div",
-      "game-card-header"
+      "game-card"
     );
 
     const headingGroup = createElement(
