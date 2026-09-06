@@ -70,6 +70,7 @@
 
     return String(entry)
       .trim()
+      .replace(/^\.\/+/, "")
       .replace(/^\/+/, "")
       .replace(/\/+$/, "");
   }
@@ -133,7 +134,7 @@
      GAME REGISTRY
      
      Primary source:
-       /games.json
+       ./games.json (or #embeddedGameRegistry)
   ========================================================= */
 
   function validateGames(data) {
@@ -157,21 +158,46 @@
     });
   }
 
-  function getEmbeddedGames() {
+  function getRegistryPath() {
     const embedded = $("#embeddedGameRegistry");
 
     if (!embedded) {
-      return null;
+      return "./games.json";
     }
 
     try {
       const parsed = JSON.parse(embedded.textContent.trim());
 
-      if (Array.isArray(parsed)) {
-        return validateGames(parsed);
+      if (typeof parsed === "string" && parsed.trim()) {
+        return parsed;
       }
 
-      return null;
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        !Array.isArray(parsed) &&
+        typeof parsed.source === "string" &&
+        parsed.source.trim()
+      ) {
+        return parsed.source;
+      }
+    } catch {
+      // The default path below also keeps the launcher usable when this
+      // optional configuration is malformed.
+    }
+
+    return "./games.json";
+  }
+
+  function getEmbeddedGames() {
+    const embedded = $("#embeddedGameRegistry");
+
+    if (!embedded) return null;
+
+    try {
+      const parsed = JSON.parse(embedded.textContent.trim());
+
+      return Array.isArray(parsed) ? validateGames(parsed) : null;
     } catch {
       return null;
     }
@@ -179,19 +205,14 @@
 
   async function loadGames() {
     try {
-      /*
-       * Always load the registry from the website root.
-       *
-       * Example:
-       * https://your-domain.com/games.json
-       */
-      const response = await fetch("/games.json", {
+      const registryPath = getRegistryPath();
+      const response = await fetch(registryPath, {
         cache: "no-cache"
       });
 
       if (!response.ok) {
         throw new Error(
-          `Unable to load games.json (${response.status})`
+          `Unable to load ${registryPath} (${response.status})`
         );
       }
 
@@ -200,14 +221,14 @@
       games = validateGames(data);
 
       console.log(
-        `[VoidForge] Loaded ${games.length} game(s) from /games.json`
+        `[VoidForge] Loaded ${games.length} game(s) from ${registryPath}`
       );
 
       renderGames();
 
       return games;
     } catch (error) {
-      console.error("[VoidForge] Failed to load /games.json:", error);
+      console.error("[VoidForge] Failed to load the game registry:", error);
 
       /*
        * Backwards-compatible fallback.
@@ -227,7 +248,7 @@
         renderGames();
 
         showToast(
-          "Using the embedded game registry because games.json could not be loaded."
+          "Using the embedded game registry because the game registry could not be loaded."
         );
 
         return games;
@@ -719,11 +740,11 @@
         if (!view) return;
 
         navItems.forEach((nav) => {
-          nav.classList.remove("active");
+          nav.classList.remove("active", "is-active");
           nav.setAttribute("aria-current", "false");
         });
 
-        item.classList.add("active");
+        item.classList.add("active", "is-active");
         item.setAttribute("aria-current", "page");
 
         renderView(view);
@@ -901,7 +922,7 @@
 
   function setupLauncherFullscreen() {
     const buttons = $$(
-      '[data-action="fullscreen"], #fullscreenButton, #launcherFullscreen'
+      '[data-action="fullscreen"], #fullscreenButton, #launcherFullscreen, #fullscreenLauncher'
     );
 
     buttons.forEach((button) => {
@@ -932,6 +953,7 @@
 
   function setupMobileMenu() {
     const menuButton =
+      $("#mobileMenu") ||
       $("#mobileMenuButton") ||
       $("#menuButton") ||
       $('[data-action="menu"]');
@@ -945,11 +967,11 @@
     }
 
     menuButton.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
+      document.body.classList.toggle("nav-open");
 
       menuButton.setAttribute(
         "aria-expanded",
-        sidebar.classList.contains("open")
+        document.body.classList.contains("nav-open")
           ? "true"
           : "false"
       );
@@ -960,7 +982,7 @@
       sidebar
     ).forEach((item) => {
       item.addEventListener("click", () => {
-        sidebar.classList.remove("open");
+        document.body.classList.remove("nav-open");
       });
     });
   }
@@ -1068,7 +1090,7 @@
     /*
      * Load the registry from:
      *
-     * /games.json
+     * ./games.json (or the source declared in #embeddedGameRegistry)
      */
     await loadGames();
 

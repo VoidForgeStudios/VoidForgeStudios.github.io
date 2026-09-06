@@ -1,4 +1,4 @@
-const CACHE = "voidforge-shell-v3";
+const CACHE = "voidforge-shell-v4";
 const SHELL = ["./", "./index.html", "./assets/launcher.css", "./assets/launcher.js", "./assets/voidforge-mark.svg", "./games.json", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
@@ -11,9 +11,7 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET" || new URL(event.request.url).origin !== location.origin) return;
-  const url = new URL(event.request.url);
-  // Game files are intentionally network-first: large game resources are not blindly cached by the launcher.
-  if (url.pathname.includes("/minecraft/")) return;
-  // Only the explicit shell list is cached; other requests keep their normal network behavior.
+  // Only the explicit launcher shell is cached. Every game entry and asset is
+  // therefore fetched normally, rather than treating Minecraft as a special case.
   event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
 });
