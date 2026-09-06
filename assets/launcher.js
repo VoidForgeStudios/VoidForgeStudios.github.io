@@ -883,13 +883,3 @@
   loadGames();
 
 })();
-```
-
-### Your HTML
-
-Use this instead of the old hardcoded Minecraft array:
-
-```html
-<script id="embeddedGameRegistry" type="application/json">
-  "./games.json"
-</script>
