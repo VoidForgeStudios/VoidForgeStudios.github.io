@@ -9,5 +9,16 @@
     "status": "Available",
     "tags": ["Voxel", "3D", "Sandbox"],
     "description": "A browser-based Minecraft-style game."
+  },
+    {
+    "id": "snake",
+    "name": "Multiplayer Snake",
+    "subtitle": "Snake",
+    "entry": "multiplayer-snake",
+    "version": "1.0.0",
+    "platform": "Browser",
+    "status": "Available",
+    "tags": ["Snake", "2D", "Sandbox"],
+    "description": "A browser-based Snake-style game."
   }
 ]
