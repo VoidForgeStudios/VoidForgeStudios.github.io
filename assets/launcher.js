@@ -97,19 +97,6 @@
 
     let value = String(entry).trim();
 
-    /*
-     * Game entries are local directories. Do not allow:
-     *
-     *   javascript:
-     *   data:
-     *   https://...
-     *   //external-site...
-     *   /absolute/path
-     *   ../outside
-     *
-     * This keeps the launcher constrained to its own game folders.
-     */
-
     value = value
       .replace(/^\.\/+/, "")
       .replace(/^\/+/, "")
@@ -177,9 +164,6 @@
       return;
     }
 
-    /*
-     * Use textContent rather than innerHTML.
-     */
     gameError.textContent = String(message ?? "");
   }
 
@@ -206,9 +190,6 @@
         document.baseURI
       );
 
-      /*
-       * Only permit normal web/local resources.
-       */
       if (
         url.protocol !== "http:" &&
         url.protocol !== "https:"
@@ -282,9 +263,7 @@
         return sanitizeRegistryPath(parsed.source);
       }
     } catch {
-      /*
-       * Fall back to the default registry.
-       */
+      // Fall back to default registry.
     }
 
     return "./games.json";
@@ -293,20 +272,6 @@
   function sanitizeRegistryPath(value) {
     const path = String(value).trim();
 
-    /*
-     * The registry should be local to the launcher.
-     *
-     * Allow:
-     *   ./games.json
-     *   games.json
-     *   ./config/games.json
-     *
-     * Reject:
-     *   javascript:
-     *   data:
-     *   https://...
-     *   //
-     */
     if (
       !path ||
       path.includes("\\") ||
@@ -373,9 +338,6 @@
         error
       );
 
-      /*
-       * Backwards-compatible embedded registry fallback.
-       */
       const fallbackGames = getEmbeddedGames();
 
       if (
@@ -412,10 +374,19 @@
   /* =========================================================
      GAME CARD CREATION
      
-     IMPORTANT:
-     No dynamic innerHTML is used here.
-     All game-controlled values are assigned with textContent,
-     attributes, or dataset.
+     CSS / DOM STRUCTURE:
+
+     article.game-card
+       ├── div.game-card-image
+       └── div.game-card-content
+           ├── div.game-card-header
+           │   ├── title/subtitle
+           │   └── span.game-status
+           ├── p.game-card-description
+           ├── div.game-tags
+           └── div.game-card-footer
+               ├── span.game-platform
+               └── button.play-game
   ========================================================= */
 
   function createGameCard(game) {
@@ -427,7 +398,6 @@
 
     const subtitle =
       game.subtitle ||
-      game.description ||
       "";
 
     const status =
@@ -438,9 +408,14 @@
       game.platform ||
       "Browser";
 
+    /*
+     * FIX:
+     * The outer card must use .game-card because
+     * that is what the stylesheet targets.
+     */
     const card = createElement(
       "article",
-      "game-card-body"
+      "game-card"
     );
 
     card.dataset.gameId = String(game.id);
@@ -449,9 +424,13 @@
        IMAGE
     ------------------------------------------------------- */
 
+    /*
+     * FIX:
+     * .game-art -> .game-card-image
+     */
     const imageWrapper = createElement(
       "div",
-      "game-art"
+      "game-card-image"
     );
 
     const imageSource = getSafeImageUrl(
@@ -467,9 +446,6 @@
       image.alt = String(title);
       image.loading = "lazy";
 
-      /*
-       * Prevent broken images from making the card ugly.
-       */
       image.addEventListener(
         "error",
         () => {
@@ -520,9 +496,14 @@
       "game-card-content"
     );
 
+    /*
+     * FIX:
+     * This was incorrectly "game-card".
+     * It must be "game-card-header".
+     */
     const header = createElement(
       "div",
-      "game-card"
+      "game-card-header"
     );
 
     const headingGroup = createElement(
@@ -535,7 +516,9 @@
       title
     );
 
-    headingGroup.appendChild(titleElement);
+    headingGroup.appendChild(
+      titleElement
+    );
 
     if (subtitle) {
       headingGroup.appendChild(
@@ -547,7 +530,9 @@
       );
     }
 
-    header.appendChild(headingGroup);
+    header.appendChild(
+      headingGroup
+    );
 
     header.appendChild(
       createElement(
@@ -557,7 +542,9 @@
       )
     );
 
-    content.appendChild(header);
+    content.appendChild(
+      header
+    );
 
     /* -------------------------------------------------------
        DESCRIPTION
@@ -604,7 +591,9 @@
         );
       });
 
-      content.appendChild(tagContainer);
+      content.appendChild(
+        tagContainer
+      );
     }
 
     /* -------------------------------------------------------
@@ -631,6 +620,7 @@
     );
 
     playButton.type = "button";
+
     playButton.dataset.gameId =
       String(game.id);
 
@@ -638,18 +628,33 @@
       "click",
       (event) => {
         event.stopPropagation();
+
         launchGame(game.id);
       }
     );
 
-    footer.appendChild(playButton);
+    footer.appendChild(
+      playButton
+    );
 
-    content.appendChild(footer);
-    card.appendChild(imageWrapper);
-    card.appendChild(content);
+    content.appendChild(
+      footer
+    );
+
+    /* -------------------------------------------------------
+       FINAL CARD
+    ------------------------------------------------------- */
+
+    card.appendChild(
+      imageWrapper
+    );
+
+    card.appendChild(
+      content
+    );
 
     /*
-     * Double-click remains supported.
+     * Double-click launches the game.
      */
     card.addEventListener(
       "dblclick",
@@ -710,17 +715,15 @@
       return;
     }
 
-    /*
-     * Avoid rendering the same DOM element twice
-     * if multiple selectors happen to match it.
-     */
     const uniqueContainers = [
       ...new Set(containers)
     ];
 
-    uniqueContainers.forEach((container) => {
-      renderGameList(container);
-    });
+    uniqueContainers.forEach(
+      (container) => {
+        renderGameList(container);
+      }
+    );
   }
 
   function renderGameList(
@@ -731,12 +734,14 @@
       return;
     }
 
-    const query = String(searchTerm || "")
+    const query = String(
+      searchTerm || ""
+    )
       .trim()
       .toLowerCase();
 
-    const filteredGames = games.filter(
-      (game) => {
+    const filteredGames =
+      games.filter((game) => {
         if (!query) {
           return true;
         }
@@ -756,13 +761,11 @@
           .join(" ")
           .toLowerCase();
 
-        return searchable.includes(query);
-      }
-    );
+        return searchable.includes(
+          query
+        );
+      });
 
-    /*
-     * Remove previous content without HTML parsing.
-     */
     container.replaceChildren();
 
     if (!filteredGames.length) {
@@ -781,13 +784,17 @@
     const fragment =
       document.createDocumentFragment();
 
-    filteredGames.forEach((game) => {
-      fragment.appendChild(
-        createGameCard(game)
-      );
-    });
+    filteredGames.forEach(
+      (game) => {
+        fragment.appendChild(
+          createGameCard(game)
+        );
+      }
+    );
 
-    container.appendChild(fragment);
+    container.appendChild(
+      fragment
+    );
   }
 
   /* =========================================================
@@ -809,7 +816,10 @@
     }
 
     if (!game) {
-      showToast("Game not found.");
+      showToast(
+        "Game not found."
+      );
+
       return;
     }
 
@@ -819,6 +829,7 @@
       showToast(
         "This game does not have a valid entry path."
       );
+
       return;
     }
 
@@ -868,7 +879,10 @@
 
     if (gameView) {
       gameView.hidden = false;
-      gameView.classList.add("active");
+
+      gameView.classList.add(
+        "active"
+      );
     }
 
     document.body.classList.add(
@@ -876,15 +890,12 @@
     );
 
     if (gameFrame) {
-      /*
-       * Reset first when launching the exact
-       * same URL again so the browser definitely
-       * starts a fresh document.
-       */
       if (
-        gameFrame.getAttribute("src") === url
+        gameFrame.getAttribute("src") ===
+        url
       ) {
-        gameFrame.src = "about:blank";
+        gameFrame.src =
+          "about:blank";
 
         requestAnimationFrame(() => {
           if (
@@ -917,13 +928,15 @@
     currentGame = null;
 
     if (gameFrame) {
-      gameFrame.src = "about:blank";
+      gameFrame.src =
+        "about:blank";
     }
 
     if (gameView) {
       gameView.classList.remove(
         "active"
       );
+
       gameView.hidden = true;
     }
 
@@ -946,7 +959,10 @@
   ========================================================= */
 
   function reloadGame() {
-    if (!gameFrame || !currentGame) {
+    if (
+      !gameFrame ||
+      !currentGame
+    ) {
       return;
     }
 
@@ -958,16 +974,15 @@
       showToast(
         "Unable to reload this game."
       );
+
       return;
     }
 
     hideError();
     showLoader(true);
 
-    /*
-     * Force a clean navigation.
-     */
-    gameFrame.src = "about:blank";
+    gameFrame.src =
+      "about:blank";
 
     requestAnimationFrame(() => {
       if (currentGame) {
@@ -985,11 +1000,6 @@
       gameFrame.addEventListener(
         "load",
         () => {
-          /*
-           * about:blank is also a successful load.
-           * Only hide the loader when an actual game
-           * is currently being displayed.
-           */
           if (
             gameFrame.src !==
               "about:blank" &&
@@ -1087,8 +1097,12 @@
     document.addEventListener(
       "keydown",
       (event) => {
-        if (event.key === "Escape") {
-          if (document.fullscreenElement) {
+        if (
+          event.key === "Escape"
+        ) {
+          if (
+            document.fullscreenElement
+          ) {
             document
               .exitFullscreen()
               .catch(() => {});
@@ -1107,10 +1121,6 @@
           return;
         }
 
-        /*
-         * "/" focuses search when the user
-         * isn't already typing.
-         */
         if (
           event.key === "/" &&
           !event.ctrlKey &&
@@ -1155,44 +1165,48 @@
       "[data-view], [data-nav]"
     );
 
-    navItems.forEach((item) => {
-      item.addEventListener(
-        "click",
-        () => {
-          const view =
-            item.dataset.view ||
-            item.dataset.nav;
+    navItems.forEach(
+      (item) => {
+        item.addEventListener(
+          "click",
+          () => {
+            const view =
+              item.dataset.view ||
+              item.dataset.nav;
 
-          if (!view) {
-            return;
-          }
+            if (!view) {
+              return;
+            }
 
-          navItems.forEach((nav) => {
-            nav.classList.remove(
+            navItems.forEach(
+              (nav) => {
+                nav.classList.remove(
+                  "active",
+                  "is-active"
+                );
+
+                nav.setAttribute(
+                  "aria-current",
+                  "false"
+                );
+              }
+            );
+
+            item.classList.add(
               "active",
               "is-active"
             );
 
-            nav.setAttribute(
+            item.setAttribute(
               "aria-current",
-              "false"
+              "page"
             );
-          });
 
-          item.classList.add(
-            "active",
-            "is-active"
-          );
-
-          item.setAttribute(
-            "aria-current",
-            "page"
-          );
-
-          renderView(view);
-        }
-      );
-    });
+            renderView(view);
+          }
+        );
+      }
+    );
   }
 
   function createViewHeading(
@@ -1204,9 +1218,8 @@
       "view-heading"
     );
 
-    const inner = createElement(
-      "div"
-    );
+    const inner =
+      createElement("div");
 
     inner.appendChild(
       createElement(
@@ -1226,7 +1239,9 @@
       );
     }
 
-    heading.appendChild(inner);
+    heading.appendChild(
+      inner
+    );
 
     return heading;
   }
@@ -1236,12 +1251,17 @@
   ) {
     return createElement(
       "section",
-      `launcher-view${className ? ` ${className}` : ""}`
+      `launcher-view${
+        className
+          ? ` ${className}`
+          : ""
+      }`
     );
   }
 
   function renderView(view) {
-    const viewRoot = $("#viewRoot");
+    const viewRoot =
+      $("#viewRoot");
 
     if (!viewRoot) {
       return;
@@ -1252,27 +1272,39 @@
     ) {
       case "library":
       case "home":
-        renderLibraryView(viewRoot);
+        renderLibraryView(
+          viewRoot
+        );
         break;
 
       case "discover":
-        renderDiscoverView(viewRoot);
+        renderDiscoverView(
+          viewRoot
+        );
         break;
 
       case "updates":
-        renderUpdatesView(viewRoot);
+        renderUpdatesView(
+          viewRoot
+        );
         break;
 
       case "about":
-        renderAboutView(viewRoot);
+        renderAboutView(
+          viewRoot
+        );
         break;
 
       case "settings":
-        renderSettingsView(viewRoot);
+        renderSettingsView(
+          viewRoot
+        );
         break;
 
       default:
-        renderLibraryView(viewRoot);
+        renderLibraryView(
+          viewRoot
+        );
         break;
     }
   }
@@ -1301,9 +1333,13 @@
 
     grid.id = "gamesGrid";
 
-    section.appendChild(grid);
+    section.appendChild(
+      grid
+    );
 
-    root.replaceChildren(section);
+    root.replaceChildren(
+      section
+    );
 
     renderGameList(grid);
   }
@@ -1332,9 +1368,13 @@
 
     grid.id = "gamesGrid";
 
-    section.appendChild(grid);
+    section.appendChild(
+      grid
+    );
 
-    root.replaceChildren(section);
+    root.replaceChildren(
+      section
+    );
 
     renderGameList(grid);
   }
@@ -1361,7 +1401,9 @@
       )
     );
 
-    root.replaceChildren(section);
+    root.replaceChildren(
+      section
+    );
   }
 
   /* =========================================================
@@ -1379,10 +1421,11 @@
       )
     );
 
-    const content = createElement(
-      "div",
-      "about-content"
-    );
+    const content =
+      createElement(
+        "div",
+        "about-content"
+      );
 
     content.appendChild(
       createElement(
@@ -1417,9 +1460,13 @@
       registryParagraph
     );
 
-    section.appendChild(content);
+    section.appendChild(
+      content
+    );
 
-    root.replaceChildren(section);
+    root.replaceChildren(
+      section
+    );
   }
 
   /* =========================================================
@@ -1437,10 +1484,11 @@
       )
     );
 
-    const content = createElement(
-      "div",
-      "settings-content"
-    );
+    const content =
+      createElement(
+        "div",
+        "settings-content"
+      );
 
     content.appendChild(
       createElement(
@@ -1450,9 +1498,13 @@
       )
     );
 
-    section.appendChild(content);
+    section.appendChild(
+      content
+    );
 
-    root.replaceChildren(section);
+    root.replaceChildren(
+      section
+    );
   }
 
   /* =========================================================
@@ -1508,31 +1560,33 @@
       '[data-action="fullscreen"], #fullscreenButton, #launcherFullscreen, #fullscreenLauncher'
     );
 
-    buttons.forEach((button) => {
-      button.addEventListener(
-        "click",
-        async () => {
-          try {
-            if (
-              document.fullscreenElement
-            ) {
-              await document.exitFullscreen();
-            } else {
-              await document.documentElement.requestFullscreen();
-            }
-          } catch (error) {
-            console.error(
-              "[VoidForge] Launcher fullscreen error:",
-              error
-            );
+    buttons.forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          async () => {
+            try {
+              if (
+                document.fullscreenElement
+              ) {
+                await document.exitFullscreen();
+              } else {
+                await document.documentElement.requestFullscreen();
+              }
+            } catch (error) {
+              console.error(
+                "[VoidForge] Launcher fullscreen error:",
+                error
+              );
 
-            showToast(
-              "Launcher fullscreen is not available."
-            );
+              showToast(
+                "Launcher fullscreen is not available."
+              );
+            }
           }
-        }
-      );
-    });
+        );
+      }
+    );
   }
 
   /* =========================================================
@@ -1557,9 +1611,6 @@
       return;
     }
 
-    /*
-     * Make the initial ARIA state explicit.
-     */
     menuButton.setAttribute(
       "aria-expanded",
       document.body.classList.contains(
@@ -1589,21 +1640,23 @@
     $$(
       "[data-view], [data-nav]",
       sidebar
-    ).forEach((item) => {
-      item.addEventListener(
-        "click",
-        () => {
-          document.body.classList.remove(
-            "nav-open"
-          );
+    ).forEach(
+      (item) => {
+        item.addEventListener(
+          "click",
+          () => {
+            document.body.classList.remove(
+              "nav-open"
+            );
 
-          menuButton.setAttribute(
-            "aria-expanded",
-            "false"
-          );
-        }
-      );
-    });
+            menuButton.setAttribute(
+              "aria-expanded",
+              "false"
+            );
+          }
+        );
+      }
+    );
   }
 
   /* =========================================================
@@ -1613,13 +1666,16 @@
   function setupConnectionStatus() {
     const updateConnectionStatus =
       () => {
-        const statusElements = $$(
-          "#connectionStatus, .connection-status, [data-connection-status]"
-        );
+        const statusElements =
+          $$(
+            "#connectionStatus, .connection-status, [data-connection-status]"
+          );
 
         statusElements.forEach(
           (element) => {
-            if (navigator.onLine) {
+            if (
+              navigator.onLine
+            ) {
               element.textContent =
                 "Online";
 
@@ -1670,10 +1726,6 @@
       return;
     }
 
-    /*
-     * Service workers require a secure context.
-     * localhost is also allowed by browsers.
-     */
     if (
       location.protocol !== "https:" &&
       location.hostname !== "localhost" &&
@@ -1739,14 +1791,6 @@
     setupMobileMenu();
     setupConnectionStatus();
 
-    /*
-     * Load:
-     *
-     *   ./games.json
-     *
-     * or the local registry configured by
-     * #embeddedGameRegistry.
-     */
     await loadGames();
 
     await registerServiceWorker();
@@ -1765,4 +1809,3 @@
     init();
   }
 })();
-
