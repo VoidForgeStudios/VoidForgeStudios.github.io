@@ -1,0 +1,86 @@
+name: Validate Game Registry
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-games:
+    name: Validate games.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate game registry
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          registry = Path("games.json")
+
+          if not registry.exists():
+              raise SystemExit("games.json does not exist")
+
+          try:
+              games = json.loads(registry.read_text())
+          except json.JSONDecodeError as exc:
+              raise SystemExit(f"games.json is invalid JSON: {exc}")
+
+          if not isinstance(games, list):
+              raise SystemExit("games.json must be an array")
+
+          ids = set()
+
+          for index, game in enumerate(games, start=1):
+              if not isinstance(game, dict):
+                  raise SystemExit(
+                      f"Game #{index} must be a JSON object"
+                  )
+
+              game_id = game.get("id")
+              entry = game.get("entry")
+
+              if not game_id:
+                  raise SystemExit(
+                      f"Game #{index} is missing 'id'"
+                  )
+
+              if not entry:
+                  raise SystemExit(
+                      f"Game '{game_id}' is missing 'entry'"
+                  )
+
+              if game_id in ids:
+                  raise SystemExit(
+                      f"Duplicate game id: {game_id}"
+                  )
+
+              ids.add(game_id)
+
+              entry_dir = Path(entry)
+              entry_html = entry_dir / "index.html"
+
+              if not entry_html.is_file():
+                  raise SystemExit(
+                      f"Game '{game_id}' points to "
+                      f"'{entry}', but '{entry_html}' does not exist"
+                  )
+
+              print(
+                  f"OK: {game_id} -> {entry_html}"
+              )
+
+          print()
+          print(f"Validated {len(games)} game(s).")
+          PY
