@@ -3,20 +3,21 @@ description: Suggest a new feature or improvement for a VoidForge Studios projec
 title: "[Feature]: "
 labels:
   - enhancement
+
 body:
   - type: markdown
     attributes:
       value: |
         ## VoidForge Studios — Feature Request
 
-        Thanks for helping improve the project!
-        Please provide enough detail for the team to understand the idea and evaluate it.
+        Thanks for helping improve this project!
+        Please provide enough detail for the team to understand and evaluate your idea.
 
   - type: textarea
     id: problem
     attributes:
       label: Problem / Motivation
-      description: What problem would this feature solve? What is currently difficult, missing, or frustrating?
+      description: What problem would this feature solve?
       placeholder: |
         Currently, users/players/developers cannot...
         This makes it difficult to...
@@ -35,10 +36,10 @@ body:
       required: true
 
   - type: textarea
-    id: use_case
+    id: use-case
     attributes:
       label: Use Case
-      description: Explain how this feature would be used in practice.
+      description: Explain how this feature would be used.
       placeholder: |
         A user/player/developer would use this when...
     validations:
@@ -48,7 +49,7 @@ body:
     id: alternatives
     attributes:
       label: Alternatives Considered
-      description: What alternatives, workarounds, or existing solutions have you tried?
+      description: What alternatives or workarounds have you tried?
       placeholder: |
         I currently work around this by...
     validations:
@@ -84,21 +85,19 @@ body:
         - Developer Experience
         - Build / Deployment
         - Other
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: textarea
     id: additional
     attributes:
       label: Additional Information
-      description: Add mockups, screenshots, examples, references, or anything else that may help.
+      description: Add mockups, screenshots, examples, references, or technical notes.
       placeholder: |
         Links, mockups, examples, technical notes, etc.
-    validations:
-      required: false
 
   - type: checkboxes
-    id: checks
+    id: checklist
     attributes:
       label: Submission Checklist
       options:
