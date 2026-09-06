@@ -54,12 +54,10 @@ jobs:
 
           required_files=(
             "index.html"
-            "index.original.html"
             "games.json"
             "manifest.webmanifest"
             "sw.js"
             "assets/launcher.js"
-            "minecraft/index.html"
           )
 
           for file in "${required_files[@]}"; do
