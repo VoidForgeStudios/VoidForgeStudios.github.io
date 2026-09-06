@@ -10,7 +10,7 @@
     "tags": ["Voxel", "3D", "Sandbox"],
     "description": "A browser-based Minecraft-style game."
   },
-    {
+  {
     "id": "snake",
     "name": "Multiplayer Snake",
     "subtitle": "Snake",
