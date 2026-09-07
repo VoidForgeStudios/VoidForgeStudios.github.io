@@ -2,7 +2,13 @@ const STORAGE_KEY = "jarvis_local_memory_v1";
 const CHAT_KEY = "jarvis_local_chat_v1";
 const GROQ_KEY = "jarvis_groq_api_key_session";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "openai/gpt-oss-120b";
+const GROQ_MODELS_ENDPOINT = "https://api.groq.com/openai/v1/models";
+const PREFERRED_GROQ_MODELS = [
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
+  "llama-3.1-8b-instant"
+];
+let activeGroqModel = null;
 
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
@@ -138,7 +144,34 @@ function conversationForAI() {
     }));
 }
 
-async function askGroq(userText) {
+async function getAvailableGroqModel(apiKey) {
+  if (activeGroqModel) return activeGroqModel;
+
+  const response = await fetch(GROQ_MODELS_ENDPOINT, {
+    headers: { "Authorization": `Bearer ${apiKey}` }
+  });
+
+  if (!response.ok) {
+    let detail = "Could not check the Groq model list.";
+    try {
+      const error = await response.json();
+      detail = error?.error?.message || detail;
+    } catch { /* keep generic message */ }
+    throw new Error(`Groq model check failed (${response.status}): ${detail}`);
+  }
+
+  const data = await response.json();
+  const available = new Set((data?.data || []).map(model => model?.id).filter(Boolean));
+  activeGroqModel = PREFERRED_GROQ_MODELS.find(model => available.has(model));
+
+  if (!activeGroqModel) {
+    throw new Error(`No compatible Groq chat model is available for this API key. Available models: ${Array.from(available).slice(0, 8).join(", ") || "none"}.`);
+  }
+
+  return activeGroqModel;
+}
+
+async function askGroq() {
   const apiKey = getGroqKey();
   if (!apiKey) throw new Error("Groq is not connected. Enter your API key above.");
 
@@ -147,7 +180,9 @@ async function askGroq(userText) {
     ? memoryEntries.map(([key, value]) => `${key}: ${value}`).join("\n")
     : "No saved memories.";
 
-  setStatus("GROQ · THINKING", true);
+  setStatus("GROQ · CHECKING MODEL", true);
+  const model = await getAvailableGroqModel(apiKey);
+  setStatus(`GROQ · ${model}`, true);
 
   const response = await fetch(GROQ_ENDPOINT, {
     method: "POST",
@@ -156,7 +191,7 @@ async function askGroq(userText) {
       "Authorization": `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: GROQ_MODEL,
+      model,
       temperature: 0.55,
       max_completion_tokens: 768,
       messages: [
@@ -175,7 +210,7 @@ async function askGroq(userText) {
       const error = await response.json();
       detail = error?.error?.message || detail;
     } catch { /* keep generic message */ }
-    throw new Error(detail);
+    throw new Error(`Groq returned ${response.status} ${response.statusText || ""}: ${detail}`.trim());
   }
 
   const data = await response.json();
@@ -192,6 +227,7 @@ function updateConnectionUI() {
 connect.addEventListener("click", () => {
   if (getGroqKey()) {
     setGroqKey("");
+    activeGroqModel = null;
     groqKey.value = "";
     updateConnectionUI();
     return;
@@ -204,6 +240,7 @@ connect.addEventListener("click", () => {
   }
 
   setGroqKey(key);
+  activeGroqModel = null;
   groqKey.value = "";
   updateConnectionUI();
 });
@@ -223,7 +260,7 @@ form.addEventListener("submit", async event => {
       addMessage("jarvis", local);
       updateConnectionUI();
     } else {
-      const reply = await askGroq(userText);
+      const reply = await askGroq();
       addMessage("jarvis", reply);
       setStatus("GROQ · READY", true);
     }
