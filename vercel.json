@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/jarvis.js": {
+      "maxDuration": 60
+    }
+  }
+}
