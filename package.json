@@ -4,7 +4,8 @@
   "description": "A static, GitHub Pages-compatible launcher for VoidForge Studios browser games.",
   "main": "sw.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "test": "node --check server.js && node --check api/jarvis.js"
   },
   "repository": {
     "type": "git",
