@@ -1,7 +1,7 @@
 const STORAGE_KEY = "jarvis_local_memory_v1";
 const CHAT_KEY = "jarvis_local_chat_v1";
 const ACCESS_KEY = "jarvis_backend_access_v1";
-const BACKEND_URL = "https://REPLACE-WITH-YOUR-VERCEL-APP.vercel.app/api/jarvis";
+const BACKEND_URL = "https://voidforgestudios-github-io.onrender.com/api/jarvis";
 
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
