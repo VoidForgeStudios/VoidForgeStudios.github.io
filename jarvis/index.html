@@ -10,30 +10,16 @@
 </head>
 <body>
   <section id="startup" class="startup" aria-label="JARVIS system initialization">
-    <div class="startup-core">
-      <div class="core-ring ring-one"></div>
-      <div class="core-ring ring-two"></div>
-      <div class="core-ring ring-three"></div>
-      <div class="core"></div>
-    </div>
-    <div class="startup-text">
-      <div id="startupLines"></div>
-      <div class="cursor">_</div>
-    </div>
+    <div class="startup-core"><div class="core-ring ring-one"></div><div class="core-ring ring-two"></div><div class="core-ring ring-three"></div><div class="core"></div></div>
+    <div class="startup-text"><div id="startupLines"></div><div class="cursor">_</div></div>
     <div class="startup-progress"><div id="progressBar"></div></div>
     <div id="startupPercent">0%</div>
   </section>
 
   <main id="app" class="app hidden">
     <header class="topbar">
-      <div class="brand">
-        <div class="orb"></div>
-        <div>
-          <strong>JARVIS</strong>
-          <small>JUST A RATHER VERY INTELLIGENT SYSTEM</small>
-        </div>
-      </div>
-      <div class="status"><i></i><span id="status">GROQ · NOT CONNECTED</span></div>
+      <div class="brand"><div class="orb"></div><div><strong>JARVIS</strong><small>JUST A RATHER VERY INTELLIGENT SYSTEM</small></div></div>
+      <div class="status"><i></i><span id="status">BACKEND · NOT CONNECTED</span></div>
     </header>
 
     <section class="workspace">
@@ -42,8 +28,8 @@
         <div class="reactor"><span></span></div>
         <p class="eyebrow">VOIDFORGE STUDIOS</p>
         <h1>JARVIS</h1>
-        <p class="subtitle">Multi-agent personal intelligence.</p>
-        <div class="telemetry"><span>AI NETWORK</span><span>MEMORY READY</span><span>TOOLS READY</span></div>
+        <p class="subtitle">Secure multi-agent personal intelligence.</p>
+        <div class="telemetry"><span>AI NETWORK</span><span>MEMORY READY</span><span>SECURE PROXY</span></div>
       </section>
 
       <section class="chat-panel">
@@ -53,42 +39,28 @@
         </div>
 
         <div class="ai-config">
-          <div class="config-title"><span>JARVIS AI NETWORK</span><small id="agentStatus">0 WORKERS · MASTER OFFLINE</small></div>
-
-          <div class="key-grid">
-            <label>WORKER 01<input id="workerKey1" type="password" autocomplete="off" placeholder="Groq key"></label>
-            <label>WORKER 02<input id="workerKey2" type="password" autocomplete="off" placeholder="Groq key"></label>
-            <label>WORKER 03<input id="workerKey3" type="password" autocomplete="off" placeholder="Groq key"></label>
-            <label class="master-key">MASTER JARVIS<input id="masterKey" type="password" autocomplete="off" placeholder="Groq key for final answer"></label>
-          </div>
-
+          <div class="config-title"><span>JARVIS AI NETWORK</span><small id="agentStatus">SERVER KEYS · OFFLINE</small></div>
+          <label class="access-field">JARVIS ACCESS CODE<input id="accessToken" type="password" autocomplete="off" placeholder="Enter your private access code"></label>
           <div class="ai-config-row">
-            <button id="connect" type="button">Connect Network</button>
-            <button id="disconnect" type="button" class="secondary">Disconnect All</button>
+            <button id="connect" type="button">Connect Securely</button>
+            <button id="disconnect" type="button" class="secondary">Forget Access</button>
           </div>
-
-          <small>Worker agents answer in parallel. Their responses are sent to Master JARVIS, which produces the final answer. Keys are kept only in this browser session.</small>
+          <small>Groq keys are stored on the private backend, not in this website. Worker keys run in parallel and Master JARVIS produces the final answer.</small>
         </div>
 
         <div id="messages" class="messages" aria-live="polite" aria-label="JARVIS conversation">
-          <article class="message jarvis">
-            <span class="label">JARVIS</span>
-            <div class="message-content">
-              <p><strong>Systems nominal.</strong></p>
-              <p>Connect one or more worker keys and a <strong>Master JARVIS</strong> key to activate the multi-agent network.</p>
-            </div>
-          </article>
+          <article class="message jarvis"><span class="label">JARVIS</span><div class="message-content"><p><strong>Systems nominal.</strong></p><p>Connect to the secure JARVIS backend to activate the multi-agent network.</p></div></article>
         </div>
 
         <form id="chatForm" class="composer">
           <textarea id="input" rows="2" maxlength="20000" placeholder="Speak with JARVIS using text…" autocomplete="off" spellcheck="true"></textarea>
           <button type="submit" id="send">Send <kbd>Enter</kbd></button>
         </form>
-        <p class="hint">Try <code>help</code>, <code>remember coffee = black</code>, or ask the multi-agent JARVIS network anything.</p>
+        <p class="hint">Try <code>help</code>, <code>remember coffee = black</code>, or ask JARVIS anything after connecting.</p>
       </section>
     </section>
 
-    <footer><span>JARVIS web edition</span><span>Multi-agent Groq · Browser client · No server required</span></footer>
+    <footer><span>JARVIS web edition</span><span>Secure Groq backend · Multi-agent network</span></footer>
   </main>
 
   <script src="app.js" defer></script>
