@@ -12,7 +12,7 @@
   <div class="shell">
     <header class="topbar">
       <div class="brand"><span class="orb"></span><div><strong>JARVIS</strong><small>JUST A RATHER VERY INTELLIGENT SYSTEM</small></div></div>
-      <div class="status"><i></i><span id="status">BROWSER MODE · READY</span></div>
+      <div class="status"><i></i><span id="status">GROQ · NOT CONNECTED</span></div>
     </header>
 
     <main class="workspace">
@@ -21,25 +21,38 @@
         <div class="reactor"><span></span></div>
         <p class="eyebrow">VOIDFORGE STUDIOS</p>
         <h1>JARVIS</h1>
-        <p class="subtitle">Private local intelligence, entirely in your browser.</p>
-        <div class="telemetry"><span>LOCAL AI</span><span>MEMORY READY</span><span>WEBGPU</span></div>
+        <p class="subtitle">Personal intelligence, powered by Groq.</p>
+        <div class="telemetry"><span>GROQ AI</span><span>MEMORY READY</span><span>TOOLS READY</span></div>
       </section>
 
       <section class="chat-panel">
-        <div class="panel-head"><div><span class="eyebrow">CONSOLE</span><h2>Conversation</h2></div><button id="clear" type="button">Clear</button></div>
+        <div class="panel-head">
+          <div><span class="eyebrow">CONSOLE</span><h2>Conversation</h2></div>
+          <button id="clear" type="button">Clear</button>
+        </div>
+
+        <div class="ai-config">
+          <label for="groqKey">GROQ API KEY</label>
+          <div class="ai-config-row">
+            <input id="groqKey" type="password" autocomplete="off" placeholder="Paste your Groq API key">
+            <button id="connect" type="button">Connect</button>
+          </div>
+          <small>Your key is kept only in this browser session and is never written to the repository.</small>
+        </div>
+
         <div id="messages" class="messages" aria-live="polite">
-          <article class="message jarvis"><span class="label">JARVIS</span><p>Systems nominal. Local AI is ready to initialise on your first question.</p></article>
+          <article class="message jarvis"><span class="label">JARVIS</span><p>Systems nominal. Enter your Groq API key to activate the AI.</p></article>
         </div>
         <form id="chatForm" class="composer">
-          <textarea id="input" rows="2" maxlength="20000" placeholder="Ask JARVIS anything…" autocomplete="off"></textarea>
+          <textarea id="input" rows="2" maxlength="20000" placeholder="Speak with JARVIS using text…" autocomplete="off"></textarea>
           <button type="submit" id="send">Send <kbd>Enter</kbd></button>
         </form>
-        <p class="hint">Local commands work instantly. Normal questions use an in-browser AI model when WebGPU is available.</p>
+        <p class="hint">Try <code>help</code>, <code>remember coffee = black</code>, or ask JARVIS anything after connecting Groq.</p>
       </section>
     </main>
 
-    <footer><span>JARVIS web edition</span><span>Local AI · No API key · No server required</span></footer>
+    <footer><span>JARVIS web edition</span><span>Groq API · Browser client · No server required</span></footer>
   </div>
-  <script type="module" src="app.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
