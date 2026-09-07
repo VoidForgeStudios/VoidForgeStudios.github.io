@@ -1,0 +1,28 @@
+{
+  "name": "voidforgestudios.github.io",
+  "version": "1.0.0",
+  "description": "A static, GitHub Pages-compatible launcher for VoidForge Studios browser games.",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VoidForgeStudios/VoidForgeStudios.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VoidForgeStudios/VoidForgeStudios.github.io/issues"
+  },
+  "homepage": "https://github.com/VoidForgeStudios/VoidForgeStudios.github.io#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
