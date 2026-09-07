@@ -1,11 +1,23 @@
-const API_BASE = window.JARVIS_API_BASE || "";
+const API_BASE = (window.JARVIS_API_BASE || "").replace(/\/$/, "");
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
 const input = document.querySelector("#input");
 const send = document.querySelector("#send");
 const status = document.querySelector("#status");
 const clear = document.querySelector("#clear");
+const apiToken = document.querySelector("#apiToken");
 const sessionId = "web-" + (crypto.randomUUID ? crypto.randomUUID() : Date.now());
+
+apiToken.value = sessionStorage.getItem("jarvis_api_token") || "";
+apiToken.addEventListener("input", () => {
+  if (apiToken.value) sessionStorage.setItem("jarvis_api_token", apiToken.value);
+  else sessionStorage.removeItem("jarvis_api_token");
+});
+
+function authHeaders() {
+  const token = apiToken.value.trim();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 function addMessage(role, text) {
   const article = document.createElement("article");
@@ -42,7 +54,7 @@ form.addEventListener("submit", async (event) => {
   try {
     const response = await fetch(`${API_BASE}/api/text/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ session_id: sessionId, message })
     });
     const data = await response.json();
@@ -57,7 +69,12 @@ form.addEventListener("submit", async (event) => {
 });
 
 clear.addEventListener("click", async () => {
-  try { await fetch(`${API_BASE}/api/text/sessions/${encodeURIComponent(sessionId)}`, { method: "DELETE" }); } catch {}
+  try {
+    await fetch(`${API_BASE}/api/text/sessions/${encodeURIComponent(sessionId)}`, {
+      method: "DELETE",
+      headers: authHeaders()
+    });
+  } catch {}
   messages.innerHTML = "";
   addMessage("jarvis", "Conversation cleared. Ready when you are.");
 });
