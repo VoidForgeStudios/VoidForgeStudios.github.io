@@ -1,0 +1,5 @@
+.access-field { display: grid; gap: 8px; margin-top: 14px; color: #8d9bad; font-size: 0.72rem; letter-spacing: 0.14em; }
+.access-field input { width: 100%; box-sizing: border-box; min-height: 44px; padding: 0 14px; border: 1px solid rgba(105, 216, 255, 0.18); border-radius: 10px; background: rgba(3, 7, 12, 0.72); color: #eaf7ff; outline: none; }
+.access-field input:focus { border-color: rgba(105, 216, 255, 0.55); box-shadow: 0 0 0 3px rgba(105, 216, 255, 0.08); }
+.ai-config-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.ai-config-row .secondary:disabled { opacity: 0.45; cursor: not-allowed; }
