@@ -1,36 +1,27 @@
 <!doctype html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#050810">
-<meta name="description" content="Snake Arena — real-time multiplayer snake battle">
-<title>Snake Arena — Multiplayer</title>
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
+<meta name="theme-color" content="#060b14">
+<title>Snake Arena</title>
 
 <style>
 :root {
-  --bg: #050810;
-  --bg2: #080d18;
-  --panel: rgba(10, 17, 30, .82);
-  --panel-solid: #0b1220;
-  --panel-light: rgba(255,255,255,.055);
-  --border: rgba(255,255,255,.10);
-  --border-bright: rgba(255,255,255,.18);
-
-  --text: #f5f8ff;
-  --muted: #8090a8;
-
-  --green: #36f0a0;
-  --green-dark: #0d6b49;
-  --blue: #5daaff;
-  --yellow: #ffd45c;
-  --red: #ff5872;
-  --purple: #b982ff;
-  --cyan: #55e8ff;
-
-  --shadow: 0 24px 80px rgba(0,0,0,.42);
-  --radius: 18px;
+  --bg: #060b14;
+  --panel: rgba(13, 22, 37, .88);
+  --panel-2: rgba(255, 255, 255, .055);
+  --border: rgba(255, 255, 255, .11);
+  --text: #f2f7ff;
+  --muted: #8da0b7;
+  --green: #35e99a;
+  --blue: #5ba9ff;
+  --yellow: #ffd166;
+  --red: #ff5c75;
+  --purple: #b681ff;
 }
 
 * {
@@ -40,11 +31,12 @@
 html,
 body {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   margin: 0;
 }
 
 body {
+  min-height: 100vh;
   overflow: hidden;
   color: var(--text);
   font-family:
@@ -57,23 +49,12 @@ body {
     sans-serif;
 
   background:
-    radial-gradient(circle at 50% -15%, rgba(42,108,177,.30), transparent 42%),
-    radial-gradient(circle at 0% 100%, rgba(54,240,160,.07), transparent 30%),
-    radial-gradient(circle at 100% 80%, rgba(185,130,255,.06), transparent 28%),
+    radial-gradient(
+      circle at 50% -10%,
+      #17365d 0,
+      transparent 45%
+    ),
     var(--bg);
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: .28;
-  background-image:
-    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
 }
 
 button,
@@ -85,201 +66,104 @@ button {
   border: 0;
 }
 
-button,
-input {
-  -webkit-tap-highlight-color: transparent;
-}
-
 .app {
-  width: min(1500px, 100%);
-  height: 100%;
+  width: min(1250px, 100%);
+  min-height: 100vh;
   margin: auto;
-  padding: 14px;
+  padding: 16px;
 
   display: grid;
-  grid-template-rows: 66px minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr;
   gap: 12px;
 }
 
-/* TOP BAR */
+.topbar,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, .35);
+
+  backdrop-filter: blur(18px);
+}
 
 .topbar {
-  position: relative;
-  z-index: 10;
+  min-height: 60px;
+  padding: 12px 16px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-
-  padding: 10px 16px;
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-
-  background: linear-gradient(
-    135deg,
-    rgba(15,25,43,.92),
-    rgba(8,14,25,.84)
-  );
-
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(22px);
+  gap: 12px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-width: 0;
+  gap: 10px;
 }
 
 .logo {
-  position: relative;
-
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
 
   display: grid;
   place-items: center;
 
-  border-radius: 12px;
+  color: #04100a;
+  font-weight: 900;
 
-  color: #03130c;
-  font-size: 20px;
-  font-weight: 950;
-
-  background:
-    linear-gradient(145deg, #5dffb4, var(--green));
-
-  box-shadow:
-    0 0 22px rgba(54,240,160,.30),
-    inset 0 1px rgba(255,255,255,.55);
-}
-
-.logo::after {
-  content: "";
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  right: 5px;
-  top: 5px;
-  border-radius: 50%;
-  background: white;
-  opacity: .7;
-}
-
-.brand-text {
-  min-width: 0;
+  background: var(--green);
+  box-shadow: 0 0 25px rgba(53, 233, 154, .35);
 }
 
 .title {
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: .04em;
 }
 
 .subtitle {
-  margin-top: 2px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
-.server-status {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-
-  padding: 8px 12px;
-
-  border: 1px solid var(--border);
-  border-radius: 999px;
-
-  background: rgba(255,255,255,.035);
-
+.connection {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: .03em;
-  white-space: nowrap;
+  font-size: 12px;
 }
 
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--red);
-  box-shadow: 0 0 12px rgba(255,88,114,.7);
-}
-
-.server-status.online {
+.connection.online {
   color: var(--green);
 }
-
-.server-status.online .status-dot {
-  background: var(--green);
-  box-shadow: 0 0 14px rgba(54,240,160,.8);
-  animation: pulse 1.8s infinite;
-}
-
-@keyframes pulse {
-  0%,100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: .55;
-    transform: scale(.75);
-  }
-}
-
-/* MAIN */
 
 .main {
   min-height: 0;
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) 250px;
   gap: 12px;
 }
 
-/* ARENA */
-
 .arena {
-  position: relative;
   min-width: 0;
   min-height: 0;
-
-  overflow: hidden;
+  position: relative;
 
   display: grid;
   place-items: center;
 
-  padding: 7px;
+  padding: 6px;
 
   border: 1px solid var(--border);
   border-radius: 22px;
 
-  background:
-    radial-gradient(circle at 50% 50%, rgba(25,53,80,.12), transparent 55%),
-    #02060c;
-
+  background: #030810;
   box-shadow:
-    inset 0 0 100px rgba(0,0,0,.65),
-    0 30px 100px rgba(0,0,0,.45);
-}
-
-.arena::before {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  pointer-events: none;
-  z-index: 1;
-
-  border: 1px solid rgba(255,255,255,.045);
-  border-radius: 17px;
+    inset 0 0 70px rgba(0, 0, 0, .5),
+    0 30px 100px rgba(0, 0, 0, .45);
 }
 
 canvas {
@@ -289,69 +173,7 @@ canvas {
   height: 100%;
 
   border-radius: 16px;
-
-  touch-action: none;
 }
-
-/* HUD */
-
-.hud {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-
-  z-index: 3;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-
-  pointer-events: none;
-}
-
-.hud-group {
-  display: flex;
-  gap: 7px;
-}
-
-.hud-card {
-  min-width: 82px;
-
-  padding: 8px 11px;
-
-  border: 1px solid var(--border);
-  border-radius: 11px;
-
-  background: rgba(5,10,18,.68);
-  backdrop-filter: blur(12px);
-
-  box-shadow: 0 10px 30px rgba(0,0,0,.22);
-}
-
-.hud-label {
-  color: var(--muted);
-  font-size: 8px;
-  font-weight: 850;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-}
-
-.hud-value {
-  margin-top: 2px;
-  font-size: 15px;
-  font-weight: 900;
-}
-
-.hud-value.green {
-  color: var(--green);
-}
-
-.hud-value.yellow {
-  color: var(--yellow);
-}
-
-/* SIDEBAR */
 
 .sidebar {
   min-height: 0;
@@ -362,670 +184,263 @@ canvas {
 }
 
 .panel {
-  padding: 15px;
-
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(15,24,40,.88),
-      rgba(8,14,25,.78)
-    );
-
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
-}
-
-.panel-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 12px;
+  padding: 14px;
 }
 
 .panel h2 {
-  margin: 0;
+  margin: 0 0 12px;
 
-  color: #a9b7ca;
-  font-size: 10px;
-  font-weight: 900;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: .16em;
-}
-
-.panel-count {
+  letter-spacing: .13em;
   color: var(--muted);
-  font-size: 10px;
 }
-
-/* LEADERBOARD */
 
 .leaderboard {
   display: grid;
-  gap: 6px;
+  gap: 7px;
 }
 
 .player {
-  position: relative;
-
   display: grid;
-  grid-template-columns: 29px minmax(0,1fr) auto;
-  align-items: center;
+  grid-template-columns: 28px 1fr auto;
   gap: 8px;
+  align-items: center;
 
   padding: 9px;
 
-  border: 1px solid transparent;
-  border-radius: 11px;
-
-  background: rgba(255,255,255,.035);
-
-  transition:
-    transform .18s ease,
-    background .18s ease,
-    border-color .18s ease;
-}
-
-.player.me {
-  border-color: rgba(54,240,160,.28);
-  background: rgba(54,240,160,.075);
+  border-radius: 10px;
+  background: var(--panel-2);
 }
 
 .player.dead {
-  opacity: .32;
+  opacity: .38;
 }
 
 .rank {
   color: var(--muted);
-  font-size: 10px;
-  font-weight: 850;
-  text-align: center;
-}
-
-.player:first-child .rank {
-  color: var(--yellow);
+  font-size: 11px;
 }
 
 .player-name {
-  min-width: 0;
-
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.player-name small {
-  margin-left: 4px;
-  color: var(--muted);
-  font-size: 8px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .player-score {
-  font-size: 12px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.you-badge {
-  display: inline-block;
-
-  margin-left: 5px;
-  padding: 2px 4px;
-
-  border-radius: 4px;
-
-  color: #03130c;
-  background: var(--green);
-
-  font-size: 7px;
-  font-weight: 950;
-  vertical-align: 2px;
-}
-
-/* CONTROLS PANEL */
-
-.control-grid {
-  display: grid;
-  gap: 9px;
-}
-
-.control-row {
+.effects {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 5px;
+}
 
+.effect {
+  padding: 4px 7px;
+  border-radius: 7px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  background: var(--panel-2);
+}
+
+.help {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
-.keys {
-  display: flex;
-  gap: 3px;
+.overlay {
+  position: absolute;
+  inset: 6px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 16px;
+
+  background: rgba(3, 8, 16, .82);
+  backdrop-filter: blur(12px);
+
+  z-index: 5;
 }
 
-.key {
-  min-width: 24px;
-  padding: 4px 5px;
+.overlay.hidden {
+  display: none;
+}
+
+.card {
+  width: min(430px, 90%);
+
+  padding: 30px;
+
+  border-radius: 20px;
 
   text-align: center;
 
   border: 1px solid var(--border);
-  border-bottom-color: var(--border-bright);
-  border-radius: 5px;
+  background: var(--panel);
 
-  color: #cbd6e5;
-  background: rgba(255,255,255,.045);
-
-  font-size: 9px;
-  font-weight: 850;
-}
-
-.power-list {
-  display: grid;
-  gap: 6px;
-  margin-top: 13px;
-}
-
-.power {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  padding: 7px 8px;
-
-  border-radius: 8px;
-  background: rgba(255,255,255,.03);
-
-  font-size: 10px;
-}
-
-.power-icon {
-  width: 23px;
-  height: 23px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 7px;
-
-  font-weight: 900;
-}
-
-.power-icon.speed {
-  color: var(--purple);
-  background: rgba(185,130,255,.13);
-}
-
-.power-icon.reverse {
-  color: var(--blue);
-  background: rgba(93,170,255,.13);
-}
-
-.power-icon.multiplier {
-  color: var(--yellow);
-  background: rgba(255,212,92,.13);
-}
-
-.power-text strong {
-  display: block;
-  color: #dce5f2;
-  font-size: 10px;
-}
-
-.power-text span {
-  color: var(--muted);
-  font-size: 9px;
-}
-
-/* OVERLAY */
-
-.overlay {
-  position: absolute;
-  inset: 7px;
-
-  z-index: 10;
-
-  display: grid;
-  place-items: center;
-
-  padding: 20px;
-
-  border-radius: 16px;
-
-  background:
-    radial-gradient(
-      circle at 50% 40%,
-      rgba(22,55,81,.34),
-      transparent 50%
-    ),
-    rgba(2,6,12,.78);
-
-  backdrop-filter: blur(16px);
-
-  transition:
-    opacity .25s ease,
-    visibility .25s ease;
-}
-
-.overlay.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.card {
-  width: min(440px, 94%);
-
-  padding: 34px;
-
-  text-align: center;
-
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 24px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(16,27,45,.96),
-      rgba(7,13,23,.94)
-    );
-
-  box-shadow:
-    0 35px 100px rgba(0,0,0,.6),
-    inset 0 1px rgba(255,255,255,.06);
-
-  animation: cardIn .4s ease both;
-}
-
-@keyframes cardIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(.97);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.card-logo {
-  width: 58px;
-  height: 58px;
-
-  margin: 0 auto 18px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 17px;
-
-  color: #03130c;
-  font-size: 28px;
-  font-weight: 950;
-
-  background: linear-gradient(145deg,#64ffbb,var(--green));
-
-  box-shadow:
-    0 0 45px rgba(54,240,160,.22),
-    inset 0 1px rgba(255,255,255,.6);
-}
-
-.card-eyebrow {
-  color: var(--green);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .2em;
-  text-transform: uppercase;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
 }
 
 .card h1 {
-  margin: 7px 0 9px;
-
-  font-size: clamp(25px, 4vw, 34px);
-  line-height: 1.05;
-  letter-spacing: -.03em;
+  margin: 5px 0 10px;
+  font-size: 30px;
 }
 
 .card p {
-  margin: 0 auto;
-
-  max-width: 350px;
-
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .form {
   display: flex;
-  gap: 8px;
-  margin-top: 23px;
+  gap: 7px;
+  margin-top: 20px;
 }
 
 input {
   min-width: 0;
   flex: 1;
 
-  padding: 13px 14px;
-
-  border: 1px solid var(--border);
-  border-radius: 11px;
-
-  outline: none;
-
-  color: var(--text);
-  background: rgba(255,255,255,.055);
-
-  transition:
-    border-color .18s,
-    box-shadow .18s,
-    background .18s;
-}
-
-input::placeholder {
-  color: #617188;
-}
-
-input:focus {
-  border-color: rgba(54,240,160,.6);
-  background: rgba(54,240,160,.045);
-  box-shadow: 0 0 0 3px rgba(54,240,160,.08);
-}
-
-.primary {
-  padding: 13px 19px;
-
-  border-radius: 11px;
-
-  color: #03130c;
-  background: linear-gradient(145deg,#62ffb8,var(--green));
-
-  font-weight: 950;
-  cursor: pointer;
-
-  box-shadow: 0 8px 24px rgba(54,240,160,.18);
-
-  transition:
-    transform .15s,
-    box-shadow .15s,
-    filter .15s;
-}
-
-.primary:hover {
-  filter: brightness(1.07);
-  box-shadow: 0 10px 30px rgba(54,240,160,.28);
-}
-
-.primary:active {
-  transform: scale(.97);
-}
-
-.secondary {
-  margin-top: 10px;
-
-  padding: 10px 15px;
+  padding: 12px 13px;
 
   border: 1px solid var(--border);
   border-radius: 10px;
 
-  color: #d7e0ed;
-  background: rgba(255,255,255,.045);
+  outline: 0;
 
-  font-size: 11px;
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+}
+
+input:focus {
+  border-color: var(--green);
+}
+
+.primary {
+  padding: 12px 17px;
+
+  color: #04100a;
   font-weight: 800;
+
+  border-radius: 10px;
+  cursor: pointer;
+
+  background: var(--green);
+}
+
+.secondary {
+  margin-top: 8px;
+
+  padding: 9px 13px;
+
+  color: var(--text);
+  font-weight: 700;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: var(--panel-2);
   cursor: pointer;
 }
-
-.secondary:hover {
-  background: rgba(255,255,255,.08);
-}
-
-.tip {
-  margin-top: 17px;
-
-  color: #617188;
-  font-size: 9px;
-}
-
-/* MOBILE CONTROLS */
 
 #mobileControls {
   display: none;
-
-  position: absolute;
-  bottom: 18px;
-  left: 50%;
-
-  z-index: 7;
-
-  transform: translateX(-50%);
-
-  grid-template-columns: repeat(3, 52px);
-  grid-template-rows: repeat(2, 52px);
-
-  gap: 6px;
-
-  touch-action: none;
 }
 
-#mobileControls button {
-  display: grid;
-  place-items: center;
-
-  color: #dce8f5;
-
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 13px;
-
-  background: rgba(10,19,32,.82);
-  backdrop-filter: blur(12px);
-
-  box-shadow: 0 8px 24px rgba(0,0,0,.3);
-
-  font-size: 17px;
-  font-weight: 900;
-
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-#mobileControls button:active {
-  transform: scale(.91);
-  background: rgba(54,240,160,.16);
-  border-color: rgba(54,240,160,.4);
-}
-
-#mobileControls button:nth-child(1) {
-  grid-column: 2;
-}
-
-#mobileControls button:nth-child(2) {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-#mobileControls button:nth-child(3) {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-#mobileControls button:nth-child(4) {
-  grid-column: 3;
-  grid-row: 2;
-}
-
-/* RESPONSIVE */
-
-@media (max-width: 900px) {
+@media (max-width: 850px) {
   body {
     overflow: auto;
   }
 
   .app {
     min-height: 100svh;
-    height: auto;
   }
 
   .main {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(430px, 1fr) auto;
+    grid-template-rows: minmax(400px, 1fr) auto;
   }
 
   .sidebar {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
+
+  .panel:last-child {
+    display: none;
+  }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 560px) {
   .app {
-    padding: 7px;
-    grid-template-rows: 56px minmax(0, 1fr);
-    gap: 7px;
+    padding: 8px;
   }
 
   .topbar {
-    padding: 8px 11px;
-    border-radius: 14px;
-  }
-
-  .logo {
-    width: 34px;
-    height: 34px;
-    flex-basis: 34px;
-    border-radius: 10px;
-    font-size: 17px;
-  }
-
-  .title {
-    font-size: 12px;
+    min-height: 52px;
   }
 
   .subtitle {
     display: none;
   }
 
-  .server-status {
-    padding: 7px 9px;
-    font-size: 9px;
-  }
-
   .main {
-    grid-template-rows: minmax(390px, 62svh) auto;
-  }
-
-  .arena {
-    border-radius: 17px;
-    padding: 5px;
-  }
-
-  .arena::before {
-    inset: 5px;
-    border-radius: 13px;
-  }
-
-  .hud {
-    top: 14px;
-    left: 14px;
-    right: 14px;
-  }
-
-  .hud-card {
-    min-width: 70px;
-    padding: 6px 8px;
-  }
-
-  .hud-label {
-    font-size: 7px;
-  }
-
-  .hud-value {
-    font-size: 13px;
+    grid-template-rows: minmax(330px, 60vh) auto;
   }
 
   .sidebar {
     grid-template-columns: 1fr;
   }
 
-  .panel {
-    padding: 12px;
-    border-radius: 14px;
-  }
-
-  .panel:last-child {
-    display: none;
-  }
-
   #mobileControls {
     display: grid;
+
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(2, 48px);
+
+    justify-content: center;
+    gap: 5px;
+
+    margin-top: 8px;
   }
 
-  .card {
-    padding: 27px 21px;
-    border-radius: 20px;
+  #mobileControls button {
+    color: var(--text);
+    border-radius: 10px;
+    background: rgba(255,255,255,.08);
   }
 
-  .form {
-    flex-direction: column;
+  #mobileControls button:nth-child(1) {
+    grid-column: 2;
   }
 
-  .primary {
-    width: 100%;
-  }
-}
-
-@media (max-height: 600px) and (orientation: landscape) {
-  .app {
-    padding: 6px;
-    grid-template-rows: 48px minmax(0,1fr);
+  #mobileControls button:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
   }
 
-  .main {
-    grid-template-columns: minmax(0,1fr) 230px;
+  #mobileControls button:nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
   }
 
-  .sidebar {
-    overflow: auto;
-  }
-
-  .hud {
-    top: 12px;
-  }
-
-  #mobileControls {
-    display: grid;
-    transform: translateX(-50%) scale(.8);
-    transform-origin: bottom center;
-  }
-}
-
-/* ACCESSIBILITY */
-
-button:focus-visible,
-input:focus-visible {
-  outline: 2px solid var(--green);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
+  #mobileControls button:nth-child(4) {
+    grid-column: 3;
+    grid-row: 2;
   }
 }
 </style>
-
 </head>
 
 <body>
@@ -1033,341 +448,131 @@ input:focus-visible {
 <div class="app">
 
   <header class="topbar">
+    <div class="brand">
+      <div class="logo">S</div>
 
-```
-<div class="brand">
-
-  <div class="logo">S</div>
-
-  <div class="brand-text">
-    <div class="title">Snake Arena</div>
-    <div class="subtitle">
-      Real-time multiplayer battle
+      <div>
+        <div class="title">Snake Arena</div>
+        <div class="subtitle">
+          Server-authoritative multiplayer
+        </div>
+      </div>
     </div>
-  </div>
 
-</div>
-
-<div id="connection" class="server-status">
-  <span class="status-dot"></span>
-  <span id="connectionText">Connecting…</span>
-</div>
-```
-
+    <div id="connection" class="connection">
+      Connecting…
+    </div>
   </header>
 
   <main class="main">
 
-```
-<section class="arena">
+    <section class="arena">
 
-  <canvas id="game"></canvas>
+      <canvas id="game"></canvas>
 
-  <div class="hud">
+      <div id="overlay" class="overlay">
+        <div class="card">
 
-    <div class="hud-group">
+          <div class="subtitle">
+            GLOBAL ARENA
+          </div>
 
-      <div class="hud-card">
-        <div class="hud-label">Score</div>
-        <div id="scoreValue" class="hud-value green">0</div>
-      </div>
+          <h1 id="overlayTitle">
+            Enter the arena
+          </h1>
 
-      <div class="hud-card">
-        <div class="hud-label">Rank</div>
-        <div id="rankValue" class="hud-value">—</div>
-      </div>
+          <p id="overlayText">
+            Choose a username to join the live multiplayer game.
+          </p>
 
-    </div>
+          <form id="joinForm" class="form">
+            <input
+              id="username"
+              maxlength="16"
+              autocomplete="nickname"
+              placeholder="Username"
+              required
+            >
 
-    <div class="hud-group">
+            <button class="primary">
+              Join
+            </button>
+          </form>
 
-      <div class="hud-card">
-        <div class="hud-label">Players</div>
-        <div id="playersValue" class="hud-value">0</div>
-      </div>
+          <button
+            id="retry"
+            class="secondary"
+            hidden
+          >
+            Retry
+          </button>
 
-      <div class="hud-card">
-        <div class="hud-label">Arena</div>
-        <div id="tickValue" class="hud-value yellow">LIVE</div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div id="overlay" class="overlay">
-
-    <div class="card">
-
-      <div class="card-logo">S</div>
-
-      <div class="card-eyebrow">
-        Global Arena
-      </div>
-
-      <h1 id="overlayTitle">
-        Enter the Arena
-      </h1>
-
-      <p id="overlayText">
-        Choose a username and battle other players
-        in the live multiplayer arena.
-      </p>
-
-      <form id="joinForm" class="form">
-
-        <input
-          id="username"
-          type="text"
-          maxlength="16"
-          minlength="1"
-          autocomplete="nickname"
-          spellcheck="false"
-          placeholder="Enter username"
-          aria-label="Username"
-          required
-        >
-
-        <button
-          type="submit"
-          class="primary"
-        >
-          Play
-        </button>
-
-      </form>
-
-      <button
-        id="retry"
-        type="button"
-        class="secondary"
-        hidden
-      >
-        Reconnect
-      </button>
-
-      <div class="tip">
-        WASD or arrow keys to move
-      </div>
-
-    </div>
-
-  </div>
-
-  <div id="mobileControls" aria-label="Mobile controls">
-
-    <button
-      type="button"
-      data-direction="up"
-      aria-label="Move up"
-    >▲</button>
-
-    <button
-      type="button"
-      data-direction="left"
-      aria-label="Move left"
-    >◀</button>
-
-    <button
-      type="button"
-      data-direction="down"
-      aria-label="Move down"
-    >▼</button>
-
-    <button
-      type="button"
-      data-direction="right"
-      aria-label="Move right"
-    >▶</button>
-
-  </div>
-
-</section>
-
-<aside class="sidebar">
-
-  <section class="panel">
-
-    <div class="panel-title">
-      <h2>Leaderboard</h2>
-      <span id="playerCount" class="panel-count">0 players</span>
-    </div>
-
-    <div
-      id="leaderboard"
-      class="leaderboard"
-    ></div>
-
-  </section>
-
-  <section class="panel">
-
-    <div class="panel-title">
-      <h2>Controls</h2>
-    </div>
-
-    <div class="control-grid">
-
-      <div class="control-row">
-        <span>Movement</span>
-
-        <div class="keys">
-          <span class="key">W</span>
-          <span class="key">A</span>
-          <span class="key">S</span>
-          <span class="key">D</span>
         </div>
       </div>
 
-      <div class="control-row">
-        <span>Alternative</span>
-
-        <div class="keys">
-          <span class="key">↑</span>
-          <span class="key">←</span>
-          <span class="key">↓</span>
-          <span class="key">→</span>
-        </div>
+      <div id="mobileControls">
+        <button data-direction="up">▲</button>
+        <button data-direction="left">◀</button>
+        <button data-direction="down">▼</button>
+        <button data-direction="right">▶</button>
       </div>
 
-    </div>
+    </section>
 
-    <div class="power-list">
+    <aside class="sidebar">
 
-      <div class="power">
+      <section class="panel">
+        <h2>Leaderboard</h2>
+        <div id="leaderboard" class="leaderboard"></div>
+      </section>
 
-        <div class="power-icon speed">
-          ⚡
+      <section class="panel">
+        <h2>Controls</h2>
+
+        <div class="help">
+          <strong>Move</strong><br>
+          WASD / Arrow Keys
+          <br><br>
+
+          <strong>Power-ups</strong><br>
+          ⚡ Speed<br>
+          ◇ Reverse controls<br>
+          ✦ 2× points
         </div>
+      </section>
 
-        <div class="power-text">
-          <strong>Speed</strong>
-          <span>Move faster</span>
-        </div>
-
-      </div>
-
-      <div class="power">
-
-        <div class="power-icon reverse">
-          ↺
-        </div>
-
-        <div class="power-text">
-          <strong>Reverse</strong>
-          <span>Confuse opponents</span>
-        </div>
-
-      </div>
-
-      <div class="power">
-
-        <div class="power-icon multiplier">
-          2×
-        </div>
-
-        <div class="power-text">
-          <strong>Multiplier</strong>
-          <span>Double your points</span>
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-</aside>
-```
+    </aside>
 
   </main>
-
 </div>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-
 <script>
 "use strict";
 
-/* =========================================================
-   CONNECTION
-   ========================================================= */
+const socket = io("https://snake-arena-server.onrender.com", {
+  transports: ["websocket", "polling"]
+});
 
-const socket = io(
-  "https://snake-arena-server.onrender.com",
-  {
-    transports: ["websocket", "polling"],
-    reconnection: true,
-    reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    timeout: 10000
-  }
-);
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d", {
+  alpha: false,
+  desynchronized: true
+});
 
-/* =========================================================
-   DOM
-   ========================================================= */
+const overlay = document.getElementById("overlay");
+const overlayTitle = document.getElementById("overlayTitle");
+const overlayText = document.getElementById("overlayText");
 
-const canvas =
-  document.getElementById("game");
+const joinForm = document.getElementById("joinForm");
+const usernameInput = document.getElementById("username");
+const retryButton = document.getElementById("retry");
 
-const ctx =
-  canvas.getContext("2d", {
-    alpha: false,
-    desynchronized: true
-  });
-
-const overlay =
-  document.getElementById("overlay");
-
-const overlayTitle =
-  document.getElementById("overlayTitle");
-
-const overlayText =
-  document.getElementById("overlayText");
-
-const joinForm =
-  document.getElementById("joinForm");
-
-const usernameInput =
-  document.getElementById("username");
-
-const retryButton =
-  document.getElementById("retry");
-
-const connection =
-  document.getElementById("connection");
-
-const connectionText =
-  document.getElementById("connectionText");
-
-const leaderboard =
-  document.getElementById("leaderboard");
-
-const playerCount =
-  document.getElementById("playerCount");
-
-const scoreValue =
-  document.getElementById("scoreValue");
-
-const rankValue =
-  document.getElementById("rankValue");
-
-const playersValue =
-  document.getElementById("playersValue");
-
-const tickValue =
-  document.getElementById("tickValue");
-
-/* =========================================================
-   GAME STATE
-   ========================================================= */
+const connection = document.getElementById("connection");
+const leaderboard = document.getElementById("leaderboard");
 
 const state = {
-
   id: null,
-
   username: null,
 
   grid: {
@@ -1376,313 +581,175 @@ const state = {
   },
 
   snakes: new Map(),
-
   food: new Map(),
-
   powerups: new Map(),
 
   leaderboard: [],
 
   lastServerTick: 0,
-
   renderTime: 0,
 
   cellSize: 10,
-
   offsetX: 0,
-
   offsetY: 0,
 
-  joined: false,
+  // Smooth follow camera
+  cameraX: 40,
+  cameraY: 25,
+  cameraReady: false,
+  zoom: 2.15,
+  baseCellSize: 10,
 
-  lastDeathHandled: false
+  // Smooth server-state interpolation
+  previousSnakes: new Map(),
+  stateReceivedAt: performance.now(),
+  interpolationMs: 90,
+
+  // Mouse follower
+  mouse: {
+    x: 0,
+    y: 0,
+    active: false
+  },
+  lastMouseDirection: null
 };
 
-/* =========================================================
-   CANVAS
-   ========================================================= */
-
 function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  const rect =
-    canvas.getBoundingClientRect();
+  canvas.width = Math.floor(rect.width * dpr);
+  canvas.height = Math.floor(rect.height * dpr);
 
-  const dpr =
-    Math.min(
-      window.devicePixelRatio || 1,
-      2
-    );
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  canvas.width =
-    Math.max(
-      1,
-      Math.floor(rect.width * dpr)
-    );
+  state.baseCellSize = Math.max(4, Math.min(
+    rect.width / 18,
+    rect.height / 12
+  ));
 
-  canvas.height =
-    Math.max(
-      1,
-      Math.floor(rect.height * dpr)
-    );
-
-  ctx.setTransform(
-    dpr,
-    0,
-    0,
-    dpr,
-    0,
-    0
-  );
-
-  const width = rect.width;
-  const height = rect.height;
-
-  state.cellSize =
-    Math.max(
-      4,
-      Math.min(
-        width / state.grid.width,
-        height / state.grid.height
-      )
-    );
-
-  state.offsetX =
-    (width -
-      state.grid.width *
-      state.cellSize) / 2;
-
-  state.offsetY =
-    (height -
-      state.grid.height *
-      state.cellSize) / 2;
+  state.cellSize = state.baseCellSize * state.zoom;
+  state.offsetX = rect.width / 2;
+  state.offsetY = rect.height / 2;
 }
 
-if ("ResizeObserver" in window) {
 
-  new ResizeObserver(
-    resizeCanvas
-  ).observe(canvas);
-
-} else {
-
-  window.addEventListener(
-    "resize",
-    resizeCanvas
-  );
-}
+new ResizeObserver(resizeCanvas)
+  .observe(canvas);
 
 window.addEventListener(
-  "orientationchange",
-  () => {
-    setTimeout(
-      resizeCanvas,
-      100
-    );
-  }
+  "resize",
+  resizeCanvas
 );
-
-/* =========================================================
-   CONNECTION UI
-   ========================================================= */
-
-function setConnection(online) {
-
-  connection.classList.toggle(
-    "online",
-    online
-  );
-
-  connectionText.textContent =
-    online
-      ? "Connected"
-      : "Disconnected";
-}
 
 function setOverlay(
   title,
   text,
   showForm = false
 ) {
+  overlayTitle.textContent = title;
+  overlayText.textContent = text;
 
-  overlayTitle.textContent =
-    title;
+  joinForm.hidden = !showForm;
+  retryButton.hidden = showForm;
 
-  overlayText.textContent =
-    text;
-
-  joinForm.hidden =
-    !showForm;
-
-  retryButton.hidden =
-    showForm;
-
-  overlay.classList.remove(
-    "hidden"
-  );
-
-  if (showForm) {
-
-    setTimeout(
-      () => usernameInput.focus(),
-      50
-    );
-  }
+  overlay.classList.remove("hidden");
 }
 
 function hideOverlay() {
+  overlay.classList.add("hidden");
+}
 
-  overlay.classList.add(
-    "hidden"
+function setConnection(online) {
+  connection.textContent =
+    online ? "● Connected" : "○ Disconnected";
+
+  connection.classList.toggle(
+    "online",
+    online
   );
 }
 
-/* =========================================================
-   SOCKET EVENTS
-   ========================================================= */
+socket.on("connect", () => {
+  setConnection(true);
 
-socket.on(
-  "connect",
-  () => {
-
-    setConnection(true);
-
-    tickValue.textContent =
-      "LIVE";
-
-    if (state.username) {
-
-      socket.emit(
-        "join",
-        {
-          username: state.username
-        }
-      );
-
-    } else {
-
-      setOverlay(
-        "Enter the Arena",
-        "Choose a username and battle other players in the live multiplayer arena.",
-        true
-      );
-    }
-  }
-);
-
-socket.on(
-  "disconnect",
-  () => {
-
-    setConnection(false);
-
-    tickValue.textContent =
-      "OFFLINE";
-
+  if (state.username) {
+    socket.emit("join", {
+      username: state.username
+    });
+  } else {
     setOverlay(
-      "Connection Lost",
-      "The game server connection was interrupted. Trying to reconnect…",
-      false
-    );
-
-    retryButton.hidden = false;
-  }
-);
-
-socket.on(
-  "connect_error",
-  () => {
-
-    setConnection(false);
-
-    tickValue.textContent =
-      "OFFLINE";
-
-    setOverlay(
-      "Server Unavailable",
-      "Unable to reach the multiplayer server. Check your connection and try again.",
-      false
-    );
-
-    retryButton.hidden = false;
-  }
-);
-
-socket.on(
-  "hello",
-  data => {
-
-    if (data && data.grid) {
-
-      state.grid =
-        data.grid;
-
-      resizeCanvas();
-    }
-  }
-);
-
-socket.on(
-  "joinError",
-  data => {
-
-    setOverlay(
-      "Unable to Join",
-      data?.message ||
-        "The server rejected your username.",
+      "Enter the arena",
+      "Choose a username to join the live multiplayer game.",
       true
     );
   }
-);
+});
 
-socket.on(
-  "joined",
-  data => {
+socket.on("disconnect", () => {
+  setConnection(false);
 
-    state.id =
-      data.id;
+  setOverlay(
+    "Connection lost",
+    "The connection to the game server was lost.",
+    false
+  );
 
-    state.username =
-      data.username;
+  retryButton.hidden = false;
+});
 
-    state.joined =
-      true;
+socket.on("connect_error", () => {
+  setConnection(false);
 
-    state.lastDeathHandled =
-      false;
+  setOverlay(
+    "Server unavailable",
+    "Unable to connect to the multiplayer server.",
+    false
+  );
 
-    hideOverlay();
+  retryButton.hidden = false;
+});
+
+socket.on("hello", data => {
+  if (data.grid) {
+    state.grid = data.grid;
+    resizeCanvas();
   }
-);
+});
 
-socket.on(
-  "state",
-  packet => {
+socket.on("joinError", data => {
+  setOverlay(
+    "Unable to join",
+    data.message || "Unable to join the arena.",
+    true
+  );
+});
 
-    applyState(packet);
-  }
-);
+socket.on("joined", data => {
+  state.id = data.id;
+  state.username = data.username;
 
-/* =========================================================
-   STATE HANDLING
-   ========================================================= */
+  hideOverlay();
+});
+
+socket.on("state", packet => {
+  applyState(packet);
+});
 
 function applyState(packet) {
-
-  if (!packet) return;
+  const now = performance.now();
+  const oldSnakes = state.snakes;
+  state.previousSnakes = new Map(oldSnakes);
+  state.stateReceivedAt = now;
 
   if (packet.full) {
-
-    const snapshot =
-      packet.state;
-
-    if (!snapshot) return;
+    const snapshot = packet.state;
 
     state.lastServerTick =
-      snapshot.tick || 0;
+      snapshot.tick;
 
     state.grid =
-      snapshot.grid ||
-      state.grid;
+      snapshot.grid;
 
     replaceCollection(
       state.snakes,
@@ -1703,44 +770,53 @@ function applyState(packet) {
     );
 
     state.leaderboard =
-      snapshot.leaderboard ||
-      [];
+      snapshot.leaderboard;
 
     resizeCanvas();
+    updateLeaderboard();
 
-  } else {
-
-    state.lastServerTick =
-      packet.tick || 0;
-
-    replaceCollection(
-      state.snakes,
-      packet.snakes,
-      snake => snake.id
-    );
-
-    replaceCollection(
-      state.food,
-      packet.food,
-      item => item.id
-    );
-
-    replaceCollection(
-      state.powerups,
-      packet.powerups,
-      item => item.id
-    );
-
-    state.leaderboard =
-      packet.leaderboard ||
-      [];
+    return;
   }
 
-  updateHUD();
+  state.lastServerTick =
+    packet.tick;
+
+  replaceCollection(
+    state.snakes,
+    packet.snakes,
+    snake => snake.id
+  );
+
+  replaceCollection(
+    state.food,
+    packet.food,
+    item => item.id
+  );
+
+  replaceCollection(
+    state.powerups,
+    packet.powerups,
+    item => item.id
+  );
+
+  state.leaderboard =
+    packet.leaderboard;
 
   updateLeaderboard();
 
-  checkDeath();
+  const me = state.snakes.get(state.id);
+
+  if (
+    state.id &&
+    me &&
+    !me.alive
+  ) {
+    setOverlay(
+      "You crashed",
+      `Final score: ${me.score}. Reconnect to play again.`,
+      false
+    );
+  }
 }
 
 function replaceCollection(
@@ -1748,195 +824,66 @@ function replaceCollection(
   array,
   getId
 ) {
+  const nextIds = new Set();
 
-  const nextIds =
-    new Set();
-
-  for (
-    const item of array || []
-  ) {
-
-    if (!item) continue;
-
-    const id =
-      getId(item);
-
-    if (id == null) continue;
+  for (const item of array || []) {
+    const id = getId(item);
 
     nextIds.add(id);
-
-    map.set(
-      id,
-      item
-    );
+    map.set(id, item);
   }
 
-  for (
-    const id of map.keys()
-  ) {
-
+  for (const id of map.keys()) {
     if (!nextIds.has(id)) {
       map.delete(id);
     }
   }
 }
 
-/* =========================================================
-   HUD
-   ========================================================= */
-
-function updateHUD() {
-
-  const me =
-    state.snakes.get(
-      state.id
-    );
-
-  const score =
-    me?.score || 0;
-
-  scoreValue.textContent =
-    score;
-
-  const alivePlayers =
-    state.leaderboard
-      .filter(
-        player => player.alive
-      ).length;
-
-  playersValue.textContent =
-    alivePlayers;
-
-  playerCount.textContent =
-    `${alivePlayers} ${
-      alivePlayers === 1
-        ? "player"
-        : "players"
-    }`;
-
-  const rank =
-    state.leaderboard.findIndex(
-      player =>
-        player.id === state.id
-    );
-
-  rankValue.textContent =
-    rank >= 0
-      ? `#${rank + 1}`
-      : "—";
-
-  tickValue.textContent =
-    state.joined
-      ? "LIVE"
-      : "WAIT";
-}
-
-/* =========================================================
-   LEADERBOARD
-   ========================================================= */
-
 function updateLeaderboard() {
-
   leaderboard.innerHTML = "";
-
-  const fragment =
-    document.createDocumentFragment();
-
-  const list =
-    state.leaderboard
-      .slice(0, 12);
 
   for (
     let i = 0;
-    i < list.length;
+    i < state.leaderboard.length;
     i++
   ) {
-
     const player =
-      list[i];
+      state.leaderboard[i];
 
     const row =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     row.className =
       "player" +
-      (player.alive
-        ? ""
-        : " dead") +
-      (player.id === state.id
-        ? " me"
-        : "");
+      (player.alive ? "" : " dead");
 
     const rank =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
-    rank.className =
-      "rank";
-
+    rank.className = "rank";
     rank.textContent =
       `#${i + 1}`;
 
     const name =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     name.className =
       "player-name";
 
     name.textContent =
-      player.username ||
-      "Unknown";
-
-    if (player.id === state.id) {
-
-      const badge =
-        document.createElement(
-          "span"
-        );
-
-      badge.className =
-        "you-badge";
-
-      badge.textContent =
-        "YOU";
-
-      name.appendChild(
-        badge
-      );
-    }
-
-    if (player.bot) {
-
-      const bot =
-        document.createElement(
-          "small"
-        );
-
-      bot.textContent =
-        "BOT";
-
-      name.appendChild(
-        bot
-      );
-    }
+      player.username +
+      (player.username === state.username ? " · YOU" : "") +
+      (player.bot ? " · BOT" : "");
 
     const score =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     score.className =
       "player-score";
 
     score.textContent =
-      Number(
-        player.score || 0
-      ).toLocaleString();
+      player.score;
 
     row.append(
       rank,
@@ -1944,87 +891,19 @@ function updateLeaderboard() {
       score
     );
 
-    fragment.appendChild(
-      row
-    );
-  }
-
-  leaderboard.appendChild(
-    fragment
-  );
-}
-
-/* =========================================================
-   DEATH
-   ========================================================= */
-
-function checkDeath() {
-
-  const me =
-    state.snakes.get(
-      state.id
-    );
-
-  if (
-    !state.id ||
-    !me
-  ) {
-    return;
-  }
-
-  if (
-    !me.alive &&
-    !state.lastDeathHandled
-  ) {
-
-    state.lastDeathHandled =
-      true;
-
-    setOverlay(
-      "You Crashed",
-      `Final score: ${
-        Number(me.score || 0)
-          .toLocaleString()
-      }.`,
-      false
-    );
-
-    retryButton.hidden =
-      false;
-  }
-
-  if (me.alive) {
-
-    state.lastDeathHandled =
-      false;
+    leaderboard.appendChild(row);
   }
 }
 
-/* =========================================================
-   INPUT
-   ========================================================= */
+function sendDirection(direction) {
+  if (!socket.connected) return;
 
-function sendDirection(
-  direction
-) {
-
-  if (
-    !socket.connected ||
-    !state.joined
-  ) {
-    return;
-  }
-
-  socket.emit(
-    "input",
-    {
-      direction
-    }
-  );
+  socket.emit("input", {
+    direction
+  });
 }
 
 const keyMap = {
-
   ArrowUp: "up",
   ArrowDown: "down",
   ArrowLeft: "left",
@@ -2032,163 +911,120 @@ const keyMap = {
 
   w: "up",
   W: "up",
-
   s: "down",
   S: "down",
-
   a: "left",
   A: "left",
-
   d: "right",
   D: "right"
 };
 
-window.addEventListener(
-  "keydown",
-  event => {
+window.addEventListener("keydown", event => {
+  const direction =
+    keyMap[event.key];
 
-    const direction =
-      keyMap[event.key];
+  if (!direction) return;
 
-    if (!direction) return;
+  event.preventDefault();
 
-    event.preventDefault();
-
-    sendDirection(
-      direction
-    );
-  },
-  {
-    passive: false
-  }
-);
-
-/* =========================================================
-   MOBILE CONTROLS
-   ========================================================= */
+  sendDirection(direction);
+});
 
 document
-  .querySelectorAll(
-    "#mobileControls button"
-  )
-  .forEach(
-    button => {
+  .querySelectorAll("#mobileControls button")
+  .forEach(button => {
+    button.addEventListener(
+      "pointerdown",
+      event => {
+        event.preventDefault();
 
-      button.addEventListener(
-        "pointerdown",
-        event => {
+        sendDirection(
+          button.dataset.direction
+        );
+      }
+    );
+  });
 
-          event.preventDefault();
+canvas.addEventListener("pointermove", event => {
+  const rect = canvas.getBoundingClientRect();
+  state.mouse.x = event.clientX - rect.left;
+  state.mouse.y = event.clientY - rect.top;
+  state.mouse.active = true;
 
-          sendDirection(
-            button.dataset.direction
-          );
-        }
-      );
-    }
-  );
+  if (event.pointerType === "mouse") {
+    updateMouseDirection();
+  }
+});
 
-/* =========================================================
-   JOIN
-   ========================================================= */
+canvas.addEventListener("pointerleave", () => {
+  state.mouse.active = false;
+});
+
+function updateMouseDirection() {
+  if (!socket.connected || !state.id) return;
+  const me = state.snakes.get(state.id);
+  if (!me?.alive || !me.body?.length) return;
+
+  const head = { x: me.body[0].x + .5, y: me.body[0].y + .5 };
+  const target = screenToWorld(state.mouse.x, state.mouse.y);
+  const dx = target.x - head.x;
+  const dy = target.y - head.y;
+  if (Math.hypot(dx, dy) < .3) return;
+
+  // Server movement remains grid-based; the renderer is smooth.
+  const direction = Math.abs(dx) >= Math.abs(dy)
+    ? (dx >= 0 ? "right" : "left")
+    : (dy >= 0 ? "down" : "up");
+
+  if (direction !== state.lastMouseDirection) {
+    state.lastMouseDirection = direction;
+    sendDirection(direction);
+  }
+}
 
 joinForm.addEventListener(
   "submit",
   event => {
-
     event.preventDefault();
 
     const username =
       usernameInput.value
         .trim()
-        .replace(/\s+/g, " ")
         .slice(0, 16);
 
     if (!username) {
-
       usernameInput.focus();
-
       return;
     }
 
-    state.username =
-      username;
+    state.username = username;
 
-    state.lastDeathHandled =
-      false;
-
-    if (socket.connected) {
-
-      socket.emit(
-        "join",
-        {
-          username
-        }
-      );
-
-    } else {
-
-      socket.connect();
-    }
+    socket.emit("join", {
+      username
+    });
   }
 );
-
-/* =========================================================
-   RETRY
-   ========================================================= */
 
 retryButton.addEventListener(
   "click",
   () => {
-
-    state.lastDeathHandled =
-      false;
-
     if (!socket.connected) {
-
       socket.connect();
-
-    } else if (
-      state.username
-    ) {
-
-      socket.emit(
-        "join",
-        {
-          username:
-            state.username
-        }
-      );
-    } else {
-
-      setOverlay(
-        "Enter the Arena",
-        "Choose a username to join the live multiplayer game.",
-        true
-      );
+    } else if (state.username) {
+      socket.emit("join", {
+        username: state.username
+      });
     }
   }
 );
 
-/* =========================================================
-   DRAWING HELPERS
-   ========================================================= */
-
-function roundedRect(
+function roundRect(
   x,
   y,
   width,
   height,
   radius
 ) {
-
-  const r =
-    Math.min(
-      radius,
-      width / 2,
-      height / 2
-    );
-
   ctx.beginPath();
 
   ctx.roundRect(
@@ -2196,727 +1032,273 @@ function roundedRect(
     y,
     width,
     height,
-    r
+    radius
   );
 
   ctx.fill();
 }
 
-function drawBackground(
-  width,
-  height
-) {
+function getInterpolatedSnake(snake) {
+  const previous = state.previousSnakes.get(snake.id);
+  if (!previous || !previous.body || !snake.body) return snake;
 
-  ctx.fillStyle =
-    "#02060c";
+  const t = Math.min(1, (performance.now() - state.stateReceivedAt) / state.interpolationMs);
+  const body = snake.body.map((segment, i) => {
+    const old = previous.body[i] || segment;
+    return {
+      x: old.x + (segment.x - old.x) * t,
+      y: old.y + (segment.y - old.y) * t
+    };
+  });
 
-  ctx.fillRect(
-    0,
-    0,
-    width,
-    height
-  );
+  return { ...snake, body };
+}
 
-  const {
-    cellSize,
-    offsetX,
-    offsetY
-  } = state;
+function worldToScreen(x, y) {
+  return {
+    x: state.offsetX + (x - state.cameraX) * state.cellSize,
+    y: state.offsetY + (y - state.cameraY) * state.cellSize
+  };
+}
 
-  const arenaWidth =
-    state.grid.width *
-    cellSize;
+function screenToWorld(x, y) {
+  return {
+    x: state.cameraX + (x - state.offsetX) / state.cellSize,
+    y: state.cameraY + (y - state.offsetY) / state.cellSize
+  };
+}
 
-  const arenaHeight =
-    state.grid.height *
-    cellSize;
+function drawBackground(width, height) {
+  ctx.fillStyle = "#030810";
+  ctx.fillRect(0, 0, width, height);
 
-  /* Arena glow */
+  const halfW = width / (2 * state.cellSize) + 2;
+  const halfH = height / (2 * state.cellSize) + 2;
+  const left = Math.floor(state.cameraX - halfW);
+  const right = Math.ceil(state.cameraX + halfW);
+  const top = Math.floor(state.cameraY - halfH);
+  const bottom = Math.ceil(state.cameraY + halfH);
 
-  const gradient =
-    ctx.createRadialGradient(
-      offsetX + arenaWidth / 2,
-      offsetY + arenaHeight / 2,
-      0,
-      offsetX + arenaWidth / 2,
-      offsetY + arenaHeight / 2,
-      Math.max(
-        arenaWidth,
-        arenaHeight
-      ) * .65
-    );
-
-  gradient.addColorStop(
-    0,
-    "rgba(18,52,72,.18)"
-  );
-
-  gradient.addColorStop(
-    1,
-    "rgba(2,6,12,0)"
-  );
-
-  ctx.fillStyle =
-    gradient;
-
-  ctx.fillRect(
-    0,
-    0,
-    width,
-    height
-  );
-
-  /* Grid */
-
-  ctx.strokeStyle =
-    "rgba(140,190,220,.035)";
-
+  ctx.strokeStyle = "rgba(255,255,255,.055)";
   ctx.lineWidth = 1;
 
-  ctx.beginPath();
-
-  for (
-    let x = 0;
-    x <= state.grid.width;
-    x++
-  ) {
-
-    const px =
-      offsetX +
-      x * cellSize;
-
-    ctx.moveTo(
-      px,
-      offsetY
-    );
-
-    ctx.lineTo(
-      px,
-      offsetY +
-        arenaHeight
-    );
+  for (let x = left; x <= right; x++) {
+    const p = worldToScreen(x, 0);
+    ctx.beginPath();
+    ctx.moveTo(Math.round(p.x) + .5, 0);
+    ctx.lineTo(Math.round(p.x) + .5, height);
+    ctx.stroke();
   }
 
-  for (
-    let y = 0;
-    y <= state.grid.height;
-    y++
-  ) {
-
-    const py =
-      offsetY +
-      y * cellSize;
-
-    ctx.moveTo(
-      offsetX,
-      py
-    );
-
-    ctx.lineTo(
-      offsetX +
-        arenaWidth,
-      py
-    );
+  for (let y = top; y <= bottom; y++) {
+    const p = worldToScreen(0, y);
+    ctx.beginPath();
+    ctx.moveTo(0, Math.round(p.y) + .5);
+    ctx.lineTo(width, Math.round(p.y) + .5);
+    ctx.stroke();
   }
 
-  ctx.stroke();
-
-  /* Arena border */
-
-  ctx.strokeStyle =
-    "rgba(54,240,160,.08)";
-
-  ctx.strokeRect(
-    offsetX + .5,
-    offsetY + .5,
-    arenaWidth - 1,
-    arenaHeight - 1
-  );
+  // Arena border
+  const tl = worldToScreen(0, 0);
+  const br = worldToScreen(state.grid.width, state.grid.height);
+  ctx.strokeStyle = "rgba(53,233,154,.22)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
 }
-
-/* =========================================================
-   FOOD
-   ========================================================= */
 
 function drawFood() {
-
-  const {
-    cellSize,
-    offsetX,
-    offsetY
-  } = state;
-
   ctx.save();
+  for (const food of state.food.values()) {
+    const p = worldToScreen(food.x + .5, food.y + .5);
+    if (p.x < -30 || p.y < -30 || p.x > canvas.clientWidth + 30 || p.y > canvas.clientHeight + 30) continue;
 
-  for (
-    const food of state.food.values()
-  ) {
-
-    const x =
-      offsetX +
-      (food.x + .5) *
-      cellSize;
-
-    const y =
-      offsetY +
-      (food.y + .5) *
-      cellSize;
-
-    const pulse =
-      1 +
-      Math.sin(
-        state.renderTime / 180 +
-        food.x +
-        food.y
-      ) * .10;
-
-    const radius =
-      cellSize *
-      .20 *
-      pulse;
-
-    ctx.shadowColor =
-      "#ff5872";
-
-    ctx.shadowBlur =
-      Math.min(
-        18,
-        cellSize * 1.5
-      );
-
-    ctx.fillStyle =
-      "#ff5872";
-
+    ctx.fillStyle = "#ff5c75";
+    ctx.shadowColor = "#ff5c75";
+    ctx.shadowBlur = Math.min(22, state.cellSize);
     ctx.beginPath();
-
-    ctx.arc(
-      x,
-      y,
-      radius,
-      0,
-      Math.PI * 2
-    );
-
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-
-    ctx.fillStyle =
-      "rgba(255,255,255,.75)";
-
-    ctx.beginPath();
-
-    ctx.arc(
-      x - radius * .3,
-      y - radius * .3,
-      radius * .27,
-      0,
-      Math.PI * 2
-    );
-
+    ctx.arc(p.x, p.y, state.cellSize * .23, 0, Math.PI * 2);
     ctx.fill();
   }
-
   ctx.restore();
 }
-
-/* =========================================================
-   POWERUPS
-   ========================================================= */
 
 function drawPowerups() {
-
-  const {
-    cellSize,
-    offsetX,
-    offsetY
-  } = state;
-
-  const colors = {
-    speed: "#b982ff",
-    reverse: "#5daaff",
-    multiplier: "#ffd45c"
-  };
-
-  const glyphs = {
-    speed: "⚡",
-    reverse: "↺",
-    multiplier: "2×"
-  };
+  const colors = { speed: "#b681ff", reverse: "#5ba9ff", multiplier: "#ffd166" };
+  const glyphs = { speed: "⚡", reverse: "↺", multiplier: "2×" };
 
   ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `800 ${Math.max(9, state.cellSize * .48)}px system-ui`;
 
-  ctx.textAlign =
-    "center";
+  for (const power of state.powerups.values()) {
+    const p = worldToScreen(power.x + .5, power.y + .5);
+    const size = state.cellSize * .64;
+    const x = p.x - size / 2;
+    const y = p.y - size / 2;
+    const color = colors[power.type] || "#fff";
 
-  ctx.textBaseline =
-    "middle";
-
-  for (
-    const power of state.powerups.values()
-  ) {
-
-    const x =
-      offsetX +
-      (power.x + .5) *
-      cellSize;
-
-    const y =
-      offsetY +
-      (power.y + .5) *
-      cellSize;
-
-    const color =
-      colors[power.type] ||
-      "#ffffff";
-
-    const pulse =
-      1 +
-      Math.sin(
-        state.renderTime / 260 +
-        power.x
-      ) * .08;
-
-    const size =
-      cellSize *
-      .62 *
-      pulse;
-
-    ctx.shadowColor =
-      color;
-
-    ctx.shadowBlur =
-      Math.min(
-        18,
-        cellSize * 1.5
-      );
-
-    ctx.fillStyle =
-      color;
-
-    roundedRect(
-      x - size / 2,
-      y - size / 2,
-      size,
-      size,
-      cellSize * .13
-    );
-
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = Math.min(18, state.cellSize);
+    roundRect(x, y, size, size, state.cellSize * .12);
     ctx.shadowBlur = 0;
-
-    ctx.fillStyle =
-      "#06101b";
-
-    ctx.font =
-      `900 ${Math.max(
-        9,
-        cellSize * .40
-      )}px system-ui`;
-
-    ctx.fillText(
-      glyphs[power.type] ||
-        "?",
-      x,
-      y + .5
-    );
+    ctx.fillStyle = "#07101c";
+    ctx.fillText(glyphs[power.type] || "✦", p.x, p.y);
   }
-
   ctx.restore();
 }
 
-/* =========================================================
-   SNAKES
-   ========================================================= */
+function drawSnakeEyes(snake, head) {
+  if (!head) return;
 
-function getSnakeColor(
-  snake
-) {
-
-  if (snake.bot) {
-    return "#ffd45c";
+  let dx = 1, dy = 0;
+  if (snake.body.length > 1) {
+    dx = head.x - snake.body[1].x;
+    dy = head.y - snake.body[1].y;
   }
 
-  if (
-    snake.id === state.id
-  ) {
-    return "#36f0a0";
-  }
+  const len = Math.hypot(dx, dy) || 1;
+  dx /= len;
+  dy /= len;
+  const px = -dy, py = dx;
+  const forward = state.cellSize * .22;
+  const side = state.cellSize * .15;
+  const eye = Math.max(1.5, state.cellSize * .055);
+  const c = worldToScreen(head.x + .5, head.y + .5);
 
-  return "#5daaff";
-}
-
-function drawSnakeEyes(
-  snake,
-  head,
-  color
-) {
-
-  if (
-    !head ||
-    state.cellSize < 7
-  ) {
-    return;
-  }
-
-  const {
-    cellSize,
-    offsetX,
-    offsetY
-  } = state;
-
-  const cx =
-    offsetX +
-    (head.x + .5) *
-    cellSize;
-
-  const cy =
-    offsetY +
-    (head.y + .5) *
-    cellSize;
-
-  let dx = 1;
-  let dy = 0;
-
-  if (
-    snake.direction === "left"
-  ) {
-    dx = -1;
-    dy = 0;
-  } else if (
-    snake.direction === "up"
-  ) {
-    dx = 0;
-    dy = -1;
-  } else if (
-    snake.direction === "down"
-  ) {
-    dx = 0;
-    dy = 1;
-  }
-
-  const sideX =
-    -dy;
-
-  const sideY =
-    dx;
-
-  const forward =
-    cellSize * .15;
-
-  const side =
-    cellSize * .17;
-
-  const eyeSize =
-    Math.max(
-      1.4,
-      cellSize * .075
-    );
-
-  ctx.fillStyle =
-    "#03100b";
-
-  for (
-    const sign of [-1, 1]
-  ) {
-
+  ctx.fillStyle = "#06100b";
+  for (const sign of [-1, 1]) {
     ctx.beginPath();
-
     ctx.arc(
-      cx +
-        dx * forward +
-        sideX * side * sign,
-
-      cy +
-        dy * forward +
-        sideY * side * sign,
-
-      eyeSize,
-      0,
-      Math.PI * 2
+      c.x + dx * forward + px * side * sign,
+      c.y + dy * forward + py * side * sign,
+      eye, 0, Math.PI * 2
     );
-
     ctx.fill();
   }
 }
 
 function drawSnakes() {
+  const colors = { p1: "#35e99a", p2: "#5ba9ff", bot: "#ffd166" };
 
-  const {
-    cellSize,
-    offsetX,
-    offsetY
-  } = state;
+  for (const rawSnake of state.snakes.values()) {
+    const snake = getInterpolatedSnake(rawSnake);
+    if (!snake.body || !snake.body.length) continue;
 
-  for (
-    const snake of state.snakes.values()
-  ) {
-
-    if (
-      !snake.body ||
-      !snake.body.length
-    ) {
-      continue;
-    }
-
-    const color =
-      getSnakeColor(
-        snake
-      );
+    const color = colors[snake.bot ? "bot" : snake.id === state.id ? "p1" : "p2"] || "#fff";
 
     ctx.save();
+    ctx.globalAlpha = snake.alive ? 1 : .25;
 
-    ctx.globalAlpha =
-      snake.alive
-        ? 1
-        : .22;
+    for (let i = snake.body.length - 1; i >= 0; i--) {
+      const segment = snake.body[i];
+      const isHead = i === 0;
+      const padding = isHead ? state.cellSize * .06 : state.cellSize * .11;
+      const p = worldToScreen(segment.x, segment.y);
 
-    const body =
-      snake.body;
-
-    /* Glow */
-
-    const head =
-      body[0];
-
-    ctx.shadowColor =
-      color;
-
-    ctx.shadowBlur =
-      Math.min(
-        12,
-        cellSize
-      );
-
-    /* Body */
-
-    for (
-      let i = body.length - 1;
-      i >= 0;
-      i--
-    ) {
-
-      const segment =
-        body[i];
-
-      const isHead =
-        i === 0;
-
-      const padding =
-        isHead
-          ? cellSize * .055
-          : cellSize * .105;
-
-      const width =
-        cellSize -
-        padding * 2;
-
-      ctx.fillStyle =
-        color;
-
-      roundedRect(
-        offsetX +
-          segment.x *
-          cellSize +
-          padding,
-
-        offsetY +
-          segment.y *
-          cellSize +
-          padding,
-
-        width,
-        width,
-
-        isHead
-          ? cellSize * .22
-          : cellSize * .16
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = isHead ? Math.min(20, state.cellSize) : Math.min(8, state.cellSize);
+      roundRect(
+        p.x + padding,
+        p.y + padding,
+        state.cellSize - padding * 2,
+        state.cellSize - padding * 2,
+        isHead ? state.cellSize * .22 : state.cellSize * .13
       );
     }
 
     ctx.shadowBlur = 0;
+    drawSnakeEyes(snake, snake.body[0]);
 
-    /* Head highlight */
-
-    if (head) {
-
-      const hx =
-        offsetX +
-        (head.x + .5) *
-        cellSize;
-
-      const hy =
-        offsetY +
-        (head.y + .5) *
-        cellSize;
-
-      const gradient =
-        ctx.createRadialGradient(
-          hx - cellSize * .18,
-          hy - cellSize * .20,
-          0,
-          hx,
-          hy,
-          cellSize * .55
-        );
-
-      gradient.addColorStop(
-        0,
-        "rgba(255,255,255,.28)"
-      );
-
-      gradient.addColorStop(
-        .25,
-        "rgba(255,255,255,.06)"
-      );
-
-      gradient.addColorStop(
-        1,
-        "rgba(255,255,255,0)"
-      );
-
-      ctx.fillStyle =
-        gradient;
-
+    if (snake.effects && snake.effects.speed > 0) {
+      const h = worldToScreen(snake.body[0].x + .5, snake.body[0].y + .5);
+      ctx.strokeStyle = "#b681ff";
+      ctx.lineWidth = 2;
       ctx.beginPath();
-
-      ctx.arc(
-        hx,
-        hy,
-        cellSize * .47,
-        0,
-        Math.PI * 2
-      );
-
-      ctx.fill();
-
-      drawSnakeEyes(
-        snake,
-        head,
-        color
-      );
-    }
-
-    /* Speed effect */
-
-    if (
-      snake.effects &&
-      snake.effects.speed > 0
-    ) {
-
-      ctx.strokeStyle =
-        "#b982ff";
-
-      ctx.lineWidth =
-        Math.max(
-          1.5,
-          cellSize * .08
-        );
-
-      ctx.shadowColor =
-        "#b982ff";
-
-      ctx.shadowBlur =
-        Math.min(
-          10,
-          cellSize
-        );
-
-      ctx.beginPath();
-
-      ctx.arc(
-        offsetX +
-          (head.x + .5) *
-          cellSize,
-
-        offsetY +
-          (head.y + .5) *
-          cellSize,
-
-        cellSize * .54,
-
-        0,
-        Math.PI * 2
-      );
-
+      ctx.arc(h.x, h.y, state.cellSize * .48, 0, Math.PI * 2);
       ctx.stroke();
-    }
-
-    /* Multiplier effect */
-
-    if (
-      snake.effects &&
-      snake.effects.multiplier > 0
-    ) {
-
-      ctx.strokeStyle =
-        "#ffd45c";
-
-      ctx.lineWidth = 1.5;
-
-      ctx.setLineDash([
-        cellSize * .18,
-        cellSize * .15
-      ]);
-
-      ctx.beginPath();
-
-      ctx.arc(
-        offsetX +
-          (head.x + .5) *
-          cellSize,
-
-        offsetY +
-          (head.y + .5) *
-          cellSize,
-
-        cellSize * .70,
-
-        0,
-        Math.PI * 2
-      );
-
-      ctx.stroke();
-
-      ctx.setLineDash([]);
     }
 
     ctx.restore();
   }
 }
 
-/* =========================================================
-   RENDER LOOP
-   ========================================================= */
+function drawMouseFollower() {
+  if (!state.mouse.active || !state.id) return;
+  const me = state.snakes.get(state.id);
+  if (!me || !me.body?.length) return;
 
-function render() {
+  const p = screenToWorld(state.mouse.x, state.mouse.y);
+  const head = { x: me.body[0].x + .5, y: me.body[0].y + .5 };
+  const target = { x: Math.max(0, Math.min(state.grid.width, p.x)), y: Math.max(0, Math.min(state.grid.height, p.y)) };
+  const dx = target.x - head.x;
+  const dy = target.y - head.y;
+  if (Math.hypot(dx, dy) < .35) return;
 
-  const rect =
-    canvas.getBoundingClientRect();
-
-  const width =
-    rect.width;
-
-  const height =
-    rect.height;
-
-  drawBackground(
-    width,
-    height
-  );
-
-  drawFood();
-
-  drawPowerups();
-
-  drawSnakes();
+  ctx.save();
+  ctx.strokeStyle = "rgba(53,233,154,.35)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 7]);
+  ctx.beginPath();
+  ctx.moveTo(state.mouse.x, state.mouse.y);
+  const hp = worldToScreen(head.x, head.y);
+  ctx.lineTo(hp.x, hp.y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle = "rgba(53,233,154,.9)";
+  ctx.beginPath();
+  ctx.arc(state.mouse.x, state.mouse.y, Math.max(7, state.cellSize * .18), 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
 }
 
-function animationLoop(
-  time
-) {
+function render() {
+  const rect = canvas.getBoundingClientRect();
+  const width = rect.width;
+  const height = rect.height;
 
-  state.renderTime =
-    time;
+  state.cellSize = state.baseCellSize * state.zoom;
+
+  const me = state.id ? state.snakes.get(state.id) : null;
+  if (me?.body?.length) {
+    const sm = getInterpolatedSnake(me);
+    const head = sm.body[0];
+    const targetX = head.x + .5;
+    const targetY = head.y + .5;
+
+    if (!state.cameraReady) {
+      state.cameraX = targetX;
+      state.cameraY = targetY;
+      state.cameraReady = true;
+    } else {
+      const ease = 1 - Math.pow(.001, 1 / 60);
+      state.cameraX += (targetX - state.cameraX) * ease;
+      state.cameraY += (targetY - state.cameraY) * ease;
+    }
+  }
+
+  // Keep the camera from showing outside the arena when possible.
+  const halfW = width / (2 * state.cellSize);
+  const halfH = height / (2 * state.cellSize);
+  if (state.grid.width / 2 > halfW) {
+    state.cameraX = Math.max(halfW, Math.min(state.grid.width - halfW, state.cameraX));
+  }
+  if (state.grid.height / 2 > halfH) {
+    state.cameraY = Math.max(halfH, Math.min(state.grid.height - halfH, state.cameraY));
+  }
+
+  drawBackground(width, height);
+  drawFood();
+  drawPowerups();
+  drawSnakes();
+  drawMouseFollower();
+}
+
+
+function animationLoop(time) {
+  state.renderTime = time;
 
   render();
 
@@ -2925,21 +1307,9 @@ function animationLoop(
   );
 }
 
-/* =========================================================
-   START
-   ========================================================= */
-
 resizeCanvas();
-
-updateHUD();
-
-requestAnimationFrame(
-  animationLoop
-);
-
-setConnection(
-  socket.connected
-);
+setInterval(updateMouseDirection, 55);
+requestAnimationFrame(animationLoop);
 </script>
 
 </body>
