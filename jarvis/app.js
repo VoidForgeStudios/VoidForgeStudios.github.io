@@ -1,291 +1,262 @@
-const STORAGE_KEY = "jarvis_local_memory_v1";
-const CHAT_KEY = "jarvis_local_chat_v1";
-const GROQ_KEY = "jarvis_groq_api_key_session";
-const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODELS_ENDPOINT = "https://api.groq.com/openai/v1/models";
-const PREFERRED_GROQ_MODELS = [
-  "openai/gpt-oss-120b",
-  "openai/gpt-oss-20b",
-  "llama-3.1-8b-instant"
+const startup = document.getElementById("startup");
+const startupLines = document.getElementById("startupLines");
+const progressBar = document.getElementById("progressBar");
+const startupPercent = document.getElementById("startupPercent");
+const app = document.getElementById("app");
+
+const messages = document.getElementById("messages");
+const chatForm = document.getElementById("chatForm");
+const input = document.getElementById("input");
+const clearButton = document.getElementById("clear");
+
+
+/*
+ * JARVIS STARTUP SEQUENCE
+ */
+
+const bootSequence = [
+  ["INITIALIZING JARVIS CORE...", "active"],
+  ["POWER SYSTEMS ................. ONLINE", "success"],
+  ["NEURAL PROCESSOR .............. ONLINE", "success"],
+  ["MEMORY SYSTEMS ................ SYNCHRONIZED", "success"],
+  ["LOCAL TOOLS ................... READY", "success"],
+  ["USER INTERFACE ............... CONNECTED", "success"],
+  ["SECURITY PROTOCOLS ........... ACTIVE", "success"],
+  ["INTELLIGENCE SYSTEM .......... STANDBY", "success"],
+  ["", ""],
+  ["JARVIS CORE INITIALIZATION COMPLETE", "active"],
+  ["", ""],
+  ["GOOD EVENING.", "success"],
+  ["I AM JARVIS.", "success"],
+  ["JUST A RATHER VERY INTELLIGENT SYSTEM.", "success"],
+  ["", ""],
+  ["ALL SYSTEMS NOMINAL.", "active"],
+  ["JARVIS IS STANDING BY.", "success"]
 ];
-let activeGroqModel = null;
 
-const messages = document.querySelector("#messages");
-const form = document.querySelector("#chatForm");
-const input = document.querySelector("#input");
-const send = document.querySelector("#send");
-const clear = document.querySelector("#clear");
-const status = document.querySelector("#status");
-const statusDot = status?.previousElementSibling;
-const groqKey = document.querySelector("#groqKey");
-const connect = document.querySelector("#connect");
 
-function loadJson(key, fallback) {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
-}
-function saveJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
-function loadMemory() { return loadJson(STORAGE_KEY, {}); }
-function saveMemory(memory) { saveJson(STORAGE_KEY, memory); }
-
-function getGroqKey() {
-  try { return sessionStorage.getItem(GROQ_KEY) || ""; } catch { return ""; }
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function setGroqKey(value) {
-  if (value) sessionStorage.setItem(GROQ_KEY, value);
-  else sessionStorage.removeItem(GROQ_KEY);
-}
 
-function setStatus(text, active = false) {
-  status.textContent = text;
-  if (statusDot) statusDot.style.background = active ? "#69d8ff" : "#657180";
-}
+async function runStartup() {
 
-function addMessage(role, text, persist = true) {
-  const article = document.createElement("article");
-  article.className = `message ${role}`;
-  const label = document.createElement("span");
-  label.className = "label";
-  label.textContent = role === "user" ? "YOU" : "JARVIS";
-  const p = document.createElement("p");
-  p.textContent = text;
-  article.append(label, p);
-  messages.appendChild(article);
-  messages.scrollTop = messages.scrollHeight;
-  if (persist) saveJson(CHAT_KEY, Array.from(messages.querySelectorAll(".message")).map(m => ({
-    role: m.classList.contains("user") ? "user" : "jarvis",
-    text: m.querySelector("p")?.textContent || ""
-  })));
-  return p;
-}
+  for (let i = 0; i < bootSequence.length; i++) {
 
-function restoreChat() {
-  const history = loadJson(CHAT_KEY, []);
-  if (!Array.isArray(history) || !history.length) return;
-  messages.innerHTML = "";
-  history.slice(-100).forEach(item => addMessage(item.role === "user" ? "user" : "jarvis", String(item.text), false));
-}
+    const [text, type] = bootSequence[i];
 
-function calculate(expression) {
-  const cleaned = expression.replace(/×/g, "*").replace(/÷/g, "/").trim();
-  if (!cleaned || cleaned.length > 100 || !/^[0-9+\-*/%().\s]+$/.test(cleaned)) return null;
-  try {
-    const value = Function(`"use strict"; return (${cleaned})`)();
-    if (!Number.isFinite(value)) return null;
-    return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(10)));
-  } catch { return null; }
-}
+    const line = document.createElement("div");
 
-function systemInfo() {
-  const nav = navigator;
-  return [
-    `Browser: ${nav.userAgentData?.brands?.map(x => `${x.brand} ${x.version}`).join(", ") || nav.appName}`,
-    `Platform: ${nav.userAgentData?.platform || nav.platform || "Unknown"}`,
-    `Language: ${nav.language}`,
-    `Online: ${nav.onLine ? "Yes" : "No"}`,
-    `CPU cores exposed: ${nav.hardwareConcurrency || "Unknown"}`,
-    `Memory exposed: ${nav.deviceMemory ? `${nav.deviceMemory} GB` : "Not exposed"}`,
-    `Screen: ${screen.width} × ${screen.height}`,
-    `Viewport: ${window.innerWidth} × ${window.innerHeight}`
-  ].join("\n");
-}
+    line.className = "startup-line";
 
-function localResponse(raw) {
-  const text = raw.trim();
-  const lower = text.toLowerCase();
-  const memory = loadMemory();
-
-  if (lower === "help" || lower === "commands") return "Available commands:\n• help\n• time\n• date\n• system info\n• calculate <expression>\n• remember <key> = <value>\n• forget <key>\n• memory\n• clear memory\n• clear\n\nNormal questions are sent to Groq when connected.";
-  if (lower === "time" || lower === "what time is it") return `The local time is ${new Intl.DateTimeFormat(undefined, { timeStyle: "medium" }).format(new Date())}.`;
-  if (lower === "date") return `Today is ${new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(new Date())}.`;
-  if (lower === "system info" || lower === "system information") return systemInfo();
-  if (lower === "memory" || lower === "what do you remember" || lower === "what do you remember?") {
-    const entries = Object.entries(memory);
-    return entries.length ? entries.map(([key, value]) => `• ${key}: ${value}`).join("\n") : "Memory is empty. Tell me: remember <key> = <value>.";
-  }
-  if (lower === "clear memory") {
-    localStorage.removeItem(STORAGE_KEY);
-    return "All local JARVIS memories have been cleared.";
-  }
-
-  const remember = text.match(/^remember\s+(.+?)\s*=\s*(.+)$/i);
-  if (remember) {
-    const key = remember[1].trim(), value = remember[2].trim();
-    if (!key || key.length > 100 || value.length > 1000) return "That memory is too large to save.";
-    memory[key] = value;
-    saveMemory(memory);
-    return `Remembered: ${key} = ${value}`;
-  }
-
-  const forget = text.match(/^forget\s+(.+)$/i);
-  if (forget) {
-    const key = forget[1].trim();
-    if (!(key in memory)) return `I don't have a memory called “${key}”.`;
-    delete memory[key];
-    saveMemory(memory);
-    return `Forgotten: ${key}.`;
-  }
-
-  const calc = text.match(/^(?:calculate|calc)\s+(.+)$/i);
-  if (calc) {
-    const result = calculate(calc[1]);
-    return result === null ? "I couldn't safely evaluate that expression." : `Result: ${result}`;
-  }
-
-  return null;
-}
-
-function conversationForAI() {
-  return Array.from(messages.querySelectorAll(".message"))
-    .slice(-20)
-    .map(message => ({
-      role: message.classList.contains("user") ? "user" : "assistant",
-      content: message.querySelector("p")?.textContent || ""
-    }));
-}
-
-async function getAvailableGroqModel(apiKey) {
-  if (activeGroqModel) return activeGroqModel;
-
-  const response = await fetch(GROQ_MODELS_ENDPOINT, {
-    headers: { "Authorization": `Bearer ${apiKey}` }
-  });
-
-  if (!response.ok) {
-    let detail = "Could not check the Groq model list.";
-    try {
-      const error = await response.json();
-      detail = error?.error?.message || detail;
-    } catch { /* keep generic message */ }
-    throw new Error(`Groq model check failed (${response.status}): ${detail}`);
-  }
-
-  const data = await response.json();
-  const available = new Set((data?.data || []).map(model => model?.id).filter(Boolean));
-  activeGroqModel = PREFERRED_GROQ_MODELS.find(model => available.has(model));
-
-  if (!activeGroqModel) {
-    throw new Error(`No compatible Groq chat model is available for this API key. Available models: ${Array.from(available).slice(0, 8).join(", ") || "none"}.`);
-  }
-
-  return activeGroqModel;
-}
-
-async function askGroq() {
-  const apiKey = getGroqKey();
-  if (!apiKey) throw new Error("Groq is not connected. Enter your API key above.");
-
-  const memoryEntries = Object.entries(loadMemory()).slice(0, 30);
-  const memoryText = memoryEntries.length
-    ? memoryEntries.map(([key, value]) => `${key}: ${value}`).join("\n")
-    : "No saved memories.";
-
-  setStatus("GROQ · CHECKING MODEL", true);
-  const model = await getAvailableGroqModel(apiKey);
-  setStatus(`GROQ · ${model}`, true);
-
-  const response = await fetch(GROQ_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.55,
-      max_completion_tokens: 768,
-      messages: [
-        {
-          role: "system",
-          content: `You are JARVIS, a calm, intelligent, concise personal assistant for VoidForge Studios. Be helpful and confident without false certainty. Use subtle British phrasing when natural. Never claim to have performed an action you cannot perform. You are connected to the user through a browser interface.\n\nSaved local memories:\n${memoryText}`
-        },
-        ...conversationForAI()
-      ]
-    })
-  });
-
-  if (!response.ok) {
-    let detail = "Groq request failed.";
-    try {
-      const error = await response.json();
-      detail = error?.error?.message || detail;
-    } catch { /* keep generic message */ }
-    throw new Error(`Groq returned ${response.status} ${response.statusText || ""}: ${detail}`.trim());
-  }
-
-  const data = await response.json();
-  return data?.choices?.[0]?.message?.content?.trim() || "I was unable to produce a response.";
-}
-
-function updateConnectionUI() {
-  const connected = Boolean(getGroqKey());
-  if (groqKey) groqKey.value = connected ? "••••••••••••••••" : "";
-  if (connect) connect.textContent = connected ? "Disconnect" : "Connect";
-  setStatus(connected ? "GROQ · READY" : "GROQ · NOT CONNECTED", connected);
-}
-
-connect.addEventListener("click", () => {
-  if (getGroqKey()) {
-    setGroqKey("");
-    activeGroqModel = null;
-    groqKey.value = "";
-    updateConnectionUI();
-    return;
-  }
-
-  const key = groqKey.value.trim();
-  if (!key) {
-    groqKey.focus();
-    return;
-  }
-
-  setGroqKey(key);
-  activeGroqModel = null;
-  groqKey.value = "";
-  updateConnectionUI();
-});
-
-form.addEventListener("submit", async event => {
-  event.preventDefault();
-  const userText = input.value.trim();
-  if (!userText) return;
-
-  addMessage("user", userText);
-  input.value = "";
-  send.disabled = true;
-
-  try {
-    const local = localResponse(userText);
-    if (local !== null) {
-      addMessage("jarvis", local);
-      updateConnectionUI();
-    } else {
-      const reply = await askGroq();
-      addMessage("jarvis", reply);
-      setStatus("GROQ · READY", true);
+    if (type) {
+      line.classList.add(type);
     }
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : "Unknown Groq error.";
-    addMessage("jarvis", `I could not reach Groq. ${reason}`);
-    updateConnectionUI();
-  } finally {
-    send.disabled = false;
-    input.focus();
+
+    line.textContent = text || "\u00a0";
+
+    startupLines.appendChild(line);
+
+    requestAnimationFrame(() => {
+      line.style.animationDelay = "0ms";
+    });
+
+    const progress =
+      Math.round(((i + 1) / bootSequence.length) * 100);
+
+    progressBar.style.width = `${progress}%`;
+
+    startupPercent.textContent = `${progress}%`;
+
+    await sleep(
+      text === ""
+        ? 180
+        : 320
+    );
   }
+
+
+  await sleep(1100);
+
+  startup.classList.add("hide");
+
+  app.classList.remove("hidden");
+
+  input.focus();
+}
+
+
+/*
+ * SIMPLE MARKDOWN FORMATTER
+ *
+ * Supports:
+ *
+ * **bold**
+ * *italic*
+ * `code`
+ * ```code blocks```
+ * - lists
+ */
+
+function escapeHTML(text) {
+
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function formatText(text) {
+
+  let html = escapeHTML(text);
+
+
+  // Code blocks
+  html = html.replace(
+    /```([\s\S]*?)```/g,
+    "<pre><code>$1</code></pre>"
+  );
+
+
+  // Inline code
+  html = html.replace(
+    /`([^`]+)`/g,
+    "<code>$1</code>"
+  );
+
+
+  // Bold
+  html = html.replace(
+    /\*\*(.+?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+
+  // Italic
+  html = html.replace(
+    /(?<!\*)\*([^*]+)\*(?!\*)/g,
+    "<em>$1</em>"
+  );
+
+
+  // Convert line breaks
+  html = html.replace(/\n/g, "<br>");
+
+
+  return html;
+}
+
+
+/*
+ * ADD MESSAGE
+ */
+
+function addMessage(sender, text) {
+
+  const article = document.createElement("article");
+
+  article.className =
+    sender === "user"
+      ? "message user"
+      : "message jarvis";
+
+
+  const label = document.createElement("span");
+
+  label.className = "label";
+
+  label.textContent =
+    sender === "user"
+      ? "YOU"
+      : "JARVIS";
+
+
+  const content = document.createElement("div");
+
+  content.className = "message-content";
+
+  content.innerHTML = formatText(text);
+
+
+  article.appendChild(label);
+
+  article.appendChild(content);
+
+  messages.appendChild(article);
+
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+
+/*
+ * DEMO RESPONSE
+ *
+ * Replace this later with your Groq request.
+ */
+
+async function respondToUser(text) {
+
+  await sleep(500);
+
+  return `**Understood.**
+
+You said:
+
+> ${text}
+
+JARVIS is ready to assist.`;
+}
+
+
+/*
+ * CHAT
+ */
+
+chatForm.addEventListener("submit", async event => {
+
+  event.preventDefault();
+
+  const text = input.value.trim();
+
+  if (!text) {
+    return;
+  }
+
+
+  input.value = "";
+
+  addMessage("user", text);
+
+
+  const response = await respondToUser(text);
+
+  addMessage("jarvis", response);
 });
 
-clear.addEventListener("click", () => {
+
+/*
+ * CLEAR CHAT
+ */
+
+clearButton.addEventListener("click", () => {
+
   messages.innerHTML = "";
-  localStorage.removeItem(CHAT_KEY);
-  addMessage("jarvis", "Conversation cleared. Local memories remain intact.");
+
+  addMessage(
+    "jarvis",
+    "**Conversation cleared.** Systems remain operational."
+  );
 });
 
-input.addEventListener("keydown", event => {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    form.requestSubmit();
-  }
-});
 
-restoreChat();
-updateConnectionUI();
+/*
+ * START JARVIS
+ */
+
+runStartup();
+
