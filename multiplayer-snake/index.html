@@ -550,7 +550,7 @@ input:focus {
 <script>
 "use strict";
 
-const socket = io({
+const socket = io("https://snake-arena-server.onrender.com", {
   transports: ["websocket", "polling"]
 });
 
