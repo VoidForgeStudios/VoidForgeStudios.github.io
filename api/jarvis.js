@@ -5,18 +5,16 @@ const PREFERRED_MODELS = [
   "llama-3.1-8b-instant"
 ];
 
-function allowedOrigin(req) {
+function setCors(req, res) {
   const configured = process.env.JARVIS_ALLOWED_ORIGIN;
   const origin = req.headers.origin || "";
-  return configured && origin === configured ? configured : configured || "";
-}
+  const allowed = !configured || origin === configured;
 
-function setCors(req, res) {
-  const origin = allowedOrigin(req);
-  if (origin) res.setHeader("Access-Control-Allow-Origin", origin);
+  if (configured && allowed) res.setHeader("Access-Control-Allow-Origin", configured);
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  return allowed;
 }
 
 function configuredKeys() {
@@ -62,21 +60,25 @@ async function chat(apiKey, model, messages, maxTokens, temperature) {
   return data?.choices?.[0]?.message?.content?.trim() || "No response was returned.";
 }
 
-function normaliseMessages(messages) {
+function normaliseMessages(messages, currentUserText) {
   if (!Array.isArray(messages)) return [];
-  return messages
+  const cleaned = messages
     .filter(item => item && (item.role === "user" || item.role === "assistant" || item.role === "system"))
-    .slice(-20)
     .map(item => ({
       role: item.role,
       content: String(item.content || "").slice(0, 12000)
     }));
+
+  const last = cleaned[cleaned.length - 1];
+  if (last?.role === "user" && last.content.trim() === currentUserText.trim()) cleaned.pop();
+  return cleaned.slice(-20);
 }
 
 module.exports = async function handler(req, res) {
-  setCors(req, res);
+  const allowed = setCors(req, res);
 
-  if (req.method === "OPTIONS") return res.status(204).end();
+  if (req.method === "OPTIONS") return res.status(allowed ? 204 : 403).end();
+  if (!allowed) return res.status(403).json({ error: "Origin not allowed." });
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed." });
 
   const expectedToken = process.env.JARVIS_ACCESS_TOKEN;
@@ -94,7 +96,7 @@ module.exports = async function handler(req, res) {
   const userText = String(body.message || "").trim();
   if (!userText || userText.length > 20000) return res.status(400).json({ error: "A valid message is required." });
 
-  const history = normaliseMessages(body.messages);
+  const history = normaliseMessages(body.messages, userText);
   const memory = String(body.memory || "No saved memories.").slice(0, 10000);
 
   const workerResults = await Promise.allSettled(workers.map(async (key, index) => {
@@ -119,24 +121,25 @@ module.exports = async function handler(req, res) {
     return res.status(502).json({ error: errors[0] || "All JARVIS workers failed." });
   }
 
-  const masterModel = await modelFor(masterKey);
-  const reportText = reports.map(item => `WORKER ${item.worker} (${item.model}):\n${item.report}`).join("\n\n");
-  const finalAnswer = await chat(masterKey, masterModel, [
-    {
-      role: "system",
-      content: "You are MASTER JARVIS. Produce the single final answer to the user using the worker reports below. Be concise, intelligent, professional, subtly British when natural, and honest about uncertainty. Resolve conflicts where possible; if they cannot be resolved, say so. Never mention hidden chain-of-thought. Do not claim actions were performed unless they actually were."
-    },
-    ...history,
-    {
-      role: "user",
-      content: `User request:\n${userText}\n\nWorker reports:\n${reportText}`
-    }
-  ], 1024, 0.3);
+  try {
+    const masterModel = await modelFor(masterKey);
+    const reportText = reports.map(item => `WORKER ${item.worker} (${item.model}):\n${item.report}`).join("\n\n");
+    const finalAnswer = await chat(masterKey, masterModel, [
+      {
+        role: "system",
+        content: "You are MASTER JARVIS. Produce the single final answer to the user using the worker reports below. Be concise, intelligent, professional, subtly British when natural, and honest about uncertainty. Resolve conflicts where possible; if they cannot be resolved, say so. Never mention hidden chain-of-thought. Do not claim actions were performed unless they actually were."
+      },
+      ...history,
+      { role: "user", content: `User request:\n${userText}\n\nWorker reports:\n${reportText}` }
+    ], 1024, 0.3);
 
-  return res.status(200).json({
-    answer: finalAnswer,
-    workers: reports.map(item => ({ worker: item.worker, model: item.model })),
-    masterModel,
-    workerCount: reports.length
-  });
+    return res.status(200).json({
+      answer: finalAnswer,
+      workers: reports.map(item => ({ worker: item.worker, model: item.model })),
+      masterModel,
+      workerCount: reports.length
+    });
+  } catch (error) {
+    return res.status(502).json({ error: error?.message || "Master JARVIS failed." });
+  }
 };
