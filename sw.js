@@ -1,4 +1,4 @@
-const CACHE = "voidforge-shell";
+const CACHE = "voidforge-shell-v2";
 
 const SHELL = [
   "./",
@@ -40,16 +40,15 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(event.request.url);
 
-  // Always get the latest registry from the server.
+  // Always try to get the latest game registry.
   if (url.pathname.endsWith("/games.json")) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
           const copy = response.clone();
 
-          caches.open(CACHE).then(cache => {
-            cache.put(event.request, copy);
-          });
+          caches.open(CACHE)
+            .then(cache => cache.put(event.request, copy));
 
           return response;
         })
@@ -58,7 +57,7 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Always get the latest CSS and JavaScript from the server.
+  // Always get the latest CSS and JavaScript.
   if (
     url.pathname.endsWith(".css") ||
     url.pathname.endsWith(".js")
@@ -70,12 +69,6 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Everything else can use the cached shell.
-  event.respondWith(
-    caches.match(event.request)
-      .then(cached => cached || fetch(event.request))
-  );
-});
   // Everything else can use the cached shell.
   event.respondWith(
     caches.match(event.request)
