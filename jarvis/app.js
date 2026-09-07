@@ -1,6 +1,9 @@
 const STORAGE_KEY = "jarvis_local_memory_v1";
 const CHAT_KEY = "jarvis_local_chat_v1";
-const MODEL_ID = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
+const GROQ_KEY = "jarvis_groq_api_key_session";
+const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
 const input = document.querySelector("#input");
@@ -8,9 +11,8 @@ const send = document.querySelector("#send");
 const clear = document.querySelector("#clear");
 const status = document.querySelector("#status");
 const statusDot = status?.previousElementSibling;
-
-let engine = null;
-let enginePromise = null;
+const groqKey = document.querySelector("#groqKey");
+const connect = document.querySelector("#connect");
 
 function loadJson(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
@@ -18,6 +20,15 @@ function loadJson(key, fallback) {
 function saveJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 function loadMemory() { return loadJson(STORAGE_KEY, {}); }
 function saveMemory(memory) { saveJson(STORAGE_KEY, memory); }
+
+function getGroqKey() {
+  try { return sessionStorage.getItem(GROQ_KEY) || ""; } catch { return ""; }
+}
+
+function setGroqKey(value) {
+  if (value) sessionStorage.setItem(GROQ_KEY, value);
+  else sessionStorage.removeItem(GROQ_KEY);
+}
 
 function setStatus(text, active = false) {
   status.textContent = text;
@@ -66,7 +77,6 @@ function systemInfo() {
     `Platform: ${nav.userAgentData?.platform || nav.platform || "Unknown"}`,
     `Language: ${nav.language}`,
     `Online: ${nav.onLine ? "Yes" : "No"}`,
-    `WebGPU: ${"gpu" in navigator ? "Available" : "Unavailable"}`,
     `CPU cores exposed: ${nav.hardwareConcurrency || "Unknown"}`,
     `Memory exposed: ${nav.deviceMemory ? `${nav.deviceMemory} GB` : "Not exposed"}`,
     `Screen: ${screen.width} × ${screen.height}`,
@@ -79,7 +89,7 @@ function localResponse(raw) {
   const lower = text.toLowerCase();
   const memory = loadMemory();
 
-  if (lower === "help" || lower === "commands") return "Available commands:\n• help\n• time\n• date\n• system info\n• calculate <expression>\n• remember <key> = <value>\n• forget <key>\n• memory\n• clear memory\n• clear\n\nFor normal questions, JARVIS uses the local browser AI when WebGPU is available.";
+  if (lower === "help" || lower === "commands") return "Available commands:\n• help\n• time\n• date\n• system info\n• calculate <expression>\n• remember <key> = <value>\n• forget <key>\n• memory\n• clear memory\n• clear\n\nNormal questions are sent to Groq when connected.";
   if (lower === "time" || lower === "what time is it") return `The local time is ${new Intl.DateTimeFormat(undefined, { timeStyle: "medium" }).format(new Date())}.`;
   if (lower === "date") return `Today is ${new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(new Date())}.`;
   if (lower === "system info" || lower === "system information") return systemInfo();
@@ -116,74 +126,88 @@ function localResponse(raw) {
     return result === null ? "I couldn't safely evaluate that expression." : `Result: ${result}`;
   }
 
-  if (/^(hi|hello|hey|good morning|good evening)\b/i.test(text)) return "Good to see you. Systems are nominal.";
-  if (lower.includes("who are you")) return "I am JARVIS — your browser-based VoidForge assistant. I can now use a local AI model when WebGPU is available.";
-  if (lower.includes("thank")) return "You're very welcome.";
-
   return null;
 }
 
-async function loadAI() {
-  if (engine) return engine;
-  if (enginePromise) return enginePromise;
-
-  if (!("gpu" in navigator)) {
-    throw new Error("WebGPU is not available in this browser.");
-  }
-
-  enginePromise = (async () => {
-    setStatus("AI · LOADING MODEL", true);
-    const { CreateMLCEngine } = await import("https://esm.run/@mlc-ai/web-llm");
-    const loaded = await CreateMLCEngine(MODEL_ID, {
-      initProgressCallback: progress => {
-        const percent = Math.round((progress.progress || 0) * 100);
-        setStatus(`AI · LOADING ${percent}%`, true);
-      }
-    });
-    engine = loaded;
-    setStatus("AI · LOCAL READY", true);
-    return engine;
-  })();
-
-  try {
-    return await enginePromise;
-  } catch (error) {
-    enginePromise = null;
-    setStatus("BROWSER MODE · READY", false);
-    throw error;
-  }
-}
-
 function conversationForAI() {
-  const history = Array.from(messages.querySelectorAll(".message")).slice(-20);
-  return history.map(message => ({
-    role: message.classList.contains("user") ? "user" : "assistant",
-    content: message.querySelector("p")?.textContent || ""
-  }));
+  return Array.from(messages.querySelectorAll(".message"))
+    .slice(-20)
+    .map(message => ({
+      role: message.classList.contains("user") ? "user" : "assistant",
+      content: message.querySelector("p")?.textContent || ""
+    }));
 }
 
-async function askAI(userText) {
-  const ai = await loadAI();
+async function askGroq(userText) {
+  const apiKey = getGroqKey();
+  if (!apiKey) throw new Error("Groq is not connected. Enter your API key above.");
+
   const memoryEntries = Object.entries(loadMemory()).slice(0, 30);
   const memoryText = memoryEntries.length
     ? memoryEntries.map(([key, value]) => `${key}: ${value}`).join("\n")
     : "No saved memories.";
 
-  const response = await ai.chat.completions.create({
-    messages: [
-      {
-        role: "system",
-        content: `You are JARVIS, a calm, intelligent, concise personal assistant for VoidForge Studios. Be helpful and confident without pretending to know things you do not know. Use subtle British phrasing when natural. Never claim to have performed an action you cannot perform. You are running entirely inside the user's browser.\n\nSaved local memories:\n${memoryText}`
-      },
-      ...conversationForAI(),
-      { role: "user", content: userText }
-    ],
-    temperature: 0.55,
-    max_tokens: 384
+  setStatus("GROQ · THINKING", true);
+
+  const response = await fetch(GROQ_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      temperature: 0.55,
+      max_completion_tokens: 768,
+      messages: [
+        {
+          role: "system",
+          content: `You are JARVIS, a calm, intelligent, concise personal assistant for VoidForge Studios. Be helpful and confident without false certainty. Use subtle British phrasing when natural. Never claim to have performed an action you cannot perform. You are connected to the user through a browser interface.\n\nSaved local memories:\n${memoryText}`
+        },
+        ...conversationForAI(),
+        { role: "user", content: userText }
+      ]
+    })
   });
 
-  return response.choices?.[0]?.message?.content?.trim() || "I was unable to produce a response.";
+  if (!response.ok) {
+    let detail = "Groq request failed.";
+    try {
+      const error = await response.json();
+      detail = error?.error?.message || detail;
+    } catch { /* keep generic message */ }
+    throw new Error(detail);
+  }
+
+  const data = await response.json();
+  return data?.choices?.[0]?.message?.content?.trim() || "I was unable to produce a response.";
 }
+
+function updateConnectionUI() {
+  const connected = Boolean(getGroqKey());
+  if (groqKey) groqKey.value = connected ? "••••••••••••••••" : "";
+  if (connect) connect.textContent = connected ? "Disconnect" : "Connect";
+  setStatus(connected ? "GROQ · READY" : "GROQ · NOT CONNECTED", connected);
+}
+
+connect.addEventListener("click", () => {
+  if (getGroqKey()) {
+    setGroqKey("");
+    groqKey.value = "";
+    updateConnectionUI();
+    return;
+  }
+
+  const key = groqKey.value.trim();
+  if (!key) {
+    groqKey.focus();
+    return;
+  }
+
+  setGroqKey(key);
+  groqKey.value = "";
+  updateConnectionUI();
+});
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
@@ -198,15 +222,16 @@ form.addEventListener("submit", async event => {
     const local = localResponse(userText);
     if (local !== null) {
       addMessage("jarvis", local);
-      setStatus(engine ? "AI · LOCAL READY" : "BROWSER MODE · READY", Boolean(engine));
+      updateConnectionUI();
     } else {
-      const reply = await askAI(userText);
+      const reply = await askGroq(userText);
       addMessage("jarvis", reply);
+      setStatus("GROQ · READY", true);
     }
   } catch (error) {
-    const reason = error instanceof Error ? error.message : "Unknown AI error.";
-    addMessage("jarvis", `I could not start the local AI. ${reason} Try a recent Chrome or Edge browser with WebGPU enabled.`);
-    setStatus("AI · UNAVAILABLE", false);
+    const reason = error instanceof Error ? error.message : "Unknown Groq error.";
+    addMessage("jarvis", `I could not reach Groq. ${reason}`);
+    updateConnectionUI();
   } finally {
     send.disabled = false;
     input.focus();
@@ -227,4 +252,4 @@ input.addEventListener("keydown", event => {
 });
 
 restoreChat();
-setStatus("BROWSER MODE · READY", false);
+updateConnectionUI();
