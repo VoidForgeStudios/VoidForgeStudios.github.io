@@ -20,5 +20,16 @@
     "status": "Available",
     "tags": ["Snake", "2D", "Sandbox"],
     "description": "A browser-based Snake-style game."
+  },
+  {
+    "id": "jarvis",
+    "name": "J.A.R.V.I.S",
+    "subtitle": "JARVIS AI",
+    "entry": "jarvis",
+    "version": "1.0.0",
+    "platform": "Browser",
+    "status": "Available",
+    "tags": ["AI", "JARVIS", "CHATBOT"],
+    "description": "A browser-based JARVIS AI."
   }
 ]
