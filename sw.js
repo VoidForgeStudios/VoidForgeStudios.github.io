@@ -40,17 +40,42 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(event.request.url);
 
+  // Always get the latest registry from the server.
+  if (url.pathname.endsWith("/games.json")) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const copy = response.clone();
+
+          caches.open(CACHE).then(cache => {
+            cache.put(event.request, copy);
+          });
+
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   // Always get the latest CSS and JavaScript from the server.
   if (
     url.pathname.endsWith(".css") ||
     url.pathname.endsWith(".js")
   ) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
+      fetch(event.request)
+        .catch(() => caches.match(event.request))
     );
     return;
   }
 
+  // Everything else can use the cached shell.
+  event.respondWith(
+    caches.match(event.request)
+      .then(cached => cached || fetch(event.request))
+  );
+});
   // Everything else can use the cached shell.
   event.respondWith(
     caches.match(event.request)
