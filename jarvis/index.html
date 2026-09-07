@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#05070b">
   <title>JARVIS — VoidForge Studios</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="secure.css">
 </head>
 <body>
   <section id="startup" class="startup" aria-label="JARVIS system initialization">
@@ -33,18 +34,12 @@
       </section>
 
       <section class="chat-panel">
-        <div class="panel-head">
-          <div><span class="eyebrow">CONSOLE</span><h2>Conversation</h2></div>
-          <button id="clear" type="button">Clear</button>
-        </div>
+        <div class="panel-head"><div><span class="eyebrow">CONSOLE</span><h2>Conversation</h2></div><button id="clear" type="button">Clear</button></div>
 
         <div class="ai-config">
           <div class="config-title"><span>JARVIS AI NETWORK</span><small id="agentStatus">SERVER KEYS · OFFLINE</small></div>
           <label class="access-field">JARVIS ACCESS CODE<input id="accessToken" type="password" autocomplete="off" placeholder="Enter your private access code"></label>
-          <div class="ai-config-row">
-            <button id="connect" type="button">Connect Securely</button>
-            <button id="disconnect" type="button" class="secondary">Forget Access</button>
-          </div>
+          <div class="ai-config-row"><button id="connect" type="button">Connect Securely</button><button id="disconnect" type="button" class="secondary">Forget Access</button></div>
           <small>Groq keys are stored on the private backend, not in this website. Worker keys run in parallel and Master JARVIS produces the final answer.</small>
         </div>
 
@@ -52,10 +47,7 @@
           <article class="message jarvis"><span class="label">JARVIS</span><div class="message-content"><p><strong>Systems nominal.</strong></p><p>Connect to the secure JARVIS backend to activate the multi-agent network.</p></div></article>
         </div>
 
-        <form id="chatForm" class="composer">
-          <textarea id="input" rows="2" maxlength="20000" placeholder="Speak with JARVIS using text…" autocomplete="off" spellcheck="true"></textarea>
-          <button type="submit" id="send">Send <kbd>Enter</kbd></button>
-        </form>
+        <form id="chatForm" class="composer"><textarea id="input" rows="2" maxlength="20000" placeholder="Speak with JARVIS using text…" autocomplete="off" spellcheck="true"></textarea><button type="submit" id="send">Send <kbd>Enter</kbd></button></form>
         <p class="hint">Try <code>help</code>, <code>remember coffee = black</code>, or ask JARVIS anything after connecting.</p>
       </section>
     </section>
