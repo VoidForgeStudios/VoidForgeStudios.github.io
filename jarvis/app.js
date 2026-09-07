@@ -1,25 +1,19 @@
+const STORAGE_KEY = "jarvis_local_memory_v1";
+const CHAT_KEY = "jarvis_local_chat_v1";
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
 const input = document.querySelector("#input");
 const send = document.querySelector("#send");
-const status = document.querySelector("#status");
 const clear = document.querySelector("#clear");
 
-const memoryKey = "jarvis_memory";
-
-function loadMemory() {
-  try {
-    return JSON.parse(localStorage.getItem(memoryKey) || "{}");
-  } catch {
-    return {};
-  }
+function loadJson(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
+function saveJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+function loadMemory() { return loadJson(STORAGE_KEY, {}); }
+function saveMemory(memory) { saveJson(STORAGE_KEY, memory); }
 
-function saveMemory(memory) {
-  localStorage.setItem(memoryKey, JSON.stringify(memory));
-}
-
-function addMessage(role, text) {
+function addMessage(role, text, persist = true) {
   const article = document.createElement("article");
   article.className = `message ${role}`;
   const label = document.createElement("span");
@@ -30,97 +24,117 @@ function addMessage(role, text) {
   article.append(label, p);
   messages.appendChild(article);
   messages.scrollTop = messages.scrollHeight;
+  if (persist) saveJson(CHAT_KEY, Array.from(messages.querySelectorAll(".message")).map(m => ({
+    role: m.classList.contains("user") ? "user" : "jarvis",
+    text: m.querySelector("p")?.textContent || ""
+  })));
+}
+
+function restoreChat() {
+  const history = loadJson(CHAT_KEY, []);
+  if (!Array.isArray(history) || !history.length) return;
+  messages.innerHTML = "";
+  history.slice(-100).forEach(item => addMessage(item.role === "user" ? "user" : "jarvis", String(item.text), false));
 }
 
 function calculate(expression) {
-  if (!/^[0-9+\-*/().%\s]+$/.test(expression)) return null;
+  const cleaned = expression.replace(/×/g, "*").replace(/÷/g, "/").trim();
+  if (!cleaned || cleaned.length > 100 || !/^[0-9+\-*/%().\s]+$/.test(cleaned)) return null;
   try {
-    const result = Function(`"use strict"; return (${expression})`)();
-    return Number.isFinite(result) ? String(result) : null;
-  } catch {
-    return null;
-  }
+    const value = Function(`"use strict"; return (${cleaned})`)();
+    if (!Number.isFinite(value)) return null;
+    return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(10)));
+  } catch { return null; }
 }
 
-function respond(message) {
-  const text = message.trim();
+function systemInfo() {
+  const nav = navigator;
+  return [
+    `Browser: ${nav.userAgentData?.brands?.map(x => `${x.brand} ${x.version}`).join(", ") || nav.appName}`,
+    `Platform: ${nav.userAgentData?.platform || nav.platform || "Unknown"}`,
+    `Language: ${nav.language}`,
+    `Online: ${nav.onLine ? "Yes" : "No"}`,
+    `CPU cores exposed: ${nav.hardwareConcurrency || "Unknown"}`,
+    `Memory exposed: ${nav.deviceMemory ? `${nav.deviceMemory} GB` : "Not exposed"}`,
+    `Screen: ${screen.width} × ${screen.height}`,
+    `Viewport: ${window.innerWidth} × ${window.innerHeight}`
+  ].join("\n");
+}
+
+function respond(raw) {
+  const text = raw.trim();
   const lower = text.toLowerCase();
+  const memory = loadMemory();
 
-  if (lower === "help") {
-    return "Available: system info, calculate <expression>, remember <key> = <value>, forget <key>, memory, clear, time.";
-  }
-
-  if (lower === "system info") {
-    return `Browser: ${navigator.userAgentData?.platform || navigator.platform || "unknown"}. Online: ${navigator.onLine ? "yes" : "no"}. Local web mode active.`;
-  }
-
-  if (lower === "time") {
-    return `Local time: ${new Date().toLocaleString()}.`;
-  }
-
-  if (lower === "memory") {
-    const memory = loadMemory();
+  if (lower === "help" || lower === "commands") return "Available commands:\n• help\n• time\n• date\n• system info\n• calculate <expression>\n• remember <key> = <value>\n• forget <key>\n• memory\n• clear memory\n• clear";
+  if (lower === "time" || lower === "what time is it") return `The local time is ${new Intl.DateTimeFormat(undefined, { timeStyle: "medium" }).format(new Date())}.`;
+  if (lower === "date") return `Today is ${new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(new Date())}.`;
+  if (lower === "system info" || lower === "system information") return systemInfo();
+  if (lower === "memory" || lower === "what do you remember" || lower === "what do you remember?") {
     const entries = Object.entries(memory);
-    return entries.length
-      ? entries.map(([key, value]) => `${key}: ${value}`).join("\n")
-      : "No memories stored.";
+    return entries.length ? entries.map(([key, value]) => `• ${key}: ${value}`).join("\n") : "Memory is empty. Tell me: remember <key> = <value>.";
   }
-
-  const calc = lower.startsWith("calculate ") ? calculate(text.slice(10).trim()) : null;
-  if (calc !== null) return calc;
-  if (lower.startsWith("calculate ")) return "I could not safely evaluate that expression.";
+  if (lower === "clear memory") {
+    localStorage.removeItem(STORAGE_KEY);
+    return "All local JARVIS memories have been cleared.";
+  }
 
   const remember = text.match(/^remember\s+(.+?)\s*=\s*(.+)$/i);
   if (remember) {
-    const memory = loadMemory();
-    memory[remember[1].trim()] = remember[2].trim();
+    const key = remember[1].trim(), value = remember[2].trim();
+    if (!key || key.length > 100 || value.length > 1000) return "That memory is too large to save.";
+    memory[key] = value;
     saveMemory(memory);
-    return `Remembered ${remember[1].trim()}.`;
+    return `Remembered: ${key} = ${value}`;
   }
 
   const forget = text.match(/^forget\s+(.+)$/i);
   if (forget) {
-    const memory = loadMemory();
     const key = forget[1].trim();
-    if (!(key in memory)) return `I have no stored memory named ${key}.`;
+    if (!(key in memory)) return `I don't have a memory called “${key}”.`;
     delete memory[key];
     saveMemory(memory);
-    return `Forgot ${key}.`;
+    return `Forgotten: ${key}.`;
   }
 
-  if (lower === "clear") {
-    return "Use the Clear button to clear this conversation.";
+  const calc = text.match(/^(?:calculate|calc)\s+(.+)$/i);
+  if (calc) {
+    const result = calculate(calc[1]);
+    return result === null ? "I couldn't safely evaluate that expression." : `Result: ${result}`;
   }
 
-  return "I'm running in browser-only mode. I can handle local commands and memory, but full AI reasoning requires an AI service connection.";
+  if (/^(hi|hello|hey|good morning|good evening)\b/i.test(text)) return "Good to see you. Systems are nominal.";
+  if (lower.includes("who are you")) return "I am JARVIS — your browser-based VoidForge assistant. This edition runs locally without a server.";
+  if (lower.includes("what can you do")) return "I can handle local memories, arithmetic, date/time, browser/device telemetry, and this conversation — entirely in the browser.";
+  if (lower.includes("thank")) return "You're very welcome.";
+
+  return "I'm in local browser mode, so I can't access external services or an AI model yet. Try “help” to see what I can do locally.";
 }
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async event => {
   event.preventDefault();
   const message = input.value.trim();
   if (!message) return;
   addMessage("user", message);
   input.value = "";
   send.disabled = true;
-
-  window.setTimeout(() => {
-    addMessage("jarvis", respond(message));
-    send.disabled = false;
-    input.focus();
-  }, 180);
+  await new Promise(resolve => setTimeout(resolve, 180));
+  addMessage("jarvis", respond(message));
+  send.disabled = false;
+  input.focus();
 });
 
 clear.addEventListener("click", () => {
   messages.innerHTML = "";
-  addMessage("jarvis", "Conversation cleared. Ready when you are.");
+  localStorage.removeItem(CHAT_KEY);
+  addMessage("jarvis", "Conversation cleared. Local memories remain intact.");
 });
 
-input.addEventListener("keydown", (event) => {
+input.addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
     form.requestSubmit();
   }
 });
 
-status.textContent = "BROWSER MODE · ONLINE";
-status.previousElementSibling.style.background = "#69d8ff";
+restoreChat();
