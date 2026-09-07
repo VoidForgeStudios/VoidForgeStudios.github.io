@@ -2,7 +2,7 @@ const STORAGE_KEY = "jarvis_local_memory_v1";
 const CHAT_KEY = "jarvis_local_chat_v1";
 const GROQ_KEY = "jarvis_groq_api_key_session";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
@@ -131,7 +131,7 @@ function localResponse(raw) {
 
 function conversationForAI() {
   return Array.from(messages.querySelectorAll(".message"))
-    .slice(-20)
+    .slice(-21, -1)
     .map(message => ({
       role: message.classList.contains("user") ? "user" : "assistant",
       content: message.querySelector("p")?.textContent || ""
