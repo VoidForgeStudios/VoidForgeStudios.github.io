@@ -3,365 +3,94 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <meta
-    name="description"
-    content="JARVIS — browser-based personal assistant by VoidForge Studios"
-  >
-
+  <meta name="description" content="JARVIS — browser-based personal assistant by VoidForge Studios">
   <meta name="theme-color" content="#05070b">
-
   <title>JARVIS — VoidForge Studios</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-  <!-- =====================================================
-       JARVIS STARTUP SEQUENCE
-  ====================================================== -->
-
-  <section
-    id="startup"
-    class="startup"
-    aria-label="JARVIS system initialization"
-  >
-
+  <section id="startup" class="startup" aria-label="JARVIS system initialization">
     <div class="startup-core">
-
       <div class="core-ring ring-one"></div>
       <div class="core-ring ring-two"></div>
       <div class="core-ring ring-three"></div>
-
       <div class="core"></div>
-
     </div>
-
-
     <div class="startup-text">
-
       <div id="startupLines"></div>
-
       <div class="cursor">_</div>
-
     </div>
-
-
-    <div class="startup-progress">
-
-      <div id="progressBar"></div>
-
-    </div>
-
-
-    <div id="startupPercent">
-      0%
-    </div>
-
+    <div class="startup-progress"><div id="progressBar"></div></div>
+    <div id="startupPercent">0%</div>
   </section>
 
-
-
-  <!-- =====================================================
-       MAIN JARVIS APPLICATION
-  ====================================================== -->
-
   <main id="app" class="app hidden">
-
-
-    <!-- ===================================================
-         TOP BAR
-    ==================================================== -->
-
     <header class="topbar">
-
       <div class="brand">
-
         <div class="orb"></div>
-
         <div>
-
           <strong>JARVIS</strong>
-
-          <small>
-            JUST A RATHER VERY INTELLIGENT SYSTEM
-          </small>
-
+          <small>JUST A RATHER VERY INTELLIGENT SYSTEM</small>
         </div>
-
       </div>
-
-
-      <div class="status">
-
-        <i></i>
-
-        <span id="status">
-          GROQ · NOT CONNECTED
-        </span>
-
-      </div>
-
+      <div class="status"><i></i><span id="status">GROQ · NOT CONNECTED</span></div>
     </header>
 
-
-
-    <!-- ===================================================
-         MAIN WORKSPACE
-    ==================================================== -->
-
     <section class="workspace">
-
-
-      <!-- =================================================
-           JARVIS REACTOR
-      ================================================== -->
-
       <section class="hero-panel">
-
-        <div class="ring ring-a"></div>
-        <div class="ring ring-b"></div>
-
-
-        <div class="reactor">
-
-          <span></span>
-
-        </div>
-
-
-        <p class="eyebrow">
-          VOIDFORGE STUDIOS
-        </p>
-
-
-        <h1>
-          JARVIS
-        </h1>
-
-
-        <p class="subtitle">
-          Personal intelligence, powered by Groq.
-        </p>
-
-
-        <div class="telemetry">
-
-          <span>
-            GROQ AI
-          </span>
-
-          <span>
-            MEMORY READY
-          </span>
-
-          <span>
-            TOOLS READY
-          </span>
-
-        </div>
-
+        <div class="ring ring-a"></div><div class="ring ring-b"></div>
+        <div class="reactor"><span></span></div>
+        <p class="eyebrow">VOIDFORGE STUDIOS</p>
+        <h1>JARVIS</h1>
+        <p class="subtitle">Multi-agent personal intelligence.</p>
+        <div class="telemetry"><span>AI NETWORK</span><span>MEMORY READY</span><span>TOOLS READY</span></div>
       </section>
-
-
-
-      <!-- =================================================
-           CONVERSATION CONSOLE
-      ================================================== -->
 
       <section class="chat-panel">
-
-
-        <!-- PANEL HEADER -->
-
         <div class="panel-head">
-
-          <div>
-
-            <span class="eyebrow">
-              CONSOLE
-            </span>
-
-            <h2>
-              Conversation
-            </h2>
-
-          </div>
-
-
-          <button
-            id="clear"
-            type="button"
-          >
-            Clear
-          </button>
-
+          <div><span class="eyebrow">CONSOLE</span><h2>Conversation</h2></div>
+          <button id="clear" type="button">Clear</button>
         </div>
-
-
-
-        <!-- =================================================
-             GROQ CONFIGURATION
-        ================================================== -->
 
         <div class="ai-config">
+          <div class="config-title"><span>JARVIS AI NETWORK</span><small id="agentStatus">0 WORKERS · MASTER OFFLINE</small></div>
 
-          <label for="groqKey">
-            GROQ API KEY
-          </label>
-
-
-          <div class="ai-config-row">
-
-            <input
-              id="groqKey"
-              type="password"
-              autocomplete="off"
-              spellcheck="false"
-              placeholder="Paste your Groq API key"
-            >
-
-
-            <button
-              id="connect"
-              type="button"
-            >
-              Connect
-            </button>
-
+          <div class="key-grid">
+            <label>WORKER 01<input id="workerKey1" type="password" autocomplete="off" placeholder="Groq key"></label>
+            <label>WORKER 02<input id="workerKey2" type="password" autocomplete="off" placeholder="Groq key"></label>
+            <label>WORKER 03<input id="workerKey3" type="password" autocomplete="off" placeholder="Groq key"></label>
+            <label class="master-key">MASTER JARVIS<input id="masterKey" type="password" autocomplete="off" placeholder="Groq key for final answer"></label>
           </div>
 
+          <div class="ai-config-row">
+            <button id="connect" type="button">Connect Network</button>
+            <button id="disconnect" type="button" class="secondary">Disconnect All</button>
+          </div>
 
-          <small>
-            Your key is kept only in this browser session
-            and is never written to the repository.
-          </small>
-
+          <small>Worker agents answer in parallel. Their responses are sent to Master JARVIS, which produces the final answer. Keys are kept only in this browser session.</small>
         </div>
 
-
-
-        <!-- =================================================
-             MESSAGE AREA
-        ================================================== -->
-
-        <div
-          id="messages"
-          class="messages"
-          aria-live="polite"
-          aria-label="JARVIS conversation"
-        >
-
-          <!-- Initial JARVIS message -->
-
+        <div id="messages" class="messages" aria-live="polite" aria-label="JARVIS conversation">
           <article class="message jarvis">
-
-            <span class="label">
-              JARVIS
-            </span>
-
-
+            <span class="label">JARVIS</span>
             <div class="message-content">
-
-              <p>
-                Systems nominal.
-              </p>
-
-              <p>
-                Enter your <strong>Groq API key</strong>
-                to activate the AI.
-              </p>
-
+              <p><strong>Systems nominal.</strong></p>
+              <p>Connect one or more worker keys and a <strong>Master JARVIS</strong> key to activate the multi-agent network.</p>
             </div>
-
           </article>
-
         </div>
 
-
-
-        <!-- =================================================
-             MESSAGE COMPOSER
-        ================================================== -->
-
-        <form
-          id="chatForm"
-          class="composer"
-        >
-
-          <textarea
-            id="input"
-            rows="2"
-            maxlength="20000"
-            placeholder="Speak with JARVIS using text…"
-            autocomplete="off"
-            spellcheck="true"
-          ></textarea>
-
-
-          <button
-            type="submit"
-            id="send"
-          >
-            Send
-
-            <kbd>
-              Enter
-            </kbd>
-
-          </button>
-
+        <form id="chatForm" class="composer">
+          <textarea id="input" rows="2" maxlength="20000" placeholder="Speak with JARVIS using text…" autocomplete="off" spellcheck="true"></textarea>
+          <button type="submit" id="send">Send <kbd>Enter</kbd></button>
         </form>
-
-
-
-        <!-- HINT -->
-
-        <p class="hint">
-
-          Try
-
-          <code>help</code>,
-
-          <code>remember coffee = black</code>,
-
-          or ask JARVIS anything after connecting Groq.
-
-        </p>
-
+        <p class="hint">Try <code>help</code>, <code>remember coffee = black</code>, or ask the multi-agent JARVIS network anything.</p>
       </section>
-
     </section>
 
-
-
-    <!-- ===================================================
-         FOOTER
-    ==================================================== -->
-
-    <footer>
-
-      <span>
-        JARVIS web edition
-      </span>
-
-      <span>
-        Groq API · Browser client · No server required
-      </span>
-
-    </footer>
-
+    <footer><span>JARVIS web edition</span><span>Multi-agent Groq · Browser client · No server required</span></footer>
   </main>
 
-
-
-  <!-- =====================================================
-       JAVASCRIPT
-  ====================================================== -->
-
   <script src="app.js" defer></script>
-
 </body>
 </html>
-
