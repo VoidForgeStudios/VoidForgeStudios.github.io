@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#05070b">
-  <meta name="description" content="JARVIS — text-first personal AI assistant by VoidForge Studios">
+  <meta name="description" content="JARVIS — browser-based personal assistant by VoidForge Studios">
   <title>JARVIS — VoidForge Studios</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -12,11 +12,7 @@
   <div class="shell">
     <header class="topbar">
       <div class="brand"><span class="orb"></span><div><strong>JARVIS</strong><small>JUST A RATHER VERY INTELLIGENT SYSTEM</small></div></div>
-      <div class="connection">
-        <label for="apiToken">API token</label>
-        <input id="apiToken" type="password" autocomplete="off" placeholder="Session only">
-      </div>
-      <div class="status"><i></i><span id="status">OFFLINE</span></div>
+      <div class="status"><i></i><span id="status">ONLINE · LOCAL MODE</span></div>
     </header>
 
     <main class="workspace">
@@ -25,24 +21,24 @@
         <div class="reactor"><span></span></div>
         <p class="eyebrow">VOIDFORGE STUDIOS</p>
         <h1>JARVIS</h1>
-        <p class="subtitle">Personal intelligence, under your control.</p>
-        <div class="telemetry"><span>TEXT MODE</span><span>MEMORY READY</span><span>TOOLS READY</span></div>
+        <p class="subtitle">Personal intelligence, entirely in your browser.</p>
+        <div class="telemetry"><span>LOCAL MODE</span><span>MEMORY READY</span><span>TOOLS READY</span></div>
       </section>
 
       <section class="chat-panel">
         <div class="panel-head"><div><span class="eyebrow">CONSOLE</span><h2>Conversation</h2></div><button id="clear" type="button">Clear</button></div>
         <div id="messages" class="messages" aria-live="polite">
-          <article class="message jarvis"><span class="label">JARVIS</span><p>Systems nominal. Text interface ready.</p></article>
+          <article class="message jarvis"><span class="label">JARVIS</span><p>Systems nominal. Local browser mode ready.</p></article>
         </div>
         <form id="chatForm" class="composer">
           <textarea id="input" rows="2" maxlength="20000" placeholder="Speak with JARVIS using text…" autocomplete="off"></textarea>
           <button type="submit" id="send">Send <kbd>Enter</kbd></button>
         </form>
-        <p class="hint">Try <code>system info</code>, <code>calculate 12 * 8</code>, or <code>remember PREFERENCES coffee = black</code>.</p>
+        <p class="hint">Try <code>help</code>, <code>time</code>, <code>system info</code>, <code>calculate 12 * 8</code>, <code>remember coffee = black</code>, or <code>memory</code>.</p>
       </section>
     </main>
 
-    <footer><span>JARVIS web edition</span><span>Token stays in this browser session · HTTPS recommended</span></footer>
+    <footer><span>JARVIS web edition</span><span>Local browser mode · No server required</span></footer>
   </div>
   <script src="app.js" defer></script>
 </body>
