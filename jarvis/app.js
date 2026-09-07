@@ -1,22 +1,22 @@
-const API_BASE = (window.JARVIS_API_BASE || "").replace(/\/$/, "");
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
 const input = document.querySelector("#input");
 const send = document.querySelector("#send");
 const status = document.querySelector("#status");
 const clear = document.querySelector("#clear");
-const apiToken = document.querySelector("#apiToken");
-const sessionId = "web-" + (crypto.randomUUID ? crypto.randomUUID() : Date.now());
 
-apiToken.value = sessionStorage.getItem("jarvis_api_token") || "";
-apiToken.addEventListener("input", () => {
-  if (apiToken.value) sessionStorage.setItem("jarvis_api_token", apiToken.value);
-  else sessionStorage.removeItem("jarvis_api_token");
-});
+const memoryKey = "jarvis_memory";
 
-function authHeaders() {
-  const token = apiToken.value.trim();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+function loadMemory() {
+  try {
+    return JSON.parse(localStorage.getItem(memoryKey) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveMemory(memory) {
+  localStorage.setItem(memoryKey, JSON.stringify(memory));
 }
 
 function addMessage(role, text) {
@@ -32,49 +32,85 @@ function addMessage(role, text) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-async function checkHealth() {
+function calculate(expression) {
+  if (!/^[0-9+\-*/().%\s]+$/.test(expression)) return null;
   try {
-    const response = await fetch(`${API_BASE}/health`);
-    if (!response.ok) throw new Error();
-    const data = await response.json();
-    status.textContent = `${data.provider.toUpperCase()} · ${data.mode.toUpperCase()}`;
-    status.previousElementSibling.style.background = "#69d8ff";
+    const result = Function(`"use strict"; return (${expression})`)();
+    return Number.isFinite(result) ? String(result) : null;
   } catch {
-    status.textContent = "WEB UI · API NOT CONNECTED";
+    return null;
   }
 }
 
-form.addEventListener("submit", async (event) => {
+function respond(message) {
+  const text = message.trim();
+  const lower = text.toLowerCase();
+
+  if (lower === "help") {
+    return "Available: system info, calculate <expression>, remember <key> = <value>, forget <key>, memory, clear, time.";
+  }
+
+  if (lower === "system info") {
+    return `Browser: ${navigator.userAgentData?.platform || navigator.platform || "unknown"}. Online: ${navigator.onLine ? "yes" : "no"}. Local web mode active.`;
+  }
+
+  if (lower === "time") {
+    return `Local time: ${new Date().toLocaleString()}.`;
+  }
+
+  if (lower === "memory") {
+    const memory = loadMemory();
+    const entries = Object.entries(memory);
+    return entries.length
+      ? entries.map(([key, value]) => `${key}: ${value}`).join("\n")
+      : "No memories stored.";
+  }
+
+  const calc = lower.startsWith("calculate ") ? calculate(text.slice(10).trim()) : null;
+  if (calc !== null) return calc;
+  if (lower.startsWith("calculate ")) return "I could not safely evaluate that expression.";
+
+  const remember = text.match(/^remember\s+(.+?)\s*=\s*(.+)$/i);
+  if (remember) {
+    const memory = loadMemory();
+    memory[remember[1].trim()] = remember[2].trim();
+    saveMemory(memory);
+    return `Remembered ${remember[1].trim()}.`;
+  }
+
+  const forget = text.match(/^forget\s+(.+)$/i);
+  if (forget) {
+    const memory = loadMemory();
+    const key = forget[1].trim();
+    if (!(key in memory)) return `I have no stored memory named ${key}.`;
+    delete memory[key];
+    saveMemory(memory);
+    return `Forgot ${key}.`;
+  }
+
+  if (lower === "clear") {
+    return "Use the Clear button to clear this conversation.";
+  }
+
+  return "I'm running in browser-only mode. I can handle local commands and memory, but full AI reasoning requires an AI service connection.";
+}
+
+form.addEventListener("submit", (event) => {
   event.preventDefault();
   const message = input.value.trim();
   if (!message) return;
   addMessage("user", message);
   input.value = "";
   send.disabled = true;
-  try {
-    const response = await fetch(`${API_BASE}/api/text/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
-      body: JSON.stringify({ session_id: sessionId, message })
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || "Request failed");
-    addMessage("jarvis", data.response);
-  } catch (error) {
-    addMessage("jarvis", `Connection unavailable. ${error.message}`);
-  } finally {
+
+  window.setTimeout(() => {
+    addMessage("jarvis", respond(message));
     send.disabled = false;
     input.focus();
-  }
+  }, 180);
 });
 
-clear.addEventListener("click", async () => {
-  try {
-    await fetch(`${API_BASE}/api/text/sessions/${encodeURIComponent(sessionId)}`, {
-      method: "DELETE",
-      headers: authHeaders()
-    });
-  } catch {}
+clear.addEventListener("click", () => {
   messages.innerHTML = "";
   addMessage("jarvis", "Conversation cleared. Ready when you are.");
 });
@@ -86,4 +122,5 @@ input.addEventListener("keydown", (event) => {
   }
 });
 
-checkHealth();
+status.textContent = "BROWSER MODE · ONLINE";
+status.previousElementSibling.style.background = "#69d8ff";
