@@ -1,141 +1,367 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="description"
+    content="JARVIS — browser-based personal assistant by VoidForge Studios"
+  >
+
+  <meta name="theme-color" content="#05070b">
+
   <title>JARVIS — VoidForge Studios</title>
+
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <!-- STARTUP -->
-  <section id="startup" class="startup">
+  <!-- =====================================================
+       JARVIS STARTUP SEQUENCE
+  ====================================================== -->
+
+  <section
+    id="startup"
+    class="startup"
+    aria-label="JARVIS system initialization"
+  >
+
     <div class="startup-core">
+
       <div class="core-ring ring-one"></div>
       <div class="core-ring ring-two"></div>
       <div class="core-ring ring-three"></div>
+
       <div class="core"></div>
+
     </div>
+
 
     <div class="startup-text">
+
       <div id="startupLines"></div>
-      <div id="startupCursor" class="cursor">_</div>
+
+      <div class="cursor">_</div>
+
     </div>
+
 
     <div class="startup-progress">
+
       <div id="progressBar"></div>
+
     </div>
 
-    <div id="startupPercent">0%</div>
+
+    <div id="startupPercent">
+      0%
+    </div>
+
   </section>
 
 
-  <!-- MAIN INTERFACE -->
+
+  <!-- =====================================================
+       MAIN JARVIS APPLICATION
+  ====================================================== -->
+
   <main id="app" class="app hidden">
 
+
+    <!-- ===================================================
+         TOP BAR
+    ==================================================== -->
+
     <header class="topbar">
+
       <div class="brand">
+
         <div class="orb"></div>
 
         <div>
+
           <strong>JARVIS</strong>
-          <small>JUST A RATHER VERY INTELLIGENT SYSTEM</small>
+
+          <small>
+            JUST A RATHER VERY INTELLIGENT SYSTEM
+          </small>
+
         </div>
+
       </div>
 
+
       <div class="status">
+
         <i></i>
-        <span>JARVIS ONLINE</span>
+
+        <span id="status">
+          GROQ · NOT CONNECTED
+        </span>
+
       </div>
+
     </header>
 
 
+
+    <!-- ===================================================
+         MAIN WORKSPACE
+    ==================================================== -->
+
     <section class="workspace">
 
-      <section class="hero">
-        <div class="hero-core">
-          <div class="hero-ring ring-one"></div>
-          <div class="hero-ring ring-two"></div>
-          <div class="hero-ring ring-three"></div>
-          <div class="hero-center"></div>
+
+      <!-- =================================================
+           JARVIS REACTOR
+      ================================================== -->
+
+      <section class="hero-panel">
+
+        <div class="ring ring-a"></div>
+        <div class="ring ring-b"></div>
+
+
+        <div class="reactor">
+
+          <span></span>
+
         </div>
 
-        <p class="eyebrow">SYSTEM ONLINE</p>
 
-        <h1>JARVIS</h1>
-
-        <p class="subtitle">
-          Personal intelligence interface.
+        <p class="eyebrow">
+          VOIDFORGE STUDIOS
         </p>
 
+
+        <h1>
+          JARVIS
+        </h1>
+
+
+        <p class="subtitle">
+          Personal intelligence, powered by Groq.
+        </p>
+
+
         <div class="telemetry">
-          <span>AI READY</span>
-          <span>MEMORY READY</span>
-          <span>TOOLS READY</span>
+
+          <span>
+            GROQ AI
+          </span>
+
+          <span>
+            MEMORY READY
+          </span>
+
+          <span>
+            TOOLS READY
+          </span>
+
         </div>
+
       </section>
 
 
-      <section class="console">
 
-        <div class="console-head">
+      <!-- =================================================
+           CONVERSATION CONSOLE
+      ================================================== -->
+
+      <section class="chat-panel">
+
+
+        <!-- PANEL HEADER -->
+
+        <div class="panel-head">
+
           <div>
-            <span class="eyebrow">CONSOLE</span>
-            <h2>Conversation</h2>
+
+            <span class="eyebrow">
+              CONSOLE
+            </span>
+
+            <h2>
+              Conversation
+            </h2>
+
           </div>
 
-          <button id="clear">Clear</button>
+
+          <button
+            id="clear"
+            type="button"
+          >
+            Clear
+          </button>
+
         </div>
 
 
-        <div id="messages" class="messages">
+
+        <!-- =================================================
+             GROQ CONFIGURATION
+        ================================================== -->
+
+        <div class="ai-config">
+
+          <label for="groqKey">
+            GROQ API KEY
+          </label>
+
+
+          <div class="ai-config-row">
+
+            <input
+              id="groqKey"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste your Groq API key"
+            >
+
+
+            <button
+              id="connect"
+              type="button"
+            >
+              Connect
+            </button>
+
+          </div>
+
+
+          <small>
+            Your key is kept only in this browser session
+            and is never written to the repository.
+          </small>
+
+        </div>
+
+
+
+        <!-- =================================================
+             MESSAGE AREA
+        ================================================== -->
+
+        <div
+          id="messages"
+          class="messages"
+          aria-live="polite"
+          aria-label="JARVIS conversation"
+        >
+
+          <!-- Initial JARVIS message -->
 
           <article class="message jarvis">
-            <span class="label">JARVIS</span>
+
+            <span class="label">
+              JARVIS
+            </span>
+
 
             <div class="message-content">
+
               <p>
-                Good evening.
+                Systems nominal.
               </p>
 
               <p>
-                I am <strong>JARVIS</strong> —
-                <em>Just A Rather Very Intelligent System.</em>
+                Enter your <strong>Groq API key</strong>
+                to activate the AI.
               </p>
 
-              <p>
-                All systems are operational.
-                <strong>How may I assist you?</strong>
-              </p>
             </div>
+
           </article>
 
         </div>
 
 
-        <form id="chatForm" class="composer">
+
+        <!-- =================================================
+             MESSAGE COMPOSER
+        ================================================== -->
+
+        <form
+          id="chatForm"
+          class="composer"
+        >
 
           <textarea
             id="input"
-            placeholder="Speak with JARVIS..."
             rows="2"
+            maxlength="20000"
+            placeholder="Speak with JARVIS using text…"
+            autocomplete="off"
+            spellcheck="true"
           ></textarea>
 
-          <button id="send" type="submit">
+
+          <button
+            type="submit"
+            id="send"
+          >
             Send
+
+            <kbd>
+              Enter
+            </kbd>
+
           </button>
 
         </form>
+
+
+
+        <!-- HINT -->
+
+        <p class="hint">
+
+          Try
+
+          <code>help</code>,
+
+          <code>remember coffee = black</code>,
+
+          or ask JARVIS anything after connecting Groq.
+
+        </p>
 
       </section>
 
     </section>
 
+
+
+    <!-- ===================================================
+         FOOTER
+    ==================================================== -->
+
+    <footer>
+
+      <span>
+        JARVIS web edition
+      </span>
+
+      <span>
+        Groq API · Browser client · No server required
+      </span>
+
+    </footer>
+
   </main>
 
-  <script src="app.js"></script>
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ====================================================== -->
+
+  <script src="app.js" defer></script>
+
 </body>
 </html>
 
