@@ -2,7 +2,7 @@ const STORAGE_KEY = "jarvis_local_memory_v1";
 const CHAT_KEY = "jarvis_local_chat_v1";
 const GROQ_KEY = "jarvis_groq_api_key_session";
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
@@ -164,8 +164,7 @@ async function askGroq(userText) {
           role: "system",
           content: `You are JARVIS, a calm, intelligent, concise personal assistant for VoidForge Studios. Be helpful and confident without false certainty. Use subtle British phrasing when natural. Never claim to have performed an action you cannot perform. You are connected to the user through a browser interface.\n\nSaved local memories:\n${memoryText}`
         },
-        ...conversationForAI(),
-        { role: "user", content: userText }
+        ...conversationForAI()
       ]
     })
   });
