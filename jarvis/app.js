@@ -1,10 +1,16 @@
 const STORAGE_KEY = "jarvis_local_memory_v1";
 const CHAT_KEY = "jarvis_local_chat_v1";
+const MODEL_ID = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
 const messages = document.querySelector("#messages");
 const form = document.querySelector("#chatForm");
 const input = document.querySelector("#input");
 const send = document.querySelector("#send");
 const clear = document.querySelector("#clear");
+const status = document.querySelector("#status");
+const statusDot = status?.previousElementSibling;
+
+let engine = null;
+let enginePromise = null;
 
 function loadJson(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
@@ -12,6 +18,11 @@ function loadJson(key, fallback) {
 function saveJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 function loadMemory() { return loadJson(STORAGE_KEY, {}); }
 function saveMemory(memory) { saveJson(STORAGE_KEY, memory); }
+
+function setStatus(text, active = false) {
+  status.textContent = text;
+  if (statusDot) statusDot.style.background = active ? "#69d8ff" : "#657180";
+}
 
 function addMessage(role, text, persist = true) {
   const article = document.createElement("article");
@@ -28,6 +39,7 @@ function addMessage(role, text, persist = true) {
     role: m.classList.contains("user") ? "user" : "jarvis",
     text: m.querySelector("p")?.textContent || ""
   })));
+  return p;
 }
 
 function restoreChat() {
@@ -54,6 +66,7 @@ function systemInfo() {
     `Platform: ${nav.userAgentData?.platform || nav.platform || "Unknown"}`,
     `Language: ${nav.language}`,
     `Online: ${nav.onLine ? "Yes" : "No"}`,
+    `WebGPU: ${"gpu" in navigator ? "Available" : "Unavailable"}`,
     `CPU cores exposed: ${nav.hardwareConcurrency || "Unknown"}`,
     `Memory exposed: ${nav.deviceMemory ? `${nav.deviceMemory} GB` : "Not exposed"}`,
     `Screen: ${screen.width} × ${screen.height}`,
@@ -61,12 +74,12 @@ function systemInfo() {
   ].join("\n");
 }
 
-function respond(raw) {
+function localResponse(raw) {
   const text = raw.trim();
   const lower = text.toLowerCase();
   const memory = loadMemory();
 
-  if (lower === "help" || lower === "commands") return "Available commands:\n• help\n• time\n• date\n• system info\n• calculate <expression>\n• remember <key> = <value>\n• forget <key>\n• memory\n• clear memory\n• clear";
+  if (lower === "help" || lower === "commands") return "Available commands:\n• help\n• time\n• date\n• system info\n• calculate <expression>\n• remember <key> = <value>\n• forget <key>\n• memory\n• clear memory\n• clear\n\nFor normal questions, JARVIS uses the local browser AI when WebGPU is available.";
   if (lower === "time" || lower === "what time is it") return `The local time is ${new Intl.DateTimeFormat(undefined, { timeStyle: "medium" }).format(new Date())}.`;
   if (lower === "date") return `Today is ${new Intl.DateTimeFormat(undefined, { dateStyle: "full" }).format(new Date())}.`;
   if (lower === "system info" || lower === "system information") return systemInfo();
@@ -104,24 +117,100 @@ function respond(raw) {
   }
 
   if (/^(hi|hello|hey|good morning|good evening)\b/i.test(text)) return "Good to see you. Systems are nominal.";
-  if (lower.includes("who are you")) return "I am JARVIS — your browser-based VoidForge assistant. This edition runs locally without a server.";
-  if (lower.includes("what can you do")) return "I can handle local memories, arithmetic, date/time, browser/device telemetry, and this conversation — entirely in the browser.";
+  if (lower.includes("who are you")) return "I am JARVIS — your browser-based VoidForge assistant. I can now use a local AI model when WebGPU is available.";
   if (lower.includes("thank")) return "You're very welcome.";
 
-  return "I'm in local browser mode, so I can't access external services or an AI model yet. Try “help” to see what I can do locally.";
+  return null;
+}
+
+async function loadAI() {
+  if (engine) return engine;
+  if (enginePromise) return enginePromise;
+
+  if (!("gpu" in navigator)) {
+    throw new Error("WebGPU is not available in this browser.");
+  }
+
+  enginePromise = (async () => {
+    setStatus("AI · LOADING MODEL", true);
+    const { CreateMLCEngine } = await import("https://esm.run/@mlc-ai/web-llm");
+    const loaded = await CreateMLCEngine(MODEL_ID, {
+      initProgressCallback: progress => {
+        const percent = Math.round((progress.progress || 0) * 100);
+        setStatus(`AI · LOADING ${percent}%`, true);
+      }
+    });
+    engine = loaded;
+    setStatus("AI · LOCAL READY", true);
+    return engine;
+  })();
+
+  try {
+    return await enginePromise;
+  } catch (error) {
+    enginePromise = null;
+    setStatus("BROWSER MODE · READY", false);
+    throw error;
+  }
+}
+
+function conversationForAI() {
+  const history = Array.from(messages.querySelectorAll(".message")).slice(-20);
+  return history.map(message => ({
+    role: message.classList.contains("user") ? "user" : "assistant",
+    content: message.querySelector("p")?.textContent || ""
+  }));
+}
+
+async function askAI(userText) {
+  const ai = await loadAI();
+  const memoryEntries = Object.entries(loadMemory()).slice(0, 30);
+  const memoryText = memoryEntries.length
+    ? memoryEntries.map(([key, value]) => `${key}: ${value}`).join("\n")
+    : "No saved memories.";
+
+  const response = await ai.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content: `You are JARVIS, a calm, intelligent, concise personal assistant for VoidForge Studios. Be helpful and confident without pretending to know things you do not know. Use subtle British phrasing when natural. Never claim to have performed an action you cannot perform. You are running entirely inside the user's browser.\n\nSaved local memories:\n${memoryText}`
+      },
+      ...conversationForAI(),
+      { role: "user", content: userText }
+    ],
+    temperature: 0.55,
+    max_tokens: 384
+  });
+
+  return response.choices?.[0]?.message?.content?.trim() || "I was unable to produce a response.";
 }
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
-  const message = input.value.trim();
-  if (!message) return;
-  addMessage("user", message);
+  const userText = input.value.trim();
+  if (!userText) return;
+
+  addMessage("user", userText);
   input.value = "";
   send.disabled = true;
-  await new Promise(resolve => setTimeout(resolve, 180));
-  addMessage("jarvis", respond(message));
-  send.disabled = false;
-  input.focus();
+
+  try {
+    const local = localResponse(userText);
+    if (local !== null) {
+      addMessage("jarvis", local);
+      setStatus(engine ? "AI · LOCAL READY" : "BROWSER MODE · READY", Boolean(engine));
+    } else {
+      const reply = await askAI(userText);
+      addMessage("jarvis", reply);
+    }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "Unknown AI error.";
+    addMessage("jarvis", `I could not start the local AI. ${reason} Try a recent Chrome or Edge browser with WebGPU enabled.`);
+    setStatus("AI · UNAVAILABLE", false);
+  } finally {
+    send.disabled = false;
+    input.focus();
+  }
 });
 
 clear.addEventListener("click", () => {
@@ -138,3 +227,4 @@ input.addEventListener("keydown", event => {
 });
 
 restoreChat();
+setStatus("BROWSER MODE · READY", false);
