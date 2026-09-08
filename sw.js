@@ -1,4 +1,4 @@
-const CACHE = "voidforge-shell-v2";
+const CACHE = "voidforge-shell-v5";
 
 const SHELL = [
   "./",
