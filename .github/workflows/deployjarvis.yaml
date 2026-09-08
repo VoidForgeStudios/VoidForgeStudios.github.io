@@ -1,0 +1,23 @@
+name: Deploy JARVIS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy JARVIS
+        env:
+          GROQ_MASTER_API_KEY: ${{ secrets.GROQ_MASTER_API_KEY }}
+          GROQ_WORKER_1_API_KEY: ${{ secrets.GROQ_WORKER_1_API_KEY }}
+          GROQ_WORKER_2_API_KEY: ${{ secrets.GROQ_WORKER_2_API_KEY }}
+          GROQ_WORKER_3_API_KEY: ${{ secrets.GROQ_WORKER_3_API_KEY }}
+        run: |
+          echo "Deploying JARVIS..."
