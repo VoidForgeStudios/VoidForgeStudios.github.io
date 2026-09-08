@@ -162,7 +162,7 @@ input:focus,textarea:focus,select:focus{border-color:rgba(94,231,255,.7)!importa
 /* BlockWorld Client UI — visual-only refresh, gameplay unchanged */
 :root{--client-blue:#5ee7ff;--client-violet:#7c5cff;--client-green:#73e36b;--client-bg:rgba(6,10,18,.74);--client-line:rgba(255,255,255,.10)}
 body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-#mainMenu{background:linear-gradient(180deg,rgba(3,7,13,.78),rgba(3,7,13,.96))!important}
+#mainMenu{background:linear-gradient(180deg,rgba(3,7,13,.16),rgba(3,7,13,.28))!important}
 #mainMenu:after{content:"CLIENT BUILD 0.5";position:absolute;left:24px;bottom:20px;color:rgba(255,255,255,.24);font:700 9px/1 system-ui;letter-spacing:2px;z-index:3}
 .menu-shell{width:min(1160px,94vw)!important;grid-template-columns:1fr 390px!important;gap:70px!important}
 .menu-brand{position:relative}
@@ -192,6 +192,10 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .survival-icon{font-size:13px!important}.survival-track{height:9px!important;background:rgba(255,255,255,.08)!important}.survival-text{font-size:9px!important;color:rgba(255,255,255,.72)!important}
 #crosshair{font-size:18px!important;color:rgba(255,255,255,.9)!important;text-shadow:0 0 4px #000!important}
 #hotbar{bottom:20px!important;padding:6px!important;gap:5px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:13px!important;background:rgba(4,8,15,.70)!important;backdrop-filter:blur(16px)!important;box-shadow:0 18px 50px rgba(0,0,0,.38)!important}
+/* Hotbar inventory: always arranged left-to-right */
+#hotbar{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;white-space:nowrap!important;overflow-x:visible!important;overflow-y:hidden!important;direction:ltr!important;width:max-content!important;max-width:calc(100vw - 18px)!important;box-sizing:border-box!important}
+#hotbar > .slot{order:0!important;display:grid!important;flex:0 0 55px!important;width:55px!important;min-width:55px!important;max-width:55px!important}
+
 .slot{width:55px!important;height:55px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:8px!important;background:rgba(255,255,255,.045)!important}
 .slot:hover{transform:translateY(-2px)!important;background:rgba(255,255,255,.075)!important}
 .slot.selected{border-color:var(--client-blue)!important;box-shadow:0 0 0 1px var(--client-blue),0 0 18px rgba(94,231,255,.22)!important;background:rgba(94,231,255,.08)!important}
@@ -209,16 +213,185 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 #joystick{background:rgba(5,9,16,.26)!important;border-color:rgba(255,255,255,.16)!important}
 #joystickKnob{background:rgba(94,231,255,.22)!important;border-color:rgba(94,231,255,.45)!important;box-shadow:0 0 20px rgba(94,231,255,.16)}
 @media(max-width:850px){.menu-shell{width:100%!important;grid-template-columns:1fr!important;gap:16px!important;padding:20px!important}.menu-brand{padding:20px 5px 5px!important}.menu-title{font-size:clamp(52px,16vw,82px)!important}.menu-panel{width:min(420px,100%)!important;justify-self:center}.menu-subtitle{font-size:12px!important}.menu-stats{display:none}.menu-action{min-height:58px!important}}
-@media(max-width:600px){#survivalHud{top:62px!important;right:10px!important;width:175px!important}.survival-bar{height:27px!important}.world-time{top:10px!important}.slot{width:48px!important;height:48px!important}.swatch{width:23px!important;height:23px!important}#hotbar{bottom:10px!important}}
+@media(max-width:600px){#survivalHud{top:62px!important;right:10px!important;width:175px!important}.survival-bar{height:27px!important}.world-time{top:10px!important}.slot{width:48px!important;height:48px!important}.swatch{width:23px!important;height:23px!important}#hotbar{bottom:10px!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;direction:ltr!important;overflow-x:auto!important;overflow-y:hidden!important;max-width:calc(100vw - 18px)!important;width:calc(100vw - 18px)!important}
+#hotbar > .slot{flex:0 0 48px!important;min-width:48px!important;width:48px!important;max-width:48px!important}}
+</style>
+
+<style id="minecraft-ui-consistency">
+body:not(.in-game-ui) #survivalHud,body:not(.in-game-ui) #worldTime,body:not(.in-game-ui) #crosshair,body:not(.in-game-ui) #status,body:not(.in-game-ui) #hotbar,body:not(.in-game-ui) #help,body:not(.in-game-ui) #pcControls,body:not(.in-game-ui) #mobileControls,body:not(.in-game-ui) #mobileExtraButtons,body:not(.in-game-ui) #deathOverlay,body:not(.in-game-ui) #saveWorldShortcut{display:none!important}
+#worldMenu.screen,#settingsMenu.screen,#realmsMenu.screen,#marketplaceMenu.screen,#profileMenu.screen,#dressingRoomMenu.screen,#errorScreen{z-index:20000!important;background:rgba(0,0,0,.40)!important;backdrop-filter:blur(3px)!important;-webkit-backdrop-filter:blur(3px)!important}
+#worldMenu .panel,#settingsMenu .panel,#realmsMenu .panel,#marketplaceMenu .panel,#profileMenu .panel,#dressingRoomMenu .panel,#errorScreen .error-box{width:min(560px,92vw)!important;max-height:88vh;overflow:auto;padding:26px!important;color:#fff!important;background:linear-gradient(180deg,rgba(46,46,46,.98),rgba(28,28,28,.98))!important;border:2px solid #171717!important;border-radius:3px!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.13),inset 0 -2px 0 rgba(0,0,0,.5),0 14px 40px rgba(0,0,0,.75)!important}
+#worldMenu .panel h2,#settingsMenu .panel h2,#realmsMenu .panel h2,#marketplaceMenu .panel h2,#profileMenu .panel h2,#dressingRoomMenu .panel h2,#errorScreen .error-box h2{margin:0 0 20px!important;color:#fff!important;font:900 25px/1.1 Arial,sans-serif!important;text-align:center;text-shadow:2px 2px 0 #111!important}
+#realmsMenu .menu-note,#marketplaceMenu .menu-note,#profileMenu .menu-note,#dressingRoomMenu .menu-note{margin:-8px 0 20px;color:#d0d0d0;font-size:13px;line-height:1.55;text-align:center;text-shadow:1px 1px #111}
+#worldMenu .option label,#settingsMenu .option label{color:#eee!important;text-shadow:1px 1px #111}
+#worldMenu .option input,#worldMenu .option select,#worldMenu .seed-row input,#settingsMenu .option select{background:#181818!important;border:2px solid #080808!important;border-radius:2px!important;color:#fff!important;box-shadow:inset 0 2px 3px rgba(0,0,0,.5)!important}
+#worldMenu input[type=range],#settingsMenu input[type=range]{accent-color:#79b94b}
+#worldMenu .button,#settingsMenu .button,#realmsMenu .button,#marketplaceMenu .button,#profileMenu .button,#dressingRoomMenu .button,#errorScreen .button{width:100%;min-height:46px;margin:7px 0;padding:8px 14px;border:2px solid #2b2b2b!important;border-radius:2px!important;background:linear-gradient(#707070,#505050)!important;color:#fff!important;font:700 14px/1 Arial,sans-serif!important;cursor:pointer;box-shadow:inset 0 2px 0 rgba(255,255,255,.2),inset 0 -2px 0 rgba(0,0,0,.35),0 2px 0 #111!important;text-shadow:2px 2px 0 #303030}
+#worldMenu .button:hover,#settingsMenu .button:hover,#realmsMenu .button:hover,#marketplaceMenu .button:hover,#profileMenu .button:hover,#dressingRoomMenu .button:hover,#errorScreen .button:hover{background:linear-gradient(#888,#626262)!important}
+#worldMenu .button.primary{background:linear-gradient(#7fbd55,#5d963d)!important;color:#fff!important}
+#pauseOverlay{background:rgba(0,0,0,.42)!important;backdrop-filter:blur(3px)!important}
+#pauseOverlay .pause-card{width:min(440px,92vw);padding:26px!important;border:2px solid #171717!important;border-radius:3px!important;background:linear-gradient(180deg,rgba(46,46,46,.98),rgba(28,28,28,.98))!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.13),inset 0 -2px 0 rgba(0,0,0,.5),0 14px 40px rgba(0,0,0,.75)!important}
+#pauseOverlay .pause-title{font-size:25px!important;text-shadow:2px 2px #111!important}
+#terrainGenerator{background:rgba(0,0,0,.42)!important;backdrop-filter:blur(3px)!important}
+#terrainGenerator .terrain-generator-card{border:2px solid #171717!important;border-radius:3px!important;background:linear-gradient(180deg,rgba(46,46,46,.98),rgba(28,28,28,.98))!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.13),inset 0 -2px 0 rgba(0,0,0,.5),0 14px 40px rgba(0,0,0,.75)!important}
+#terrainGenerator .tg-section{border-color:#111!important;border-radius:3px!important;background:rgba(0,0,0,.16)!important}
+#terrainGenerator .tg-preset,#terrainGenerator .tg-actions button,#terrainGenerator .tg-close{border:2px solid #222!important;border-radius:2px!important;background:linear-gradient(#707070,#505050)!important;color:#fff!important}
+#terrainGenerator .tg-preset.selected,#terrainGenerator .tg-actions .tg-generate{background:linear-gradient(#7fbd55,#5d963d)!important;border-color:#151515!important}
+@media(max-width:700px){#worldMenu .panel,#settingsMenu .panel,#realmsMenu .panel,#marketplaceMenu .panel,#profileMenu .panel,#dressingRoomMenu .panel,#errorScreen .error-box{width:calc(100vw - 24px)!important;padding:20px!important}}
+</style>
+<style id="minecraft-menu-refresh">
+/* Classic block-game menu, based on the supplied visual reference. */
+.minecraft-menu{
+  padding:0!important;
+  overflow:hidden!important;
+  background:rgba(0,0,0,.10)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.mc-menu-bg{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.42)),
+    radial-gradient(circle at 50% 45%,rgba(255,255,255,.05),transparent 42%);
+  pointer-events:none;
+}
+.mc-menu-bg:before{
+  content:"";position:absolute;inset:-5%;
+  background:
+    linear-gradient(180deg,rgba(110,180,230,.10),rgba(20,70,35,.16)),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 2px,transparent 2px 6px);
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+.mc-menu-content{
+  position:relative;z-index:2;width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 20px 28px;
+}
+.mc-logo{
+  position:relative;text-align:center;margin-bottom:30px;transform:skewX(-4deg) rotate(-1deg);
+  filter:drop-shadow(0 6px 0 rgba(0,0,0,.7)) drop-shadow(0 10px 18px rgba(0,0,0,.55));
+}
+.mc-logo-main,.mc-logo-shadow{
+  font-family:Impact,Haettenschweiler,"Arial Black",sans-serif;
+  font-size:clamp(54px,9vw,104px);font-weight:900;letter-spacing:-5px;line-height:.78;
+}
+.mc-logo-main{
+  position:relative;z-index:2;color:#e9e9e9;
+  -webkit-text-stroke:5px #171717;
+  text-shadow:2px 2px 0 #fff0,4px 7px 0 #4b4b4b;
+}
+.mc-logo-shadow{
+  position:absolute;left:0;right:0;top:7px;color:#2d2d2d;
+  -webkit-text-stroke:5px #111;z-index:1;
+}
+.mc-logo-sub{
+  margin-top:10px;font:900 11px/1 system-ui,sans-serif;letter-spacing:4px;color:#f4d85e;
+  text-shadow:2px 2px 0 #513b00,0 2px 5px #000;transform:rotate(-3deg);
+}
+.mc-menu-buttons{width:min(440px,92vw);display:grid;gap:7px}
+.mc-button{
+  min-height:44px;padding:8px 14px;border:2px solid #2b2b2b!important;border-radius:2px!important;
+  background:linear-gradient(#707070,#505050)!important;color:#fff!important;
+  font:700 15px/1 Arial,sans-serif!important;letter-spacing:.1px;
+  text-align:center;cursor:pointer;box-shadow:inset 0 2px 0 rgba(255,255,255,.22),inset 0 -2px 0 rgba(0,0,0,.35),0 2px 0 #111;
+  text-shadow:2px 2px 0 #303030;
+}
+.mc-button:hover{
+  transform:none!important;filter:none!important;
+  background:linear-gradient(#8b8b8b,#626262)!important;border-color:#111!important;
+}
+.mc-button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.mc-button:active{transform:translateY(2px)!important}
+.mc-button-wide{width:100%}
+.mc-button-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mc-side-left,.mc-side-right{position:absolute;bottom:58px;z-index:3}
+.mc-side-left{left:18px}.mc-side-right{right:18px}
+.mc-side-button{
+  min-width:125px;min-height:38px;padding:7px 12px;border:2px solid #2b2b2b;border-radius:2px;
+  color:#fff;background:linear-gradient(#6d6d6d,#4d4d4d);font-weight:700;font-size:13px;
+  text-shadow:2px 2px 0 #303030;box-shadow:inset 0 2px rgba(255,255,255,.18),0 2px #111;cursor:pointer;
+}
+.mc-side-button:hover{background:linear-gradient(#858585,#5d5d5d)}
+.mc-menu-footer{
+  position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:space-between;
+  color:rgba(255,255,255,.72);font:11px Arial,sans-serif;text-shadow:1px 1px #000;z-index:3
+}
+#pcControls{
+  position:fixed;left:16px;bottom:18px;z-index:35;pointer-events:none;display:none;
+}
+body.in-game-ui #pcControls{display:block}
+.pc-controls-card{
+  padding:10px 12px;border:1px solid rgba(255,255,255,.16);border-radius:10px;
+  background:rgba(5,9,16,.68);backdrop-filter:blur(10px);box-shadow:0 8px 24px rgba(0,0,0,.25);
+  color:rgba(255,255,255,.74);font:10px/1.35 Arial,sans-serif;
+}
+.pc-controls-title{margin-bottom:7px;color:#fff;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.pc-control-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}
+.pc-control-grid span{white-space:nowrap}
+kbd{
+  display:inline-block;min-width:18px;margin-right:3px;padding:2px 4px;border:1px solid rgba(255,255,255,.22);
+  border-radius:4px;background:rgba(255,255,255,.10);color:#fff;font:700 9px/1 Arial,sans-serif;text-align:center
+}
+#pauseOverlay{z-index:6000;background:rgba(0,0,0,.52)!important;backdrop-filter:blur(3px)!important}
+.pause-card{
+  width:min(420px,92vw);padding:24px;border:2px solid #2b2b2b;border-radius:3px;
+  background:rgba(30,30,30,.95);box-shadow:0 24px 70px rgba(0,0,0,.65);text-align:center
+}
+.pause-title{margin:0 0 18px;color:#fff;font:900 28px Arial,sans-serif;text-shadow:2px 2px #222}
+.pause-card .mc-button{margin:5px 0}
+@media(max-width:800px){
+  #pcControls{display:none!important}
+  .mc-menu-content{padding-top:24px}
+  .mc-logo{margin-bottom:22px}
+  .mc-logo-main,.mc-logo-shadow{font-size:clamp(45px,15vw,78px);letter-spacing:-3px;-webkit-text-stroke:3px #171717}
+  .mc-logo-sub{font-size:8px;letter-spacing:3px}
+  .mc-menu-buttons{width:min(380px,90vw)}
+  .mc-button{min-height:46px}
+  .mc-side-left,.mc-side-right{bottom:62px}
+  .mc-side-button{min-width:108px;font-size:11px}
+  .mc-menu-footer{font-size:9px;bottom:14px}
+}
 </style>
 </head>
 <body><div id="ultra-bg"><div class="orb o1"></div><div class="orb o2"></div><div class="gridfx"></div></div>
 <div id="game"></div>
 <div id="loadingScreen"><div class="loading-box"><div class="loading-logo">Block<span>World</span></div><div class="loading-subtitle">Procedural voxel sandbox</div><div class="loading-bar"><div id="loadingProgress" class="loading-progress"></div></div><div id="loadingText" class="loading-text">Starting...</div><div id="loadingPercent" class="loading-percent">0%</div></div></div>
 <div id="terrainGenerator"><div class="terrain-generator-card"><div class="tg-header"><div><h2 class="tg-title">Terrain Generator</h2><p class="tg-subtitle">Design mountains, plains, islands, deserts and snow worlds. Chunks stream in around you as you explore.</p></div><button id="tgClose" class="tg-close" type="button">✕</button></div><div class="tg-grid"><section class="tg-section"><h3>Terrain Preset</h3><div class="tg-presets"><button class="tg-preset selected" data-terrain="normal" type="button">🌿 Normal</button><button class="tg-preset" data-terrain="mountains" type="button">⛰ Mountains</button><button class="tg-preset" data-terrain="flat" type="button">▰ Flat</button><button class="tg-preset" data-terrain="islands" type="button">🏝 Islands</button><button class="tg-preset" data-terrain="desert" type="button">🏜 Desert</button><button class="tg-preset" data-terrain="snow" type="button">❄ Snow</button></div><div class="tg-field"><label for="tgSeed">Seed</label><input id="tgSeed" type="number" value="1" step="1"></div><div class="tg-field"><label for="tgHeight">Height <span id="tgHeightValue">32</span></label><input id="tgHeight" type="range" min="16" max="64" step="4" value="32"></div></section><section class="tg-section"><h3>Generation Settings</h3><div class="tg-field"><label for="tgMountain">Mountain Height <span id="tgMountainValue">70%</span></label><input id="tgMountain" type="range" min="0" max="100" value="70"></div><div class="tg-field"><label for="tgRoughness">Roughness <span id="tgRoughnessValue">55%</span></label><input id="tgRoughness" type="range" min="0" max="100" value="55"></div><div class="tg-field"><label for="tgWater">Water Level <span id="tgWaterValue">5</span></label><input id="tgWater" type="range" min="0" max="15" value="5"></div><div class="tg-checks"><label class="tg-check"><input id="tgTrees" type="checkbox" checked>Trees</label><label class="tg-check"><input id="tgWaterEnabled" type="checkbox" checked>Water</label><label class="tg-check"><input id="tgCaves" type="checkbox">Caves</label><label class="tg-check"><input id="tgIslands" type="checkbox">Extra islands</label></div></section><section class="tg-section"><h3>Preview</h3><div class="tg-preview"><canvas id="terrainPreviewCanvas" width="700" height="260"></canvas><div class="tg-preview-label">Live terrain preview</div></div></section><section class="tg-section"><h3>Quick Controls</h3><div class="tg-field"><label for="tgWorldType">World Type</label><select id="tgWorldType"><option value="normal">Balanced</option><option value="highlands">Highlands</option><option value="lowlands">Lowlands</option><option value="ocean">Ocean World</option></select></div><button id="tgRandomSeed" class="tg-actions" type="button" style="width:100%;justify-content:center">🎲 Random Seed</button></section></div><div class="tg-actions"><button id="tgCancel" type="button">Cancel</button><button id="tgGenerate" class="tg-generate" type="button">Generate World</button></div></div></div>
-<div id="mainMenu" class="screen hidden"><div class="menu-shell"><div class="menu-brand"><div class="menu-kicker">Procedural Sandbox</div><h1 class="menu-title">Block<span>World</span></h1><p class="menu-subtitle">Build, explore and shape an endlessly customizable voxel world with streamed terrain, mobs, survival and a living day/night cycle.</p><div class="menu-stats"><div class="menu-stat">🌍 Chunk-Streamed Worlds</div><div class="menu-stat">🧱 Destructible Blocks</div><div class="menu-stat">🐄 Mobs + AI</div><div class="menu-stat">🌙 Day / Night</div><div class="menu-stat">📱 Mobile Controls</div></div></div><div class="menu-panel"><p class="menu-panel-title">BlockWorld</p><p class="menu-panel-version">v0.5 Survival</p><div class="menu-actions"><button id="newWorldButton" class="menu-action primary" type="button"><span class="action-left"><span class="action-icon">🌎</span><span class="action-text"><strong>Create World</strong><small>Generate a new voxel world</small></span></span><span class="arrow">›</span></button><button id="continueButton" class="menu-action" type="button"><span class="action-left"><span class="action-icon">▶</span><span class="action-text"><strong>Play Current World</strong><small>Continue your generated world</small></span></span><span class="arrow">›</span></button><button id="settingsButton" class="menu-action" type="button"><span class="action-left"><span class="action-icon">⚙</span><span class="action-text"><strong>Settings</strong><small>Graphics, view and controls</small></span></span><span class="arrow">›</span></button></div><div class="menu-footer"><span>Desktop + Mobile</span><span>Chunked Voxel Engine</span></div></div></div></div>
+<div id="mainMenu" class="screen hidden minecraft-menu">
+  <div class="mc-menu-bg"></div>
+  <div class="mc-menu-content">
+    <div class="mc-logo" aria-label="BlockWorld">
+      <div class="mc-logo-main">BLOCKWORLD</div>
+      <div class="mc-logo-shadow">BLOCKWORLD</div>
+      <div class="mc-logo-sub">A VOXEL ADVENTURE</div>
+    </div>
+    <div class="mc-menu-buttons">
+      <button id="continueButton" class="mc-button mc-button-wide" type="button">Play</button>
+      <div class="mc-button-row">
+        <button id="settingsButton" class="mc-button" type="button">Settings</button>
+        <button id="realmsButton" class="mc-button" type="button">Realms</button>
+      </div>
+      <button id="marketplaceButton" class="mc-button mc-button-wide" type="button">Marketplace</button>
+    </div>
+    <div class="mc-side-left">
+      <button id="profileButton" class="mc-side-button" type="button">Profile</button>
+    </div>
+    <div class="mc-side-right">
+      <button id="dressingRoomButton" class="mc-side-button" type="button">Dressing Room</button>
+    </div>
+    <div class="mc-menu-footer">
+      <span>BlockWorld v0.5 Survival</span>
+      <span>Desktop + Mobile</span>
+    </div>
+  </div>
+</div>
 <div id="worldMenu" class="screen hidden"><div class="panel"><h2>Create New World</h2><div class="option"><label for="worldName">World Name</label><input id="worldName" type="text" value="My World" maxlength="32"></div><div class="option"><label for="terrainType">Terrain</label><select id="terrainType"><option value="normal">Normal</option><option value="mountains">Mountains</option><option value="flat">Flat</option><option value="islands">Islands</option><option value="desert">Desert</option><option value="snow">Snowy</option></select></div><div class="option"><label for="seed">World Seed</label><div class="seed-row"><input id="seed" type="number" placeholder="Random"><button id="randomSeed" class="small-button" type="button">🎲</button></div></div><button id="generateButton" class="button primary" type="button">CREATE WORLD</button><button id="backWorldButton" class="button" type="button">BACK</button></div></div>
 <div id="settingsMenu" class="screen hidden"><div class="panel"><h2>Settings</h2><div class="option"><label for="fov">Field of View <span id="fovValue" class="range-value">75</span></label><input id="fov" type="range" min="55" max="100" value="75" style="width:100%"></div><div class="option"><label for="sensitivity">Look Sensitivity <span id="sensitivityValue" class="range-value">4</span></label><input id="sensitivity" type="range" min="1" max="10" value="4" style="width:100%"></div><div class="option"><label for="renderDistance">Render Distance</label><select id="renderDistance"><option value="35">Low</option><option value="55" selected>Medium</option><option value="75">High</option></select></div><button id="backSettingsButton" class="button" type="button">BACK</button></div></div>
+<div id="realmsMenu" class="screen hidden"><div class="panel"><h2>Realms</h2><div class="menu-note">Play with friends using BlockWorld's peer-to-peer multiplayer. Multiplayer opens only when you enter a world.</div><button id="openRealmsButton" class="button" type="button">OPEN MULTIPLAYER</button><button id="backRealmsButton" class="button" type="button">BACK</button></div></div>
+<div id="marketplaceMenu" class="screen hidden"><div class="panel"><h2>Marketplace</h2><div class="menu-note">The BlockWorld Marketplace is coming soon.</div><button id="backMarketplaceButton" class="button" type="button">BACK</button></div></div>
+<div id="profileMenu" class="screen hidden"><div class="panel"><h2>Profile</h2><div class="menu-note">Player profile<br><strong>Player</strong></div><button id="backProfileButton" class="button" type="button">BACK</button></div></div>
+<div id="dressingRoomMenu" class="screen hidden"><div class="panel"><h2>Dressing Room</h2><div class="menu-note">Customize your BlockWorld character. More options are coming soon.</div><button id="backDressingButton" class="button" type="button">BACK</button></div></div>
 <div id="errorScreen"><div class="error-box"><h2>BlockWorld could not start</h2><div id="errorMessage"></div><br><button class="button" type="button" onclick="location.reload()">RELOAD</button></div></div>
 <div id="survivalHud"><div class="survival-bar"><div class="survival-icon">♥</div><div class="survival-track"><div id="healthFill" class="survival-fill health-fill"></div></div><div id="healthText" class="survival-text">20 / 20</div></div><div class="survival-bar"><div class="survival-icon">🍗</div><div class="survival-track"><div id="hungerFill" class="survival-fill hunger-fill"></div></div><div id="hungerText" class="survival-text">20 / 20</div></div></div><div id="worldTime" class="world-time">☀ Day 12:00</div><div id="crosshair">+</div><div id="status">BlockWorld v0.5</div><div id="hotbar"></div><div id="help"><b>BlockWorld</b><br>Click to play · WASD move · Space jump<br>Shift sprint · Left click break · Right click place<br>1–4 select block · Mobs roam · Night brings zombies · Esc unlock</div>
 <div id="deathOverlay"><div class="death-card"><div class="death-title">YOU DIED</div><div class="death-subtitle">Respawning...</div></div></div>
@@ -228,8 +401,31 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 <div id="ingameOptionsPanel" class="game-panel hidden"><button class="close-x" data-close="ingameOptionsPanel">✕</button><h2>⚙️ In-game Options</h2><div class="option"><label for="mpName">Player Name</label><input id="mpName" class="mp-input" maxlength="20" value="Player"></div><button id="openMultiplayerButton" class="mp-button" type="button">👥 Multiplayer / P2P</button><button id="resumeButton" class="mp-button secondary" type="button">RESUME GAME</button></div>
 <div id="multiplayerPanel" class="game-panel hidden"><button class="close-x" data-close="multiplayerPanel">✕</button><h2>👥 P2P Multiplayer</h2><div id="mpStatus" class="mp-status">Offline · Create a host offer or join with an offer.</div><div class="option"><label for="mpName2">Player Name</label><input id="mpName2" class="mp-input" maxlength="20" value="Player"></div><div class="mp-actions"><button id="mpCreate" class="mp-button" type="button">CREATE HOST OFFER</button><button id="mpApply" class="mp-button secondary" type="button">JOIN WITH ANSWER</button></div><label class="option"><span style="display:block;margin-bottom:7px;color:#cbd5e1;font-size:13px;font-weight:700">Connection data</span><textarea id="mpArea" class="mp-area" placeholder="Host: copy the generated OFFER to the other player.
 Guest: paste the OFFER here, create an ANSWER, then send the ANSWER back."></textarea></label><button id="mpCopy" class="mp-button secondary" type="button">COPY DATA</button></div>
+<div id="pcControls" aria-hidden="true">
+  <div class="pc-controls-card">
+    <div class="pc-controls-title">PC Controls</div>
+    <div class="pc-control-grid">
+      <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</span>
+      <span><kbd>Mouse</kbd> Look</span>
+      <span><kbd>Space</kbd> Jump</span>
+      <span><kbd>Shift</kbd> Sprint</span>
+      <span><kbd>LMB</kbd> Break / Attack</span>
+      <span><kbd>RMB</kbd> Place Block</span>
+      <span><kbd>1–4</kbd> Hotbar</span>
+      <span><kbd>Esc</kbd> Pause / Unlock Mouse</span>
+    </div>
+  </div>
+</div>
+<div id="pauseOverlay" class="screen hidden">
+  <div class="pause-card">
+    <div class="pause-title">Game Menu</div>
+    <button id="resumePauseButton" class="mc-button mc-button-wide" type="button">Back to Game</button>
+    <button id="pauseSettingsButton" class="mc-button mc-button-wide" type="button">Settings</button>
+    <button id="quitWorldButton" class="mc-button mc-button-wide" type="button">Save &amp; Quit to Menu</button>
+  </div>
+</div>
 <div id="mobileControls"><div id="lookArea"></div><div id="joystick"><div id="joystickKnob"></div></div><button id="jumpButton" class="mobile-button" type="button">↑</button><button id="sprintButton" class="mobile-button" type="button">⚡</button><button id="breakButton" class="mobile-button" type="button">⛏</button><button id="placeButton" class="mobile-button" type="button">＋</button></div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" onerror="document.getElementById('errorMessage').textContent='Three.js could not be loaded. Check your internet connection.';document.getElementById('errorScreen').style.display='flex';document.getElementById('loadingScreen').classList.add('hidden');"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js';"></script>
 <script>
 "use strict";
 const THREE=window.THREE;
@@ -299,7 +495,16 @@ function interact(button){if(!gameActive||generationInProgress||survival.dead)re
 window.addEventListener("keydown",e=>{if(!gameActive)return;player.keys.add(e.code);if(["KeyW","KeyA","KeyS","KeyD","Space","ShiftLeft","ShiftRight"].includes(e.code))e.preventDefault();const n=Number(e.key);if(n>=1&&n<=hotbar.length){selectedBlock=n-1;drawHotbar()}});window.addEventListener("keyup",e=>player.keys.delete(e.code));
 renderer.domElement.addEventListener("click",()=>{if(!gameActive||isMobile())return;if(document.pointerLockElement!==renderer.domElement)try{renderer.domElement.requestPointerLock()}catch(_){} });document.addEventListener("mousemove",e=>{if(!gameActive||document.pointerLockElement!==renderer.domElement)return;const s=Number(sensitivityInput.value)*.0005;player.yaw-=e.movementX*s;player.pitch=THREE.MathUtils.clamp(player.pitch-e.movementY*s,-Math.PI/2+.01,Math.PI/2-.01)});renderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
 const joystick=$("#joystick"),joystickKnob=$("#joystickKnob"),lookArea=$("#lookArea");let joystickPointer=null,lookPointer=null,lookX=0,lookY=0;function updateJoystick(e){const r=joystick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let x=e.clientX-cx,y=e.clientY-cy,rad=r.width*.34,len=Math.hypot(x,y);if(len>rad){x=x/len*rad;y=y/len*rad}mobile.x=THREE.MathUtils.clamp(x/rad,-1,1);mobile.y=THREE.MathUtils.clamp(-y/rad,-1,1);joystickKnob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`}function resetJoystick(){joystickPointer=null;mobile.x=mobile.y=0;joystickKnob.style.transform="translate(-50%,-50%)"}joystick.addEventListener("pointerdown",e=>{if(!gameActive)return;e.preventDefault();joystickPointer=e.pointerId;try{joystick.setPointerCapture(e.pointerId)}catch(_){}updateJoystick(e)});joystick.addEventListener("pointermove",e=>{if(e.pointerId===joystickPointer)updateJoystick(e)});joystick.addEventListener("pointerup",resetJoystick);joystick.addEventListener("pointercancel",resetJoystick);lookArea.addEventListener("pointerdown",e=>{if(!gameActive)return;e.preventDefault();lookPointer=e.pointerId;lookX=e.clientX;lookY=e.clientY;try{lookArea.setPointerCapture(e.pointerId)}catch(_){} });lookArea.addEventListener("pointermove",e=>{if(!gameActive||e.pointerId!==lookPointer)return;const dx=e.clientX-lookX,dy=e.clientY-lookY;lookX=e.clientX;lookY=e.clientY;const s=Number(sensitivityInput.value)*.001;player.yaw-=dx*s;player.pitch=THREE.MathUtils.clamp(player.pitch-dy*s,-Math.PI/2+.01,Math.PI/2-.01)});lookArea.addEventListener("pointerup",()=>lookPointer=null);lookArea.addEventListener("pointercancel",()=>lookPointer=null);function holdButton(el,prop){el.addEventListener("pointerdown",e=>{if(!gameActive)return;e.preventDefault();mobile[prop]=true});const r=()=>mobile[prop]=false;el.addEventListener("pointerup",r);el.addEventListener("pointercancel",r);el.addEventListener("pointerleave",r)}holdButton($("#jumpButton"),"jump");holdButton($("#sprintButton"),"sprint");$("#breakButton").addEventListener("pointerdown",e=>{if(gameActive){e.preventDefault();interact(0)}});$("#placeButton").addEventListener("pointerdown",e=>{if(gameActive){e.preventDefault();interact(2)}});
-function isMobile(){return window.matchMedia("(pointer:coarse)").matches||innerWidth<=800}function showLoading(text="Loading..."){gameActive=false;resetInputs();hideAllMenus();loadingScreen.classList.remove("hidden");setLoading(0,text)}function hideAllMenus(){mainMenu.classList.add("hidden");worldMenu.classList.add("hidden");settingsMenu.classList.add("hidden");terrainGenerator.classList.remove("active")}function showMainMenu(){gameActive=false;document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";document.getElementById("mobileExtraButtons").style.display="none";resetInputs();try{if(document.pointerLockElement)document.exitPointerLock()}catch(_){}loadingScreen.classList.add("hidden");hideAllMenus();mainMenu.classList.remove("hidden")}function showWorldMenu(){gameActive=false;document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";resetInputs();loadingScreen.classList.add("hidden");hideAllMenus();worldMenu.classList.remove("hidden")}function showSettings(){gameActive=false;document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";resetInputs();loadingScreen.classList.add("hidden");hideAllMenus();settingsMenu.classList.remove("hidden")}function showTerrainGenerator(){gameActive=false;document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";resetInputs();loadingScreen.classList.add("hidden");hideAllMenus();terrainGenerator.classList.add("active");updateTerrainPreview()}function showGame(){loadingScreen.classList.add("hidden");hideAllMenus();closePanels();gameActive=true;document.body.classList.add("in-game-ui");saveShortcut.style.display="block";document.getElementById("mobileExtraButtons").style.display="flex";camera.position.set(player.position.x,player.position.y+player.eyeHeight,player.position.z)}
+function isMobile(){return window.matchMedia("(pointer:coarse)").matches||innerWidth<=800}
+let settingsReturn="main";
+function setNonGameUI(){gameActive=false;document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";document.getElementById("mobileExtraButtons").style.display="none";resetInputs();try{if(document.pointerLockElement)document.exitPointerLock()}catch(_){}closePanels()}
+function showLoading(text="Loading..."){setNonGameUI();hideAllMenus();loadingScreen.classList.remove("hidden");setLoading(0,text)}
+function hideAllMenus(){mainMenu.classList.add("hidden");worldMenu.classList.add("hidden");settingsMenu.classList.add("hidden");realmsMenu.classList.add("hidden");marketplaceMenu.classList.add("hidden");profileMenu.classList.add("hidden");dressingRoomMenu.classList.add("hidden");terrainGenerator.classList.remove("active")}
+function showMainMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();mainMenu.classList.remove("hidden")}
+function showWorldMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();worldMenu.classList.remove("hidden")}
+function showSettings(returnTo="main"){setNonGameUI();settingsReturn=returnTo;loadingScreen.classList.add("hidden");hideAllMenus();settingsMenu.classList.remove("hidden")}
+function showTerrainGenerator(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();terrainGenerator.classList.add("active");updateTerrainPreview()}
+function showGame(){loadingScreen.classList.add("hidden");hideAllMenus();closePanels();gameActive=true;document.body.classList.add("in-game-ui");saveShortcut.style.display="block";document.getElementById("mobileExtraButtons").style.display="flex";camera.position.set(player.position.x,player.position.y+player.eyeHeight,player.position.z)}
 function updateDayNight(dt){if(!gameActive)return;dayNight.time=(dayNight.time+dt*(1440/dayNight.duration))%1440;const t=dayNight.time/1440,angle=t*Math.PI*2-Math.PI/2,s=Math.sin(angle),day=THREE.MathUtils.clamp(s*.5+.5,0,1),night=1-day;sun.position.set(Math.cos(angle)*40,Math.max(6,s*40),Math.sin(angle)*40);moon.position.set(-sun.position.x,Math.max(6,-sun.position.y),-sun.position.z);sun.intensity=.15+2.1*day;moon.intensity=.03+.15*night;hemi.intensity=.35+1.8*day;scene.background.copy(dayNight.skyNight).lerp(dayNight.skyDay,day);scene.fog.color.copy(dayNight.fogNight).lerp(dayNight.fogDay,day);scene.fog.near=Number(renderDistanceInput.value)*.36*(.72+.28*day);scene.fog.far=Number(renderDistanceInput.value)*(.7+.3*day);worldTimeLabel.textContent=(day>=.35?"☀ Day ":"🌙 Night ")+formatTime(dayNight.time);worldTimeLabel.classList.toggle("night",day<.35)}function formatTime(m){const h=Math.floor(m/60)%24,mm=Math.floor(m%60).toString().padStart(2,"0");return `${h.toString().padStart(2,"0")}:${mm}`}
 /* MOBS */
 const mobs=[];const mobGroups=new Set();const mobMaterials={cow:new THREE.MeshLambertMaterial({color:0x6f5a49}),white:new THREE.MeshLambertMaterial({color:0xf0f0eb}),black:new THREE.MeshLambertMaterial({color:0x292929}),pig:new THREE.MeshLambertMaterial({color:0xe89aa7}),zombie:new THREE.MeshLambertMaterial({color:0x4d8f62}),eye:new THREE.MeshBasicMaterial({color:0xffefef})};const mobBodyGeo=new THREE.BoxGeometry(1,1,1),mobHeadGeo=new THREE.BoxGeometry(.62,.62,.62),mobLegGeo=new THREE.BoxGeometry(.22,.62,.22),mobEyeGeo=new THREE.BoxGeometry(.08,.08,.05);const MAX_MOBS=LOW_DEVICE?6:10;const mobClock={spawn:0};
@@ -386,8 +591,52 @@ $("#emoteGrid").innerHTML=EMOTES.map(e=>`<button class="emote" type="button">${e
 const saveShortcut=document.createElement("button");saveShortcut.type="button";saveShortcut.id="saveWorldShortcut";saveShortcut.textContent="💾";saveShortcut.title="Save world";saveShortcut.style.cssText="position:fixed;right:18px;top:18px;z-index:90;display:none;width:46px;height:46px;border-radius:14px;border:1px solid #ffffff22;background:#111827cc;color:white;font-size:20px;backdrop-filter:blur(10px);cursor:pointer";document.body.appendChild(saveShortcut);saveShortcut.addEventListener("click",async()=>{saveShortcut.textContent="⏳";await saveWorldNow();saveShortcut.textContent="✓";setTimeout(()=>saveShortcut.textContent="💾",900)});
 
 /* menus / generator */
-$("#newWorldButton").addEventListener("click",showWorldMenu);$("#backWorldButton").addEventListener("click",showMainMenu);$("#randomSeed").addEventListener("click",()=>seedInput.value=String(Math.floor(Math.random()*2147483646)+1));$("#generateButton").addEventListener("click",async()=>{const seed=Number(seedInput.value)||Math.floor(Math.random()*2147483646)+1;const terrain=terrainInput.value||"normal";showLoading("Creating your world...");try{await generateWorld(terrain,seed,{terrainHeight:32,mountainHeight:45,roughness:55,waterLevel:6,water:true,trees:true,caves:true,extraIslands:false,worldType:"normal"});showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){}}catch(e){showError("World creation failed:\n\n"+(e&&e.message||String(e)))}});$("#continueButton").addEventListener("click",async()=>{if(!world.size){const seed=Math.floor(Math.random()*2147483646)+1;showLoading("Creating a new world...");try{await generateWorld("normal",seed,{terrainHeight:32,mountainHeight:45,roughness:55,waterLevel:6,water:true,trees:true,caves:true,extraIslands:false,worldType:"normal"});showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){}}catch(e){showError("World creation failed:\n\n"+(e&&e.message||String(e)))}return}showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){} });$("#settingsButton").addEventListener("click",showSettings);$("#backSettingsButton").addEventListener("click",showMainMenu);
-fovInput.addEventListener("input",()=>{fovValue.textContent=fovInput.value;camera.fov=Number(fovInput.value);camera.updateProjectionMatrix()});sensitivityInput.addEventListener("input",()=>sensitivityValue.textContent=sensitivityInput.value);renderDistanceInput.addEventListener("change",()=>{const d=Number(renderDistanceInput.value);scene.fog.near=d*.36;scene.fog.far=d;camera.far=Math.max(150,d*2);camera.updateProjectionMatrix()});document.addEventListener("pointerlockchange",()=>{if(!isMobile()&&gameActive&&document.pointerLockElement!==renderer.domElement)showMainMenu()});document.addEventListener("visibilitychange",()=>{if(document.hidden){resetInputs();try{document.exitPointerLock()}catch(_){}}});
+const newWorldButton=$("#newWorldButton");if(newWorldButton)newWorldButton.addEventListener("click",showWorldMenu);$("#backWorldButton").addEventListener("click",showMainMenu);$("#randomSeed").addEventListener("click",()=>seedInput.value=String(Math.floor(Math.random()*2147483646)+1));$("#generateButton").addEventListener("click",async()=>{const seed=Number(seedInput.value)||Math.floor(Math.random()*2147483646)+1;const terrain=terrainInput.value||"normal";showLoading("Creating your world...");try{await generateWorld(terrain,seed,{terrainHeight:32,mountainHeight:45,roughness:55,waterLevel:6,water:true,trees:true,caves:true,extraIslands:false,worldType:"normal"});showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){}}catch(e){showError("World creation failed:\n\n"+(e&&e.message||String(e)))}});$("#continueButton").addEventListener("click",async()=>{if(!world.size){const seed=Math.floor(Math.random()*2147483646)+1;showLoading("Creating a new world...");try{await generateWorld("normal",seed,{terrainHeight:32,mountainHeight:45,roughness:55,waterLevel:6,water:true,trees:true,caves:true,extraIslands:false,worldType:"normal"});showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){}}catch(e){showError("World creation failed:\n\n"+(e&&e.message||String(e)))}return}showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){} });$("#settingsButton").addEventListener("click",()=>showSettings("main"));$("#backSettingsButton").addEventListener("click",()=>settingsReturn==="pause"?showPauseFromSettings():showMainMenu());
+$("#realmsButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();realmsMenu.classList.remove("hidden")});
+$("#marketplaceButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();marketplaceMenu.classList.remove("hidden")});
+$("#profileButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();profileMenu.classList.remove("hidden")});
+$("#dressingRoomButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();dressingRoomMenu.classList.remove("hidden")});
+$("#backRealmsButton").addEventListener("click",showMainMenu);$("#backMarketplaceButton").addEventListener("click",showMainMenu);$("#backProfileButton").addEventListener("click",showMainMenu);$("#backDressingButton").addEventListener("click",showMainMenu);
+$("#openRealmsButton").addEventListener("click",()=>{if(world.size){showGame();openPanel("multiplayerPanel")}else{showMainMenu()}});
+function pauseGame(){
+  if(!gameActive||isMobile())return;
+  resetInputs();
+  try{if(document.pointerLockElement)document.exitPointerLock()}catch(_){}
+  closePanels();
+  document.body.classList.remove("in-game-ui");
+  saveShortcut.style.display="none";
+  document.getElementById("mobileExtraButtons").style.display="none";
+  $("#pauseOverlay").classList.remove("hidden");
+}
+function resumeGame(){
+  $("#pauseOverlay").classList.add("hidden");
+  if(!gameActive)return;
+  document.body.classList.add("in-game-ui");
+  saveShortcut.style.display="block";
+  document.getElementById("mobileExtraButtons").style.display="flex";
+  try{renderer.domElement.requestPointerLock()}catch(_){}
+}
+$("#resumePauseButton").addEventListener("click",resumeGame);
+function showPauseFromSettings(){gameActive=true;resetInputs();document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";document.getElementById("mobileExtraButtons").style.display="none";loadingScreen.classList.add("hidden");hideAllMenus();$("#pauseOverlay").classList.remove("hidden")}
+$("#pauseSettingsButton").addEventListener("click",()=>{pauseGame();$("#pauseOverlay").classList.add("hidden");showSettings("pause")});
+$("#quitWorldButton").addEventListener("click",async()=>{await saveWorldNow();$("#pauseOverlay").classList.add("hidden");showMainMenu()});
+document.addEventListener("keydown",e=>{
+  if(!gameActive||isMobile())return;
+  if(e.code==="Escape"){
+    e.preventDefault();
+    if($("#pauseOverlay").classList.contains("hidden"))pauseGame();else resumeGame();
+    return;
+  }
+  if(e.code==="KeyE" && document.pointerLockElement===renderer.domElement){
+    e.preventDefault();
+  }
+});
+fovInput.addEventListener("input",()=>{fovValue.textContent=fovInput.value;camera.fov=Number(fovInput.value);camera.updateProjectionMatrix()});sensitivityInput.addEventListener("input",()=>sensitivityValue.textContent=sensitivityInput.value);renderDistanceInput.addEventListener("change",()=>{const d=Number(renderDistanceInput.value);scene.fog.near=d*.36;scene.fog.far=d;camera.far=Math.max(150,d*2);camera.updateProjectionMatrix()});document.addEventListener("pointerlockchange",()=>{
+  if(isMobile()||!gameActive)return;
+  if(document.pointerLockElement!==renderer.domElement && !$("#pauseOverlay").classList.contains("hidden")){
+    return;
+  }
+});document.addEventListener("visibilitychange",()=>{if(document.hidden){resetInputs();try{document.exitPointerLock()}catch(_){}}});
 let selectedTerrainPreset="normal";document.querySelectorAll(".tg-preset").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tg-preset").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");selectedTerrainPreset=b.dataset.terrain;updateTerrainPreview()}));function updateTGLabels(){$("#tgHeightValue").textContent=tgHeight.value;$("#tgMountainValue").textContent=tgMountain.value+"%";$("#tgRoughnessValue").textContent=tgRoughness.value+"%";$("#tgWaterValue").textContent=tgWaterLevel.value}function tgHash(x,y,seed){let n=Math.imul(x+seed,374761393)^Math.imul(y+seed*31,668265263);n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967295}function tgNoise(x,y,seed){const x0=Math.floor(x),y0=Math.floor(y),xf=x-x0,yf=y-y0,fade=t=>t*t*(3-2*t),a=tgHash(x0,y0,seed),b=tgHash(x0+1,y0,seed),c=tgHash(x0,y0+1,seed),d=tgHash(x0+1,y0+1,seed),u=fade(xf),v=fade(yf),ab=a+(b-a)*u,cd=c+(d-c)*u;return ab+(cd-ab)*v}function tgTerrainHeight(x,z,size,seed){const p=selectedTerrainPreset,rough=+tgRoughness.value/100,mountain=+tgMountain.value/100,water=+tgWaterLevel.value,half=size/2,nx=(x-half)/half,nz=(z-half)/half,large=tgNoise(x*.035,z*.035,seed),medium=tgNoise(x*.085,z*.085,seed+91),small=tgNoise(x*.2,z*.2,seed+177),base=Math.max(4,+tgHeight.value*.23);let h;switch(p){case"flat":h=base+(medium-.5)*2;break;case"mountains":h=base+large*(+tgHeight.value)*(.55+mountain)+medium*10*rough+small*3;break;case"islands":{const e=Math.sqrt(nx*nx+nz*nz),island=Math.max(0,1-Math.pow(e,1.45));h=water-3+island*(+tgHeight.value)*.65+large*5;if(tgIslands.checked)h+=Math.max(0,medium-.7)*16;break}case"desert":h=base+large*(+tgHeight.value)*.28+medium*4*rough;break;case"snow":h=base+large*(+tgHeight.value)*.48+medium*8*rough+small*3;break;default:h=base+large*(+tgHeight.value)*.36+medium*7*rough+small*2}if(tgWorldType.value==="highlands")h+=5;else if(tgWorldType.value==="lowlands")h-=4;else if(tgWorldType.value==="ocean")h=Math.min(h,water-2);return Math.max(1,Math.floor(h))}function updateTerrainPreview(){updateTGLabels();const c=terrainPreviewCanvas,ctx=c.getContext("2d",{alpha:false}),W=c.width,H=c.height,seed=+tgSeed.value||1,size=48,water=+tgWaterLevel.value,img=ctx.createImageData(W,H);for(let py=0;py<H;py++)for(let px=0;px<W;px++){const h=tgTerrainHeight(px/W*size,py/H*size,size,seed);let r=72,g=150,b=80;if(tgWaterEnabled.checked&&h<=water){r=45;g=105;b=190}else if(selectedTerrainPreset==="desert"){r=190;g=155;b=82}else if(selectedTerrainPreset==="snow"&&h>10){r=220;g=230;b=238}else if(h>14){r=g=b=105}else if(h>9){r=75;g=125;b=65}const i=(py*W+px)*4;img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=255}ctx.putImageData(img,0,0)}[tgHeight,tgMountain,tgRoughness,tgWaterLevel,tgSeed,tgWorldType,tgWaterEnabled,tgTrees,tgCaves,tgIslands].forEach(e=>{e.addEventListener("input",updateTerrainPreview);e.addEventListener("change",updateTerrainPreview)});$("#tgRandomSeed").addEventListener("click",()=>{tgSeed.value=String(Math.floor(Math.random()*2147483646)+1);updateTerrainPreview()});
 async function generateWorld(type="normal",seed=1,options={}){if(generationInProgress)return;generationInProgress=true;const id=++generationId;try{generationOptions={...generationOptions,...options};generationOptions.terrainHeight=Math.max(16,+generationOptions.terrainHeight||32);worldHeight=Math.max(40,Math.ceil(generationOptions.terrainHeight*1.8)+12);currentTerrain=type;worldSeed=Number.isFinite(+seed)?Math.trunc(+seed):1;world.clear();clearAllChunkMeshes();generatedChunks.clear();chunkGenQueue=[];lastPlayerChunk={cx:null,cz:null};mobs.splice(0,mobs.length);for(const g of [...mobGroups])scene.remove(g);mobGroups.clear();survival.health=20;survival.hunger=20;survival.dead=false;updateSurvivalHud();setLoading(10,"Generating terrain...");await new Promise(r=>setTimeout(r,0));const coords=[];for(let cx=-INITIAL_CHUNK_RADIUS;cx<=INITIAL_CHUNK_RADIUS;cx++)for(let cz=-INITIAL_CHUNK_RADIUS;cz<=INITIAL_CHUNK_RADIUS;cz++)coords.push([cx,cz]);for(let i=0;i<coords.length;i++){if(id!==generationId)return;generateChunk(coords[i][0],coords[i][1]);setLoading(10+i/coords.length*55,"Generating terrain...");await new Promise(r=>setTimeout(r,0))}for(let i=0;i<coords.length;i++){if(id!==generationId)return;buildChunkMesh(coords[i][0],coords[i][1]);setLoading(68+i/coords.length*22,"Building voxel mesh...");await new Promise(r=>setTimeout(r,0))}setLoading(94,"Finding spawn point...");findSpawn();lastPlayerChunk={cx:null,cz:null};await saveWorldNow();setLoading(100,"World ready!");await new Promise(r=>setTimeout(r,160))}finally{generationInProgress=false}}
 $("#tgGenerate").addEventListener("click",async()=>{const opts={terrainHeight:+tgHeight.value,mountainHeight:+tgMountain.value,roughness:+tgRoughness.value,waterLevel:+tgWaterLevel.value,water:tgWaterEnabled.checked,trees:tgTrees.checked,caves:tgCaves.checked,extraIslands:tgIslands.checked,worldType:tgWorldType.value};let seed=+tgSeed.value;if(!Number.isFinite(seed))seed=Math.floor(Math.random()*2147483646)+1;showTerrainGenerator();showLoading("Starting terrain generator...");try{await generateWorld(selectedTerrainPreset,seed,opts);handleResize();showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){}}catch(e){showError("Terrain generation failed:\n\n"+(e&&e.message||String(e)))}});
