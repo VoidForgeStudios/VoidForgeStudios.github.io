@@ -92,6 +92,41 @@ html,body{overflow:auto}
 .hero h1{font-size:70px}
 .panel{min-height:500px}
 }
+
+.ui-window{position:fixed;inset:76px 24px 20px;z-index:50;display:none;overflow:hidden;background:#07101ef5;border:1px solid #ffffff25;box-shadow:0 25px 80px #0009;backdrop-filter:blur(18px)}
+.ui-window.open{display:flex;flex-direction:column}
+.ui-window-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #ffffff18;background:#0a1628}
+.ui-window-title{font-size:25px;font-weight:900;font-style:italic}
+.ui-window-subtitle{color:#8fa2be;font-size:12px;margin-top:3px}
+.ui-window-close{width:38px;height:38px;border:1px solid #ffffff30;background:#ffffff0b;color:white;font-size:22px;font-weight:900}
+.ui-window-close:hover{background:#ff6262}
+.ui-window-content{flex:1;min-height:0;overflow:auto;padding:22px}
+.ui-grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:14px}
+.ui-card{position:relative;min-height:170px;padding:16px;background:linear-gradient(145deg,#142744,#0b1628);border:1px solid #ffffff18;box-shadow:0 10px 30px #0003}
+.ui-card:hover{transform:translateY(-2px);border-color:#ffd02f66}
+.ui-card h3{margin:0 0 7px;font-size:17px}
+.ui-card p{margin:0;color:#8fa2be;font-size:12px}
+.ui-card-action{position:absolute;left:16px;right:16px;bottom:16px;padding:9px;border:0;background:#ffd02f;color:#172139;font-weight:900}
+.bp-progress{height:10px;margin:18px 0 24px;background:#ffffff12;border:1px solid #ffffff15}
+.bp-progress span{display:block;width:42%;height:100%;background:#ffd02f}
+.shop-price{position:absolute;right:14px;top:14px;color:#7bdcff;font-weight:900}
+.locker-loadout{display:grid;grid-template-columns:1.1fr 2fr;gap:18px}
+.loadout-preview{min-height:360px;display:grid;place-items:center;background:radial-gradient(circle,#36557d,#101b2d 65%);border:1px solid #ffffff18}
+.loadout-character{font-size:85px;font-weight:900;font-style:italic;text-shadow:6px 7px #000}
+.loadout-slots{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.loadout-slot{min-height:120px;padding:14px;background:#ffffff08;border:1px solid #ffffff18}
+.loadout-slot strong{display:block;margin-bottom:6px}
+.loadout-slot span{color:#8fa2be;font-size:12px}
+@media(max-width:850px){
+  .ui-window{inset:70px 10px 10px}
+  .ui-grid{grid-template-columns:repeat(2,minmax(140px,1fr))}
+  .locker-loadout{grid-template-columns:1fr}
+  .loadout-preview{min-height:220px}
+}
+@media(max-width:500px){
+  .ui-grid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 
@@ -157,6 +192,66 @@ html,body{overflow:auto}
 </aside>
 </div>
 </div>
+
+
+<!-- Other UI sections: each is an independent DIV window. -->
+<section id="battlePassWindow" class="ui-window" aria-hidden="true">
+  <div class="ui-window-header">
+    <div>
+      <div class="ui-window-title">BATTLE PASS</div>
+      <div class="ui-window-subtitle">CHAPTER 2 • SEASON 9</div>
+    </div>
+    <button class="ui-window-close" data-close-window="battlePassWindow" aria-label="Close">×</button>
+  </div>
+  <div class="ui-window-content">
+    <div class="bp-progress"><span></span></div>
+    <div class="ui-grid">
+      <div class="ui-card"><h3>LEVEL 10</h3><p>Season reward unlocked.</p><button class="ui-card-action">CLAIM</button></div>
+      <div class="ui-card"><h3>LEVEL 20</h3><p>Outfit reward waiting.</p><button class="ui-card-action">VIEW</button></div>
+      <div class="ui-card"><h3>LEVEL 30</h3><p>Pickaxe reward.</p><button class="ui-card-action">VIEW</button></div>
+      <div class="ui-card"><h3>LEVEL 40</h3><p>Emote reward.</p><button class="ui-card-action">VIEW</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="itemShopWindow" class="ui-window" aria-hidden="true">
+  <div class="ui-window-header">
+    <div>
+      <div class="ui-window-title">ITEM SHOP</div>
+      <div class="ui-window-subtitle">FEATURED ITEMS</div>
+    </div>
+    <button class="ui-window-close" data-close-window="itemShopWindow" aria-label="Close">×</button>
+  </div>
+  <div class="ui-window-content">
+    <div class="ui-grid">
+      <div class="ui-card"><span class="shop-price">1,500 V</span><h3>RAVEN</h3><p>Featured outfit</p><button class="ui-card-action">PURCHASE</button></div>
+      <div class="ui-card"><span class="shop-price">800 V</span><h3>DARK AXE</h3><p>Harvesting tool</p><button class="ui-card-action">PURCHASE</button></div>
+      <div class="ui-card"><span class="shop-price">500 V</span><h3>VICTORY</h3><p>Emote</p><button class="ui-card-action">PURCHASE</button></div>
+      <div class="ui-card"><span class="shop-price">1,200 V</span><h3>NIGHT FLIGHT</h3><p>Glider</p><button class="ui-card-action">PURCHASE</button></div>
+    </div>
+  </div>
+</section>
+
+<section id="lockerWindow" class="ui-window" aria-hidden="true">
+  <div class="ui-window-header">
+    <div>
+      <div class="ui-window-title">LOCKER</div>
+      <div class="ui-window-subtitle">YOUR LOADOUT</div>
+    </div>
+    <button class="ui-window-close" data-close-window="lockerWindow" aria-label="Close">×</button>
+  </div>
+  <div class="ui-window-content">
+    <div class="locker-loadout">
+      <div class="loadout-preview"><div class="loadout-character">BZ</div></div>
+      <div class="loadout-slots">
+        <div class="loadout-slot"><strong>OUTFIT</strong><span>BattleZone default</span></div>
+        <div class="loadout-slot"><strong>PICKAXE</strong><span>Standard pickaxe</span></div>
+        <div class="loadout-slot"><strong>GLIDER</strong><span>Standard glider</span></div>
+        <div class="loadout-slot"><strong>EMOTE</strong><span>Victory pose</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <div id="toast" class="toast"></div>
 
@@ -502,6 +597,20 @@ document
 
   updateVbucks(0);
 
+  const uiWindows = {
+    "BATTLE PASS": document.getElementById("battlePassWindow"),
+    "ITEM SHOP": document.getElementById("itemShopWindow"),
+    "LOCKER": document.getElementById("lockerWindow")
+  };
+
+  function closeAllWindows() {
+    Object.values(uiWindows).forEach(function (windowEl) {
+      if (!windowEl) return;
+      windowEl.classList.remove("open");
+      windowEl.setAttribute("aria-hidden", "true");
+    });
+  }
+
   topNavButtons.forEach(function (button) {
     button.addEventListener("click", function () {
       topNavButtons.forEach(function (item) {
@@ -511,12 +620,30 @@ document
 
       const section = button.dataset.section;
       sectionBanner.textContent = section;
+      closeAllWindows();
 
       if (section === "PLAY") {
         showToast("Play section selected.");
-      } else {
-        showToast(section + " selected.");
+        return;
       }
+
+      const windowEl = uiWindows[section];
+      if (windowEl) {
+        windowEl.classList.add("open");
+        windowEl.setAttribute("aria-hidden", "false");
+      }
+      showToast(section + " opened.");
+    });
+  });
+
+  document.querySelectorAll("[data-close-window]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      closeAllWindows();
+      topNavButtons.forEach(function (item) {
+        item.classList.toggle("active", item.dataset.section === "PLAY");
+      });
+      sectionBanner.textContent = "PLAY";
+      showToast("Back to Play.");
     });
   });
 
