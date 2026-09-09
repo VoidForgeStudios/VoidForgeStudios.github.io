@@ -1,1191 +1,372 @@
 /* =========================================================
-   BattleZone Matchmaking
-   Firebase Auth + Firestore
-   Classic browser script
+   VoidForge / BattleZone Matchmaking
+   PlayerDB wrapper
+
+   Requires:
+   - Firebase compat SDK
+   - playerdb.js
+
+   Creates:
+   window.BattleMatchmaking
 ========================================================= */
 
-(function(){
+(function () {
 
   "use strict";
 
 
-  const Matchmaking = {};
-
-
   /* =======================================================
-     STATE
+     CHECK PLAYERDB
   ======================================================= */
 
-  let player = null;
+  if (!window.PlayerDB) {
 
-  let unsubscribeTicket = null;
-
-  let searching = false;
-
-  let currentMatchId = null;
-
-
-  /* =======================================================
-     FIREBASE
-  ======================================================= */
-
-  function getAuth(){
-
-    if(!window.PlayerDB){
-
-      throw new Error(
-        "PlayerDB is not loaded."
-      );
-    }
-
-    if(!PlayerDB.auth){
-
-      throw new Error(
-        "Firebase Auth is unavailable."
-      );
-    }
-
-    return PlayerDB.auth;
-  }
-
-
-  function getDB(){
-
-    if(!window.PlayerDB){
-
-      throw new Error(
-        "PlayerDB is not loaded."
-      );
-    }
-
-    if(!PlayerDB.db){
-
-      throw new Error(
-        "Firestore is unavailable."
-      );
-    }
-
-    return PlayerDB.db;
-  }
-
-
-  /* =======================================================
-     PLAYER
-  ======================================================= */
-
-  Matchmaking.setPlayer =
-    function(currentPlayer){
-
-      player =
-        currentPlayer || null;
-
-    };
-
-
-  async function loadPlayer(){
-
-    if(player){
-      return player;
-    }
-
-
-    if(
-      window.PlayerDB &&
-      typeof PlayerDB.getCurrentPlayer ===
-      "function"
-    ){
-
-      player =
-        await PlayerDB.getCurrentPlayer();
-
-      return player;
-    }
-
-
-    throw new Error(
-      "Could not load player."
+    console.error(
+      "[BattleMatchmaking] PlayerDB is not loaded."
     );
+
+    return;
   }
 
 
   /* =======================================================
-     START
+     GET REGISTERED PLAYERS
   ======================================================= */
 
-  Matchmaking.start =
-    async function(){
+  async function getRegisteredPlayers() {
 
-      if(searching){
+    const currentUser =
+      PlayerDB.getCurrentUser();
+
+
+    if (!currentUser) {
+
+      throw new Error(
+        "You are not logged in."
+      );
+
+    }
+
+
+    const players =
+      await PlayerDB.getPlayers();
+
+
+    /*
+      Remove the current player from the list.
+    */
+
+    return players.filter(
+      function (player) {
+
+        return player.uid !==
+          currentUser.uid;
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     SEND INVITATION
+  ======================================================= */
+
+  async function sendInvitation(
+    uid,
+    username
+  ) {
+
+    const currentUser =
+      PlayerDB.getCurrentUser();
+
+
+    if (!currentUser) {
+
+      throw new Error(
+        "You are not logged in."
+      );
+
+    }
+
+
+    if (!uid || !username) {
+
+      throw new Error(
+        "Invalid player."
+      );
+
+    }
+
+
+    const currentPlayer =
+      await PlayerDB.getCurrentPlayer();
+
+
+    if (!currentPlayer) {
+
+      throw new Error(
+        "Your player profile could not be loaded."
+      );
+
+    }
+
+
+    /*
+      PlayerDB handles:
+      - sender verification
+      - target verification
+      - self-invite prevention
+      - invitation creation
+    */
+
+    return PlayerDB.sendInvitation(
+      currentPlayer.username,
+      username
+    );
+
+  }
+
+
+  /* =======================================================
+     ACCEPT INVITATION
+  ======================================================= */
+
+  async function acceptInvitation(
+    invitationId
+  ) {
+
+    if (!invitationId) {
+
+      throw new Error(
+        "Invitation ID is required."
+      );
+
+    }
+
+
+    return PlayerDB.acceptInvitation(
+      invitationId
+    );
+
+  }
+
+
+  /* =======================================================
+     DECLINE INVITATION
+  ======================================================= */
+
+  async function declineInvitation(
+    invitationId
+  ) {
+
+    if (!invitationId) {
+
+      throw new Error(
+        "Invitation ID is required."
+      );
+
+    }
+
+
+    return PlayerDB.declineInvitation(
+      invitationId
+    );
+
+  }
+
+
+  /* =======================================================
+     WATCH INVITATIONS
+  ======================================================= */
+
+  function watchInvitations(callback) {
+
+    if (
+      typeof callback !==
+      "function"
+    ) {
+
+      throw new Error(
+        "watchInvitations requires a callback."
+      );
+
+    }
+
+
+    /*
+      Firestore realtime listener.
+
+      This is better than repeatedly polling
+      getInvitations().
+    */
+
+    let unsubscribe = null;
+
+
+    function startListener(user) {
+
+      /*
+        Remove previous listener.
+      */
+
+      if (unsubscribe) {
+
+        unsubscribe();
+        unsubscribe = null;
+
+      }
+
+
+      /*
+        Logged out.
+      */
+
+      if (!user) {
+
+        callback([]);
 
         return;
 
       }
 
 
-      const auth =
-        getAuth();
-
-      const db =
-        getDB();
-
-
-      const user =
-        auth.currentUser;
-
-
-      if(!user){
-
-        throw new Error(
-          "You must be logged in."
-        );
-      }
-
-
-      const currentPlayer =
-        await loadPlayer();
-
-
-      if(
-        !currentPlayer ||
-        !currentPlayer.uid
-      ){
-
-        throw new Error(
-          "Player profile was not found."
-        );
-      }
-
-
-      /*
-        Verify that the player actually exists
-        in the players collection.
-      */
-
-      const playerRef =
-        db
-          .collection("players")
-          .doc(user.uid);
-
-
-      const playerSnapshot =
-        await playerRef.get();
-
-
-      if(!playerSnapshot.exists){
-
-        throw new Error(
-          "Your player account is not in the database."
-        );
-      }
-
-
-      /*
-        Always use Firestore's actual player data.
-      */
-
-      player =
-        playerSnapshot.data();
-
-
-      searching = true;
-
-
-      dispatch(
-        "battlezone-matchmaking-started"
-      );
-
-
-      showOverlay();
-
-
-      const ticketRef =
-        db
-          .collection("matchmaking")
-          .doc(user.uid);
-
-
-      /*
-        Remove stale ticket / create new ticket.
-      */
-
-      await ticketRef.set({
-
-        uid: user.uid,
-
-        username:
-          player.username ||
-          user.displayName ||
-          "PLAYER",
-
-        usernameLower:
-          String(
-            player.username ||
-            user.displayName ||
-            "player"
-          ).toLowerCase(),
-
-        status: "waiting",
-
-        createdAt:
-          firebase.firestore.FieldValue
-            .serverTimestamp(),
-
-        updatedAt:
-          firebase.firestore.FieldValue
-            .serverTimestamp()
-
-      });
-
-
-      /*
-        Listen to our own ticket.
-
-        Another player can create a match
-        involving us.
-      */
-
-      subscribeToTicket(
-        ticketRef
-      );
-
-
-      /*
-        Search for an existing waiting player.
-      */
-
-      await findOpponent();
-
-    };
-
-
-  /* =======================================================
-     SEARCH FOR OPPONENT
-  ======================================================= */
-
-  async function findOpponent(){
-
-    if(!searching){
-      return;
-    }
-
-
-    const db =
-      getDB();
-
-    const auth =
-      getAuth();
-
-    const uid =
-      auth.currentUser.uid;
-
-
-    /*
-      Find waiting players.
-
-      We deliberately use a small batch.
-    */
-
-    const snapshot =
-      await db
-        .collection("matchmaking")
-        .where(
-          "status",
-          "==",
-          "waiting"
-        )
-        .limit(10)
-        .get();
-
-
-    let opponent = null;
-
-
-    snapshot.forEach(
-      function(doc){
-
-        if(
-          !opponent &&
-          doc.id !== uid
-        ){
-
-          opponent = {
-            id: doc.id,
-            data: doc.data()
-          };
-
-        }
-
-      }
-    );
-
-
-    if(!opponent){
-
-      setStatus(
-        "Searching for an opponent..."
-      );
-
-      return;
-    }
-
-
-    /*
-      Make sure opponent still exists
-      as a real player.
-    */
-
-    const opponentPlayer =
-      await db
-        .collection("players")
-        .doc(opponent.id)
-        .get();
-
-
-    if(!opponentPlayer.exists){
-
-      return;
-
-    }
-
-
-    await createMatch(
-      opponent.id,
-      opponent.data
-    );
-
-  }
-
-
-  /* =======================================================
-     CREATE MATCH
-  ======================================================= */
-
-  async function createMatch(
-    opponentUid,
-    opponentTicket
-  ){
-
-    if(!searching){
-      return;
-    }
-
-
-    const db =
-      getDB();
-
-    const auth =
-      getAuth();
-
-    const myUid =
-      auth.currentUser.uid;
-
-
-    if(
-      !opponentUid ||
-      opponentUid === myUid
-    ){
-
-      return;
-    }
-
-
-    /*
-      Deterministic ID.
-
-      Both players calculate exactly
-      the same match ID.
-    */
-
-    const ids = [
-      myUid,
-      opponentUid
-    ].sort();
-
-
-    const matchId =
-      ids[0] + "_" + ids[1];
-
-
-    const matchRef =
-      db
-        .collection("matches")
-        .doc(matchId);
-
-
-    /*
-      Transaction protects against two clients
-      trying to create the same match.
-    */
-
-    await db.runTransaction(
-      async function(transaction){
-
-        const existing =
-          await transaction.get(
-            matchRef
-          );
-
-
-        if(existing.exists){
-
-          return;
-
-        }
-
-
-        const opponentRef =
-          db
-            .collection("matchmaking")
-            .doc(opponentUid);
-
-
-        const myRef =
-          db
-            .collection("matchmaking")
-            .doc(myUid);
-
-
-        const opponentSnapshot =
-          await transaction.get(
-            opponentRef
-          );
-
-
-        const mySnapshot =
-          await transaction.get(
-            myRef
-          );
-
-
-        if(
-          !opponentSnapshot.exists ||
-          !mySnapshot.exists
-        ){
-
-          return;
-
-        }
-
-
-        const opponentData =
-          opponentSnapshot.data();
-
-        const myData =
-          mySnapshot.data();
-
-
-        if(
-          opponentData.status !==
-          "waiting"
-        ){
-
-          return;
-
-        }
-
-
-        if(
-          myData.status !==
-          "waiting"
-        ){
-
-          return;
-
-        }
-
-
-        /*
-          Create match.
-        */
-
-        transaction.set(
-          matchRef,
-          {
-
-            matchId: matchId,
-
-            players: [
-              myUid,
-              opponentUid
-            ],
-
-            playerData: {
-
-              [myUid]: {
-                uid: myUid,
-                username:
-                  myData.username ||
-                  "PLAYER"
-              },
-
-              [opponentUid]: {
-                uid: opponentUid,
-                username:
-                  opponentData.username ||
-                  "PLAYER"
-              }
-
-            },
-
-            status:
-              "starting",
-
-            createdAt:
-              firebase.firestore.FieldValue
-                .serverTimestamp(),
-
-            startedBy:
-              myUid
-
-          }
-        );
-
-
-        /*
-          Mark OUR ticket matched.
-        */
-
-        transaction.update(
-          myRef,
-          {
-
-            status:
-              "matched",
-
-            matchId:
-              matchId,
-
-            opponentUid:
-              opponentUid,
-
-            updatedAt:
-              firebase.firestore.FieldValue
-                .serverTimestamp()
-
-          }
-        );
-
-      }
-    );
-
-
-    currentMatchId =
-      matchId;
-
-
-    /*
-      Listen for match document.
-    */
-
-    subscribeToMatch(
-      matchRef
-    );
-
-  }
-
-
-  /* =======================================================
-     TICKET LISTENER
-  ======================================================= */
-
-  function subscribeToTicket(
-    ticketRef
-  ){
-
-    if(unsubscribeTicket){
-
-      unsubscribeTicket();
-
-    }
-
-
-    unsubscribeTicket =
-      ticketRef.onSnapshot(
-        async function(snapshot){
-
-          if(!snapshot.exists){
-
-            return;
-          }
-
-
-          const data =
-            snapshot.data();
-
-
-          if(
-            data.status ===
-            "matched" &&
-            data.matchId
-          ){
-
-            currentMatchId =
-              data.matchId;
-
-
-            const matchRef =
-              getDB()
-                .collection("matches")
-                .doc(
-                  data.matchId
+      unsubscribe =
+        PlayerDB.db
+          .collection("invitations")
+          .where(
+            "toUid",
+            "==",
+            user.uid
+          )
+          .where(
+            "status",
+            "==",
+            "pending"
+          )
+          .onSnapshot(
+
+            function (snapshot) {
+
+              const invitations =
+                snapshot.docs.map(
+                  function (doc) {
+
+                    return {
+
+                      id:
+                        doc.id,
+
+                      ...doc.data()
+
+                    };
+
+                  }
                 );
 
 
-            subscribeToMatch(
-              matchRef
-            );
-
-          }
-
-        },
-        function(error){
-
-          console.error(
-            "[Matchmaking] Ticket listener:",
-            error
-          );
-
-        }
-      );
-
-  }
-
-
-  /* =======================================================
-     MATCH LISTENER
-  ======================================================= */
-
-  function subscribeToMatch(
-    matchRef
-  ){
-
-    matchRef.onSnapshot(
-      async function(snapshot){
-
-        if(!snapshot.exists){
-
-          return;
-        }
-
-
-        const match =
-          snapshot.data();
-
-
-        if(
-          !match.players ||
-          !Array.isArray(match.players)
-        ){
-
-          return;
-        }
-
-
-        const auth =
-          getAuth();
-
-        const uid =
-          auth.currentUser &&
-          auth.currentUser.uid;
-
-
-        if(
-          !uid ||
-          !match.players.includes(uid)
-        ){
-
-          return;
-        }
-
-
-        const opponentUid =
-          match.players.find(
-            function(id){
-              return id !== uid;
-            }
-          );
-
-
-        let opponent =
-          match.playerData &&
-          match.playerData[
-            opponentUid
-          ];
-
-
-        /*
-          If playerData is missing,
-          load the real Firestore player.
-        */
-
-        if(!opponent){
-
-          const opponentSnapshot =
-            await getDB()
-              .collection("players")
-              .doc(opponentUid)
-              .get();
-
-
-          if(
-            opponentSnapshot.exists
-          ){
-
-            const data =
-              opponentSnapshot.data();
-
-            opponent = {
-
-              uid:
-                opponentUid,
-
-              username:
-                data.username ||
-                "PLAYER"
-
-            };
-
-          }
-
-        }
-
-
-        showMatchFound(
-          player,
-          opponent
-        );
-
-
-        /*
-          Give the UI a moment to display
-          MATCH FOUND before redirect.
-        */
-
-        setTimeout(
-          function(){
-
-            window.location.href =
-              "./game.html?match=" +
-              encodeURIComponent(
-                match.matchId
+              callback(
+                invitations
               );
 
-          },
-          1800
-        );
+            },
 
-      },
-      function(error){
+            function (error) {
 
-        console.error(
-          "[Matchmaking] Match listener:",
-          error
-        );
-
-        showError(
-          error.message ||
-          "Matchmaking error."
-        );
-
-        reset();
-
-      }
-    );
-
-  }
+              console.error(
+                "[BattleMatchmaking] Invitation listener error:",
+                error
+              );
 
 
-  /* =======================================================
-     CANCEL
-  ======================================================= */
+              callback([]);
 
-  Matchmaking.cancel =
-    async function(){
+            }
 
-      if(!searching){
-
-        hideOverlay();
-
-        return;
-
-      }
-
-
-      searching = false;
-
-
-      const auth =
-        getAuth();
-
-      const db =
-        getDB();
-
-
-      if(
-        unsubscribeTicket
-      ){
-
-        unsubscribeTicket();
-
-        unsubscribeTicket =
-          null;
-
-      }
-
-
-      if(
-        auth.currentUser
-      ){
-
-        const ticketRef =
-          db
-            .collection("matchmaking")
-            .doc(
-              auth.currentUser.uid
-            );
-
-
-        try{
-
-          await ticketRef.delete();
-
-        }catch(error){
-
-          /*
-            It is okay if the ticket was already
-            changed by the matchmaking process.
-          */
-
-          console.warn(
-            "[Matchmaking] Ticket cleanup:",
-            error
           );
 
-        }
+    }
+
+
+    /*
+      Listen for authentication changes.
+    */
+
+    const stopAuth =
+      PlayerDB.auth.onAuthStateChanged(
+        startListener
+      );
+
+
+    /*
+      Return one cleanup function.
+    */
+
+    return function () {
+
+      stopAuth();
+
+      if (unsubscribe) {
+
+        unsubscribe();
+
+        unsubscribe = null;
 
       }
-
-
-      currentMatchId =
-        null;
-
-
-      hideOverlay();
-
-
-      dispatch(
-        "battlezone-matchmaking-cancelled"
-      );
 
     };
 
-
-  /* =======================================================
-     RESET
-  ======================================================= */
-
-  function reset(){
-
-    searching = false;
-
-    currentMatchId =
-      null;
-
-    if(unsubscribeTicket){
-
-      unsubscribeTicket();
-
-      unsubscribeTicket =
-        null;
-
-    }
-
-    hideOverlay();
-
-    dispatch(
-      "battlezone-matchmaking-cancelled"
-    );
-
   }
 
 
   /* =======================================================
-     UI
+     FIND MATCH
   ======================================================= */
 
-  function showOverlay(){
+  async function findMatch() {
 
-    const overlay =
-      document.getElementById(
-        "matchmakingOverlay"
-      );
-
-    if(overlay){
-
-      overlay.classList.add(
-        "visible"
-      );
-
-    }
+    const user =
+      PlayerDB.getCurrentUser();
 
 
-    const searchingContent =
-      document.querySelector(
-        ".searching-content"
-      );
+    if (!user) {
 
-    const found =
-      document.querySelector(
-        ".match-found"
-      );
-
-
-    if(searchingContent){
-
-      searchingContent.classList.remove(
-        "hidden"
+      throw new Error(
+        "You are not logged in."
       );
 
     }
 
 
-    if(found){
+    const player =
+      await PlayerDB.getCurrentPlayer();
 
-      found.classList.remove(
-        "visible"
+
+    if (!player) {
+
+      throw new Error(
+        "Your player profile could not be loaded."
       );
 
     }
 
 
-    setStatus(
-      "Searching for an opponent..."
+    /*
+      Basic matchmaking placeholder.
+
+      For now this confirms that the player
+      is authenticated and has a PlayerDB profile.
+
+      A real queue/match system can be added here.
+    */
+
+    console.log(
+      "[BattleMatchmaking] Searching for match:",
+      player.username
     );
 
 
-    const cancel =
-      document.getElementById(
-        "cancelButton"
-      );
-
-
-    if(cancel){
-
-      cancel.onclick =
-        function(){
-
-          Matchmaking.cancel();
-
-        };
-
-    }
-
-  }
-
-
-  function hideOverlay(){
-
-    const overlay =
-      document.getElementById(
-        "matchmakingOverlay"
-      );
-
-    if(overlay){
-
-      overlay.classList.remove(
-        "visible"
-      );
-
-    }
-
-  }
-
-
-  function setStatus(
-    text
-  ){
-
-    const status =
-      document.getElementById(
-        "matchStatus"
-      );
-
-    if(status){
-
-      status.textContent =
-        text;
-
-    }
-
-  }
-
-
-  function showMatchFound(
-    me,
-    opponent
-  ){
-
-    const searchingContent =
-      document.querySelector(
-        ".searching-content"
-      );
-
-    const found =
-      document.querySelector(
-        ".match-found"
-      );
-
-
-    if(searchingContent){
-
-      searchingContent.classList.add(
-        "hidden"
-      );
-
-    }
-
-
-    if(found){
-
-      found.classList.add(
-        "visible"
-      );
-
-    }
-
-
-    const myName =
-      document.getElementById(
-        "myMatchName"
-      );
-
-    const enemyName =
-      document.getElementById(
-        "enemyMatchName"
-      );
-
-    const myAvatar =
-      document.getElementById(
-        "myMatchAvatar"
-      );
-
-    const enemyAvatar =
-      document.getElementById(
-        "enemyMatchAvatar"
-      );
-
-
-    const myUsername =
-      me?.username ||
-      "PLAYER";
-
-
-    const enemyUsername =
-      opponent?.username ||
-      "PLAYER";
-
-
-    if(myName){
-
-      myName.textContent =
-        myUsername;
-
-    }
-
-
-    if(enemyName){
-
-      enemyName.textContent =
-        enemyUsername;
-
-    }
-
-
-    if(myAvatar){
-
-      myAvatar.textContent =
-        initials(
-          myUsername
-        );
-
-    }
-
-
-    if(enemyAvatar){
-
-      enemyAvatar.textContent =
-        initials(
-          enemyUsername
-        );
-
-    }
-
-  }
-
-
-  function initials(
-    name
-  ){
-
-    return String(
-      name || "?"
-    )
-      .trim()
-      .substring(0,2)
-      .toUpperCase();
-
-  }
-
-
-  function showError(
-    message
-  ){
-
-    const box =
-      document.getElementById(
-        "errorBox"
-      );
-
-
-    if(!box){
-      return;
-    }
-
-
-    box.textContent =
-      message;
-
-
-    box.classList.add(
-      "visible"
-    );
-
-
-    setTimeout(
-      function(){
-
-        box.classList.remove(
-          "visible"
-        );
-
-      },
-      5000
-    );
-
-  }
-
-
-  /* =======================================================
-     EVENT
-  ======================================================= */
-
-  function dispatch(
-    name
-  ){
-
-    window.dispatchEvent(
-      new CustomEvent(name)
-    );
+    return null;
 
   }
 
@@ -1194,29 +375,33 @@
      PUBLIC API
   ======================================================= */
 
-  Matchmaking.isSearching =
-    function(){
+  window.BattleMatchmaking = {
 
-      return searching;
+    getRegisteredPlayers:
+      getRegisteredPlayers,
 
-    };
+    sendInvitation:
+      sendInvitation,
 
+    acceptInvitation:
+      acceptInvitation,
 
-  Matchmaking.getMatchId =
-    function(){
+    declineInvitation:
+      declineInvitation,
 
-      return currentMatchId;
+    watchInvitations:
+      watchInvitations,
 
-    };
+    findMatch:
+      findMatch
 
-
-  window.Matchmaking =
-    Matchmaking;
+  };
 
 
   console.log(
-    "[BattleZone] Matchmaking initialized."
+    "[BattleMatchmaking] Initialized."
   );
 
 
 })();
+
