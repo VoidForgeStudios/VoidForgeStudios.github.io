@@ -1,379 +1,477 @@
-// ./js/playerdb.js
+/* =========================================================
+   VoidForge / BattleZone PlayerDB
+   Firebase Auth + Firestore
+   Classic browser script - NO ES MODULES
+========================================================= */
 
-import { initializeApp }
-  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+(function () {
+  "use strict";
 
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.firebasestorage.app",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
 
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-
-// ========================================================
-// FIREBASE CONFIG
-// ========================================================
-//
-// Get this from:
-// Firebase Console
-// → Project settings
-// → Your apps
-// → Web app
-//
-// ========================================================
-
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.firebasestorage.app",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-
-// ========================================================
-// INITIALIZE FIREBASE
-// ========================================================
-
-const app = initializeApp(firebaseConfig);
-
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-
-
-// ========================================================
-// CREATE PLAYER
-// ========================================================
-
-export async function registerPlayer(
-  username,
-  email,
-  password
-) {
-
-  username = String(username).trim();
-  email = String(email).trim().toLowerCase();
-
-  if (!username) {
-    throw new Error("Username is required.");
-  }
-
-  if (!email) {
-    throw new Error("Email is required.");
-  }
-
-  if (password.length < 6) {
-    throw new Error(
-      "Password must contain at least 6 characters."
+  if (!window.firebase) {
+    console.error(
+      "[PlayerDB] Firebase SDK is not loaded."
     );
+    return;
+  }
+
+  let app;
+
+  try {
+    app = firebase.app();
+  } catch (error) {
+    app = firebase.initializeApp(firebaseConfig);
+  }
+
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+
+  /* =======================================================
+     HELPERS
+  ======================================================= */
+
+  function cleanUsername(username) {
+    return String(username || "")
+      .trim()
+      .replace(/\s+/g, " ");
   }
 
 
-  // Create Firebase Authentication account
-  const credential =
-    await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-  const user = credential.user;
+  function normalizeEmail(email) {
+    return String(email || "")
+      .trim()
+      .toLowerCase();
+  }
 
 
-  // Set Firebase display name
-  await updateProfile(user, {
-    displayName: username
-  });
+  function validateUsername(username) {
+
+    if (!username) {
+      throw new Error("Username is required.");
+    }
+
+    if (username.length < 3) {
+      throw new Error(
+        "Username must contain at least 3 characters."
+      );
+    }
+
+    if (username.length > 24) {
+      throw new Error(
+        "Username cannot contain more than 24 characters."
+      );
+    }
+
+    if (!/^[a-zA-Z0-9_ -]+$/.test(username)) {
+      throw new Error(
+        "Username contains invalid characters."
+      );
+    }
+  }
 
 
-  // Create Firestore player document
-  await setDoc(
-    doc(db, "players", user.uid),
-    {
+  /* =======================================================
+     REGISTER
+  ======================================================= */
+
+  async function registerPlayer(
+    username,
+    email,
+    password
+  ) {
+
+    username = cleanUsername(username);
+    email = normalizeEmail(email);
+
+    validateUsername(username);
+
+    if (!email) {
+      throw new Error("Email is required.");
+    }
+
+    if (!password || password.length < 6) {
+      throw new Error(
+        "Password must contain at least 6 characters."
+      );
+    }
+
+
+    const result =
+      await auth.createUserWithEmailAndPassword(
+        email,
+        password
+      );
+
+
+    const user = result.user;
+
+
+    await user.updateProfile({
+      displayName: username
+    });
+
+
+    await db
+      .collection("players")
+      .doc(user.uid)
+      .set({
+
+        uid: user.uid,
+
+        username: username,
+
+        usernameLower:
+          username.toLowerCase(),
+
+        email: email,
+
+        level: 1,
+
+        xp: 0,
+
+        vbucks: 2850,
+
+        wins: 0,
+
+        matches: 0,
+
+        kills: 0,
+
+        createdAt:
+          firebase.firestore.FieldValue
+            .serverTimestamp(),
+
+        lastLogin:
+          firebase.firestore.FieldValue
+            .serverTimestamp()
+      });
+
+
+    return {
       uid: user.uid,
       username: username,
-      email: email,
+      email: email
+    };
+  }
 
-      level: 1,
-      xp: 0,
 
-      createdAt: serverTimestamp(),
-      lastLogin: serverTimestamp()
+  /* =======================================================
+     LOGIN
+  ======================================================= */
+
+  async function loginPlayer(
+    email,
+    password
+  ) {
+
+    email = normalizeEmail(email);
+
+    if (!email || !password) {
+      throw new Error(
+        "Email and password are required."
+      );
     }
-  );
 
 
-  return {
-    uid: user.uid,
-    username: username,
-    email: email
-  };
-}
+    const result =
+      await auth.signInWithEmailAndPassword(
+        email,
+        password
+      );
 
 
-// ========================================================
-// LOGIN
-// ========================================================
-//
-// Your index.html can call:
-//
-// await loginPlayer(email, password)
-//
-// ========================================================
+    const user = result.user;
 
-export async function loginPlayer(
-  email,
-  password
-) {
 
-  email = String(email).trim().toLowerCase();
+    const ref =
+      db
+        .collection("players")
+        .doc(user.uid);
 
-  if (!email || !password) {
-    throw new Error(
-      "Email and password are required."
+
+    const snapshot =
+      await ref.get();
+
+
+    let player;
+
+
+    if (snapshot.exists) {
+
+      player = snapshot.data();
+
+
+      await ref.set(
+        {
+          lastLogin:
+            firebase.firestore.FieldValue
+              .serverTimestamp()
+        },
+        {
+          merge: true
+        }
+      );
+
+    } else {
+
+      player = {
+
+        uid: user.uid,
+
+        username:
+          user.displayName || "PLAYER",
+
+        email: user.email,
+
+        level: 1,
+
+        xp: 0,
+
+        vbucks: 2850,
+
+        wins: 0,
+
+        matches: 0,
+
+        kills: 0
+      };
+
+
+      await ref.set({
+
+        ...player,
+
+        createdAt:
+          firebase.firestore.FieldValue
+            .serverTimestamp(),
+
+        lastLogin:
+          firebase.firestore.FieldValue
+            .serverTimestamp()
+      });
+    }
+
+
+    return player;
+  }
+
+
+  /* =======================================================
+     CURRENT PLAYER
+  ======================================================= */
+
+  async function getCurrentPlayer() {
+
+    const user = auth.currentUser;
+
+
+    if (!user) {
+      return null;
+    }
+
+
+    const snapshot =
+      await db
+        .collection("players")
+        .doc(user.uid)
+        .get();
+
+
+    if (!snapshot.exists) {
+
+      return {
+
+        uid: user.uid,
+
+        username:
+          user.displayName || "PLAYER",
+
+        email: user.email
+      };
+    }
+
+
+    return snapshot.data();
+  }
+
+
+  /* =======================================================
+     CURRENT USER
+  ======================================================= */
+
+  function getCurrentUser() {
+    return auth.currentUser;
+  }
+
+
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
+
+  async function logoutPlayer() {
+    await auth.signOut();
+  }
+
+
+  /* =======================================================
+     AUTH STATE
+  ======================================================= */
+
+  function watchPlayer(callback) {
+
+    return auth.onAuthStateChanged(
+      async function (user) {
+
+        if (!user) {
+
+          callback(null);
+
+          return;
+        }
+
+
+        try {
+
+          const player =
+            await getCurrentPlayer();
+
+          callback(player);
+
+        } catch (error) {
+
+          console.error(
+            "[PlayerDB] Error loading player:",
+            error
+          );
+
+
+          callback({
+
+            uid: user.uid,
+
+            username:
+              user.displayName || "PLAYER",
+
+            email: user.email
+          });
+        }
+      }
     );
   }
 
 
-  const credential =
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+  /* =======================================================
+     UPDATE PLAYER
+  ======================================================= */
 
-  const user = credential.user;
+  async function updatePlayer(updates) {
 
-
-  // Get player profile
-  const playerRef =
-    doc(db, "players", user.uid);
-
-  const playerSnap =
-    await getDoc(playerRef);
+    const user = auth.currentUser;
 
 
-  let username =
-    user.displayName || "PLAYER";
-
-
-  if (playerSnap.exists()) {
-
-    const data =
-      playerSnap.data();
-
-    if (data.username) {
-      username = data.username;
+    if (!user) {
+      throw new Error(
+        "You are not logged in."
+      );
     }
 
 
-    // Update last login
-    await setDoc(
-      playerRef,
-      {
-        lastLogin: serverTimestamp()
-      },
+    const ref =
+      db
+        .collection("players")
+        .doc(user.uid);
+
+
+    const data = {
+      ...updates,
+
+      updatedAt:
+        firebase.firestore.FieldValue
+          .serverTimestamp()
+    };
+
+
+    if (updates.username) {
+
+      const username =
+        cleanUsername(
+          updates.username
+        );
+
+
+      validateUsername(username);
+
+
+      await user.updateProfile({
+        displayName: username
+      });
+
+
+      data.username = username;
+
+      data.usernameLower =
+        username.toLowerCase();
+    }
+
+
+    await ref.set(
+      data,
       {
         merge: true
       }
     );
 
+
+    return getCurrentPlayer();
   }
 
 
-  return {
-    uid: user.uid,
-    username: username,
-    email: user.email
+  /* =======================================================
+     PUBLIC API
+  ======================================================= */
+
+  window.PlayerDB = {
+
+    app: app,
+
+    auth: auth,
+
+    db: db,
+
+    registerPlayer:
+      registerPlayer,
+
+    loginPlayer:
+      loginPlayer,
+
+    getCurrentPlayer:
+      getCurrentPlayer,
+
+    getCurrentUser:
+      getCurrentUser,
+
+    logoutPlayer:
+      logoutPlayer,
+
+    watchPlayer:
+      watchPlayer,
+
+    updatePlayer:
+      updatePlayer
   };
-}
 
 
-// ========================================================
-// GET CURRENT PLAYER
-// ========================================================
-
-export async function getCurrentPlayer() {
-
-  const user = auth.currentUser;
-
-  if (!user) {
-    return null;
-  }
-
-
-  const playerRef =
-    doc(db, "players", user.uid);
-
-  const playerSnap =
-    await getDoc(playerRef);
-
-
-  if (!playerSnap.exists()) {
-
-    return {
-      uid: user.uid,
-      username:
-        user.displayName || "PLAYER",
-      email: user.email
-    };
-
-  }
-
-
-  return {
-    uid: user.uid,
-    ...playerSnap.data()
-  };
-}
-
-
-// ========================================================
-// GET CURRENT FIREBASE USER
-// ========================================================
-
-export function getCurrentUser() {
-  return auth.currentUser;
-}
-
-
-// ========================================================
-// LOGOUT
-// ========================================================
-
-export async function logoutPlayer() {
-
-  await signOut(auth);
-
-}
-
-
-// ========================================================
-// AUTH STATE LISTENER
-// ========================================================
-
-export function watchPlayer(callback) {
-
-  return onAuthStateChanged(
-    auth,
-    async user => {
-
-      if (!user) {
-        callback(null);
-        return;
-      }
-
-
-      try {
-
-        const player =
-          await getCurrentPlayer();
-
-        callback(player);
-
-      } catch (error) {
-
-        console.error(
-          "Failed to load player:",
-          error
-        );
-
-        callback({
-          uid: user.uid,
-          username:
-            user.displayName || "PLAYER",
-          email: user.email
-        });
-
-      }
-
-    }
-  );
-}
-
-
-// ========================================================
-// UPDATE PLAYER PROFILE
-// ========================================================
-
-export async function updatePlayer(
-  updates
-) {
-
-  const user = auth.currentUser;
-
-  if (!user) {
-    throw new Error(
-      "You are not logged in."
-    );
-  }
-
-
-  const playerRef =
-    doc(db, "players", user.uid);
-
-
-  await setDoc(
-    playerRef,
-    {
-      ...updates,
-      updatedAt: serverTimestamp()
-    },
-    {
-      merge: true
-    }
+  console.log(
+    "[PlayerDB] Firebase PlayerDB initialized."
   );
 
-
-  if (updates.username) {
-
-    await updateProfile(user, {
-      displayName: updates.username
-    });
-
-  }
-
-
-  return getCurrentPlayer();
-}
-
-
-// ========================================================
-// CHECK USERNAME
-// ========================================================
-//
-// Useful when creating accounts.
-// ========================================================
-
-export async function usernameExists(
-  username
-) {
-
-  username =
-    String(username)
-      .trim()
-      .toLowerCase();
-
-
-  // This requires a Firestore query if you want
-  // globally unique usernames.
-  //
-  // For now this function returns false.
-  //
-  // We can add a usernames collection for proper
-  // uniqueness.
-
-  return false;
-}
+})();
