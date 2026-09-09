@@ -1,10 +1,10 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07101e">
+
 <title>BattleZone</title>
 
 <style>
@@ -16,42 +16,20 @@
 
 html,
 body{
-  margin:0;
   width:100%;
   height:100%;
+  margin:0;
   overflow:hidden;
-  font-family:'Barlow Condensed',Arial,sans-serif;
-  color:#fff;
-  background:#07101e;
 }
 
 body{
-  user-select:none;
-}
-
-button,
-input{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-/* =========================================================
-   BACKGROUND
-========================================================= */
-
-.app{
-  position:fixed;
-  inset:0;
-  overflow:hidden;
-
+  font-family:'Barlow Condensed',Arial,sans-serif;
+  color:white;
   background:
     radial-gradient(
-      circle at 70% 30%,
-      rgba(255,225,170,.38),
-      transparent 25%
+      circle at 68% 35%,
+      rgba(255,225,170,.35),
+      transparent 22%
     ),
     linear-gradient(
       135deg,
@@ -61,20 +39,48 @@ button{
     );
 }
 
-.app:before{
+button{
+  font:inherit;
+}
+
+button:disabled{
+  cursor:not-allowed;
+}
+
+.background{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(52,126,220,.22),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255,180,100,.22),
+      transparent 30%
+    );
+}
+
+.background::after{
   content:"";
   position:absolute;
   inset:0;
-
   background:
     linear-gradient(
       180deg,
-      rgba(0,0,0,.45),
+      rgba(0,0,0,.42),
       transparent 35%,
-      rgba(0,0,0,.5)
+      rgba(0,0,0,.45)
     );
+}
 
-  pointer-events:none;
+.menu{
+  width:100%;
+  height:100%;
+  position:relative;
 }
 
 /* =========================================================
@@ -82,24 +88,19 @@ button{
 ========================================================= */
 
 .top{
-  position:absolute;
-  z-index:20;
-  top:0;
-  left:0;
-  right:0;
-
   height:82px;
-
   display:flex;
   align-items:center;
-
   padding:0 28px;
 
   background:
     linear-gradient(
-      rgba(5,12,25,.94),
-      transparent
+      rgba(5,12,25,.95),
+      rgba(5,12,25,0)
     );
+
+  position:relative;
+  z-index:5;
 }
 
 .logo{
@@ -107,9 +108,7 @@ button{
   font-weight:900;
   font-style:italic;
   letter-spacing:1px;
-
-  text-shadow:
-    3px 4px #111;
+  text-shadow:3px 4px #111;
 }
 
 .logo span{
@@ -118,8 +117,8 @@ button{
 
 nav{
   display:flex;
+  margin-left:45px;
   gap:5px;
-  margin-left:40px;
 }
 
 nav button{
@@ -128,25 +127,26 @@ nav button{
 
   color:white;
   background:transparent;
-
   border:0;
 
   font-size:18px;
   font-weight:900;
 
+  cursor:pointer;
+
   transform:skew(-5deg);
 
   transition:
     background .2s,
-    color .2s;
+    transform .2s;
 }
 
-nav button:hover,
-nav button.active{
-  background:#ffffff1c;
+nav button:hover{
+  background:#ffffff18;
 }
 
 nav button.active{
+  background:#ffffff18;
   border-bottom:4px solid #ffd42e;
 }
 
@@ -159,13 +159,10 @@ nav button.active{
 }
 
 .vbucks{
-  padding:9px 14px;
-
   background:#07101dcc;
   border:1px solid #ffffff45;
-
+  padding:9px 14px;
   border-radius:5px;
-
   font-weight:800;
 }
 
@@ -176,12 +173,12 @@ nav button.active{
   width:20px;
   height:20px;
 
-  margin-right:5px;
-
   border-radius:50%;
 
   background:#62d8ff;
   color:#16466d;
+
+  margin-right:5px;
 }
 
 .avatar{
@@ -209,8 +206,6 @@ nav button.active{
 
 .center{
   position:absolute;
-  z-index:2;
-
   inset:82px 0 0;
 
   display:grid;
@@ -220,7 +215,7 @@ nav button.active{
 }
 
 .content{
-  margin-top:-20px;
+  margin-top:-30px;
 }
 
 .eyebrow{
@@ -229,7 +224,7 @@ nav button.active{
   font-weight:800;
 }
 
-.hero-title{
+.title{
   font-size:clamp(70px,11vw,155px);
   line-height:.8;
 
@@ -261,8 +256,9 @@ nav button.active{
 
   font-size:29px;
   font-weight:900;
-
   letter-spacing:2px;
+
+  cursor:pointer;
 
   clip-path:
     polygon(
@@ -282,13 +278,16 @@ nav button.active{
   transform:translateY(-2px);
 }
 
+.play:disabled{
+  opacity:.65;
+}
+
 /* =========================================================
-   BOTTOM PROFILE
+   BOTTOM
 ========================================================= */
 
 .bottom{
   position:absolute;
-  z-index:10;
 
   left:24px;
   right:24px;
@@ -297,6 +296,8 @@ nav button.active{
   display:flex;
   justify-content:space-between;
   align-items:end;
+
+  z-index:5;
 }
 
 .profile{
@@ -304,13 +305,11 @@ nav button.active{
   gap:12px;
   align-items:center;
 
-  padding:10px 15px;
-
   background:#07101dcc;
 
-  border:1px solid #ffffff30;
+  padding:10px 15px;
 
-  backdrop-filter:blur(8px);
+  border:1px solid #ffffff30;
 }
 
 .pfp{
@@ -342,14 +341,12 @@ nav button.active{
 }
 
 .news{
-  padding:10px 18px;
-
   background:#07101dcc;
   border:1px solid #ffffff30;
 
-  text-align:center;
+  padding:10px 18px;
 
-  backdrop-filter:blur(8px);
+  text-align:center;
 }
 
 .news b{
@@ -362,157 +359,200 @@ nav button.active{
 }
 
 /* =========================================================
-   PANEL
+   MATCHMAKING OVERLAY
 ========================================================= */
 
-.panel{
+#matchmakingOverlay{
   position:fixed;
-  z-index:50;
+  inset:0;
 
-  top:95px;
-  right:25px;
+  z-index:100;
 
-  width:min(420px,calc(100vw - 30px));
+  display:none;
+  align-items:center;
+  justify-content:center;
 
-  max-height:
-    calc(100vh - 125px);
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(45,91,145,.88),
+      rgba(3,9,19,.97)
+    );
 
-  overflow:auto;
+  backdrop-filter:blur(12px);
+}
 
-  padding:20px;
+#matchmakingOverlay.visible{
+  display:flex;
+}
+
+.match-card{
+  width:min(520px,92vw);
+
+  padding:35px;
+
+  text-align:center;
 
   background:
     rgba(5,13,27,.94);
 
-  border:1px solid #ffffff25;
+  border:1px solid rgba(255,255,255,.2);
 
   box-shadow:
-    0 20px 70px #0008;
-
-  backdrop-filter:blur(18px);
-
-  transform:
-    translateX(110%);
-
-  opacity:0;
-  pointer-events:none;
-
-  transition:
-    transform .35s ease,
-    opacity .35s ease;
+    0 30px 100px rgba(0,0,0,.55),
+    inset 0 1px rgba(255,255,255,.07);
 }
 
-.panel.open{
-  transform:translateX(0);
-  opacity:1;
-  pointer-events:auto;
+.match-logo{
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:4px;
+  opacity:.7;
 }
 
-.panel-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.match-title{
+  margin:10px 0 5px;
 
-  margin-bottom:15px;
-}
-
-.panel-title h3{
-  margin:0;
-
-  font-size:30px;
+  font-size:48px;
   font-weight:900;
   font-style:italic;
 }
 
-.close{
-  width:35px;
-  height:35px;
+.match-status{
+  min-height:27px;
 
-  border:1px solid #ffffff25;
-  background:#ffffff10;
-  color:white;
+  color:#a9b8ce;
 
-  font-size:20px;
+  font-size:17px;
 }
 
-/* =========================================================
-   SEARCH
-========================================================= */
+.search-animation{
+  width:80px;
+  height:80px;
 
-.search{
-  display:flex;
-  gap:8px;
+  margin:30px auto;
 
-  margin-bottom:15px;
+  border:5px solid #ffffff20;
+  border-top-color:#ffd02f;
+  border-radius:50%;
+
+  animation:spin 1s linear infinite;
 }
 
-.search input{
-  flex:1;
-
-  min-width:0;
-
-  height:46px;
-
-  padding:0 12px;
-
-  color:white;
-
-  background:#111d31;
-
-  border:1px solid #ffffff20;
-
-  outline:none;
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
 }
 
-.search input:focus{
-  border-color:#ffd02f;
+.match-progress{
+  width:100%;
+  height:5px;
+
+  margin-top:20px;
+
+  background:#ffffff15;
+  overflow:hidden;
 }
 
-.search button{
-  padding:0 15px;
+.match-progress::before{
+  content:"";
 
-  border:0;
+  display:block;
+
+  width:40%;
+  height:100%;
 
   background:#ffd02f;
-  color:#172139;
 
-  font-weight:900;
+  animation:
+    searching 1.2s infinite ease-in-out;
+}
+
+@keyframes searching{
+  0%{
+    transform:translateX(-120%);
+  }
+
+  50%{
+    transform:translateX(150%);
+  }
+
+  100%{
+    transform:translateX(300%);
+  }
+}
+
+.cancel{
+  margin-top:30px;
+
+  padding:12px 30px;
+
+  background:#ffffff0d;
+
+  color:white;
+
+  border:1px solid #ffffff40;
+
+  font-size:18px;
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+.cancel:hover{
+  background:#ffffff18;
 }
 
 /* =========================================================
-   PLAYER LIST
+   MATCH FOUND
 ========================================================= */
 
-.player-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+.match-found{
+  display:none;
 }
 
-.player{
+.match-found.visible{
+  display:block;
+}
+
+.searching-content.hidden{
+  display:none;
+}
+
+.match-found-title{
+  color:#ffd02f;
+
+  font-size:54px;
+  font-weight:900;
+  font-style:italic;
+
+  text-shadow:3px 4px #000;
+}
+
+.players{
+  margin:25px 0;
+
   display:flex;
   align-items:center;
-  gap:10px;
-
-  padding:10px;
-
-  background:#ffffff08;
-
-  border:1px solid #ffffff12;
-
-  transition:
-    background .2s;
+  justify-content:center;
+  gap:20px;
 }
 
-.player:hover{
-  background:#ffffff15;
+.player-card{
+  min-width:150px;
+
+  padding:15px;
+
+  background:#ffffff0b;
+  border:1px solid #ffffff20;
 }
 
 .player-avatar{
-  width:40px;
-  height:40px;
+  width:55px;
+  height:55px;
 
-  flex:none;
+  margin:auto;
 
   display:grid;
   place-items:center;
@@ -524,182 +564,63 @@ nav button.active{
       #d99a71
     );
 
-  font-weight:900;
-}
+  border:2px solid white;
 
-.player-info{
-  flex:1;
-  min-width:0;
+  font-size:22px;
+  font-weight:900;
 }
 
 .player-name{
-  overflow:hidden;
+  margin-top:10px;
 
-  white-space:nowrap;
-  text-overflow:ellipsis;
-
-  font-size:18px;
-  font-weight:900;
-}
-
-.player-level{
-  color:#8292aa;
-  font-size:13px;
-}
-
-.invite{
-  padding:8px 12px;
-
-  border:0;
-
-  background:#ffd02f;
-  color:#172139;
-
-  font-weight:900;
-}
-
-.invite:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-.empty{
-  padding:25px;
-
-  text-align:center;
-
-  color:#8494ad;
-}
-
-/* =========================================================
-   INVITATIONS
-========================================================= */
-
-.invitation{
-  padding:12px;
-
-  margin-bottom:8px;
-
-  background:#ffffff08;
-
-  border:1px solid #ffffff15;
-}
-
-.invitation-name{
   font-size:19px;
   font-weight:900;
+
+  word-break:break-word;
 }
 
-.invitation-actions{
-  display:flex;
-  gap:8px;
-
-  margin-top:10px;
-}
-
-.accept,
-.decline{
-  flex:1;
-
-  height:38px;
-
-  border:0;
-
+.vs{
+  font-size:28px;
   font-weight:900;
-}
-
-.accept{
-  background:#ffd02f;
-  color:#172139;
-}
-
-.decline{
-  background:#ffffff12;
-  color:white;
+  color:#ffd02f;
 }
 
 /* =========================================================
-   TOAST
+   ERROR TOAST
 ========================================================= */
 
-.toast{
+#errorBox{
   position:fixed;
-  z-index:100;
 
   left:50%;
-  bottom:35px;
+  bottom:30px;
 
   transform:
-    translate(-50%,30px);
+    translate(-50%,20px);
 
-  opacity:0;
-  pointer-events:none;
+  z-index:200;
+
+  max-width:90vw;
 
   padding:13px 20px;
 
-  background:#07101eec;
+  background:#9e2424e8;
 
-  border:1px solid #ffffff25;
+  border:1px solid #ff8585;
 
-  box-shadow:0 10px 35px #0008;
-
-  font-weight:800;
+  opacity:0;
+  pointer-events:none;
 
   transition:
     opacity .3s,
     transform .3s;
 }
 
-.toast.show{
+#errorBox.visible{
   opacity:1;
+
   transform:
     translate(-50%,0);
-}
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.loading{
-  position:fixed;
-  z-index:200;
-
-  inset:0;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  background:#07101e;
-}
-
-.loading.hidden{
-  display:none;
-}
-
-.loader-content{
-  text-align:center;
-}
-
-.loader-logo{
-  font-size:60px;
-
-  font-weight:900;
-  font-style:italic;
-
-  text-shadow:4px 5px #000;
-}
-
-.loader-logo span{
-  color:#ffd02f;
-}
-
-.loader-text{
-  margin-top:10px;
-
-  color:#8292aa;
-
-  letter-spacing:3px;
 }
 
 /* =========================================================
@@ -708,17 +629,16 @@ nav button.active{
 
 @media(max-width:750px){
 
+  nav{
+    display:none;
+  }
+
   .top{
-    height:70px;
-    padding:0 12px;
+    padding:0 14px;
   }
 
   .logo{
     font-size:24px;
-  }
-
-  nav{
-    display:none;
   }
 
   .vbucks{
@@ -731,20 +651,16 @@ nav button.active{
     height:37px;
   }
 
-  .center{
-    inset:70px 0 0;
-  }
-
   .eyebrow{
     font-size:16px;
   }
 
-  .hero-title{
-    font-size:65px;
-  }
-
   .tagline{
     font-size:17px;
+  }
+
+  .title{
+    font-size:65px;
   }
 
   .play{
@@ -752,25 +668,37 @@ nav button.active{
     padding:13px 45px;
   }
 
-  .bottom{
-    left:12px;
-    right:12px;
-    bottom:12px;
-  }
-
   .news{
     display:none;
   }
 
-  .panel{
-    top:78px;
-    right:10px;
+  .bottom{
+    left:12px;
+    right:12px;
+  }
 
-    width:
-      calc(100vw - 20px);
+  .match-card{
+    padding:25px 18px;
+  }
 
-    max-height:
-      calc(100vh - 90px);
+  .match-title{
+    font-size:38px;
+  }
+
+  .match-found-title{
+    font-size:42px;
+  }
+
+  .players{
+    gap:8px;
+  }
+
+  .player-card{
+    min-width:120px;
+  }
+
+  .vs{
+    font-size:20px;
   }
 }
 </style>
@@ -778,34 +706,9 @@ nav button.active{
 
 <body>
 
-<!-- =======================================================
-     LOADING
-======================================================= -->
+<div class="background"></div>
 
-<div id="loading" class="loading">
-
-  <div class="loader-content">
-
-    <div class="loader-logo">
-      BATTLE<span>ZONE</span>
-    </div>
-
-    <div class="loader-text">
-      LOADING PLAYER PROFILE...
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =======================================================
-     APP
-======================================================= -->
-
-<div class="app">
-
-  <!-- TOP -->
+<div class="menu">
 
   <header class="top">
 
@@ -815,23 +718,23 @@ nav button.active{
 
     <nav>
 
-      <button class="active" data-page="play">
+      <button class="active">
         PLAY
       </button>
 
-      <button data-page="locker">
+      <button>
         LOCKER
       </button>
 
-      <button data-page="shop">
+      <button>
         SHOP
       </button>
 
-      <button data-page="battlepass">
+      <button>
         BATTLE PASS
       </button>
 
-      <button data-page="quests">
+      <button>
         QUESTS
       </button>
 
@@ -841,10 +744,14 @@ nav button.active{
 
       <div class="vbucks">
         <span class="coin">V</span>
-        <span id="topVbucks">0</span>
+        <span id="vbucks">
+          2,850
+        </span>
       </div>
 
-      <div id="topAvatar" class="avatar">
+      <div
+        id="avatar"
+        class="avatar">
         ?
       </div>
 
@@ -852,8 +759,6 @@ nav button.active{
 
   </header>
 
-
-  <!-- CENTER -->
 
   <main class="center">
 
@@ -863,7 +768,7 @@ nav button.active{
         CHAPTER 2 • SEASON 9
       </div>
 
-      <div class="hero-title">
+      <div class="title">
         BATTLE<br>
         ROYAL
       </div>
@@ -872,7 +777,9 @@ nav button.active{
         DROP IN. SURVIVE. CONQUER.
       </div>
 
-      <button id="playButton" class="play">
+      <button
+        id="playButton"
+        class="play">
         PLAY
       </button>
 
@@ -881,23 +788,27 @@ nav button.active{
   </main>
 
 
-  <!-- BOTTOM -->
-
   <footer class="bottom">
 
     <div class="profile">
 
-      <div id="bottomAvatar" class="pfp">
+      <div
+        id="profileAvatar"
+        class="pfp">
         ?
       </div>
 
       <div>
 
-        <div id="playerName" class="name">
+        <div
+          id="profileName"
+          class="name">
           LOADING...
         </div>
 
-        <div id="playerLevel" class="level">
+        <div
+          id="profileLevel"
+          class="level">
           LEVEL 1
         </div>
 
@@ -909,11 +820,11 @@ nav button.active{
     <div class="news">
 
       <b>
-        SEASON UPDATE
+        ONLINE SERVICES
       </b>
 
       <small>
-        New challenges are waiting.
+        Matchmaking system online.
       </small>
 
     </div>
@@ -924,104 +835,128 @@ nav button.active{
 
 
 <!-- =======================================================
-     PLAYER PANEL
+     MATCHMAKING
 ======================================================= -->
 
-<section id="playersPanel" class="panel">
+<div id="matchmakingOverlay">
 
-  <div class="panel-title">
+  <div class="match-card">
 
-    <h3>
-      PLAYERS
-    </h3>
+    <div class="searching-content">
 
-    <button class="close" data-close="playersPanel">
-      ×
-    </button>
+      <div class="match-logo">
+        BATTLEZONE
+      </div>
 
-  </div>
+      <div class="match-title">
+        FINDING MATCH
+      </div>
 
-  <div class="search">
+      <div
+        id="matchStatus"
+        class="match-status">
+        Searching for an opponent...
+      </div>
 
-    <input
-      id="playerSearch"
-      type="text"
-      placeholder="Search username..."
-      autocomplete="off"
-    >
+      <div class="search-animation"></div>
 
-    <button id="searchButton">
-      SEARCH
-    </button>
+      <div class="match-progress"></div>
 
-  </div>
+      <button
+        id="cancelButton"
+        class="cancel">
+        CANCEL
+      </button>
 
-  <div id="playerList" class="player-list">
+    </div>
 
-    <div class="empty">
-      Loading PlayerDB...
+
+    <div class="match-found">
+
+      <div class="match-found-title">
+        MATCH FOUND
+      </div>
+
+      <div class="match-status">
+        Preparing battle...
+      </div>
+
+      <div class="players">
+
+        <div class="player-card">
+
+          <div
+            id="myMatchAvatar"
+            class="player-avatar">
+            ?
+          </div>
+
+          <div
+            id="myMatchName"
+            class="player-name">
+            PLAYER
+          </div>
+
+        </div>
+
+        <div class="vs">
+          VS
+        </div>
+
+        <div class="player-card">
+
+          <div
+            id="enemyMatchAvatar"
+            class="player-avatar">
+            ?
+          </div>
+
+          <div
+            id="enemyMatchName"
+            class="player-name">
+            PLAYER
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
 
   </div>
 
-</section>
+</div>
+
+
+<div
+  id="errorBox"
+  aria-live="polite">
+</div>
 
 
 <!-- =======================================================
-     INVITATIONS PANEL
-======================================================= -->
-
-<section id="invitePanel" class="panel">
-
-  <div class="panel-title">
-
-    <h3>
-      INVITATIONS
-    </h3>
-
-    <button class="close" data-close="invitePanel">
-      ×
-    </button>
-
-  </div>
-
-  <div id="invitationList">
-
-    <div class="empty">
-      Loading invitations...
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =======================================================
-     TOAST
-======================================================= -->
-
-<div id="toast" class="toast"></div>
-
-
-<!-- =======================================================
-     FIREBASE
+     FIREBASE COMPAT SDK
 ======================================================= -->
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-
-<!-- IMPORTANT:
-     playerdb.js is a CLASSIC SCRIPT.
-     Do NOT use type="module".
--->
-
-<script src="./js/playerdb.js"></script>
 
 
 <!-- =======================================================
-     MAIN APPLICATION
+     YOUR PLAYER DATABASE
 ======================================================= -->
+
+<script src="./js/playerdb.js"></script>
+
+<!-- =======================================================
+     MATCHMAKING
+======================================================= -->
+
+<script src="./js/matchmaking.js"></script>
+
 
 <script>
 
@@ -1029,759 +964,232 @@ nav button.active{
 
 
 /* =========================================================
-   STATE
-========================================================= */
-
-let currentPlayer = null;
-let allPlayers = [];
-
-
-/* =========================================================
    ELEMENTS
 ========================================================= */
 
-const loading =
-  document.getElementById("loading");
+const playButton =
+  document.getElementById("playButton");
 
-const playerName =
-  document.getElementById("playerName");
+const profileName =
+  document.getElementById("profileName");
 
-const playerLevel =
-  document.getElementById("playerLevel");
+const profileLevel =
+  document.getElementById("profileLevel");
 
-const topVbucks =
-  document.getElementById("topVbucks");
+const avatar =
+  document.getElementById("avatar");
 
-const topAvatar =
-  document.getElementById("topAvatar");
+const profileAvatar =
+  document.getElementById("profileAvatar");
 
-const bottomAvatar =
-  document.getElementById("bottomAvatar");
-
-const playersPanel =
-  document.getElementById("playersPanel");
-
-const invitePanel =
-  document.getElementById("invitePanel");
-
-const playerList =
-  document.getElementById("playerList");
-
-const invitationList =
-  document.getElementById("invitationList");
-
-const playerSearch =
-  document.getElementById("playerSearch");
-
-const toast =
-  document.getElementById("toast");
+const vbucks =
+  document.getElementById("vbucks");
 
 
 /* =========================================================
-   TOAST
+   HELPERS
 ========================================================= */
 
-let toastTimer;
+function initials(name){
 
-function showToast(message){
+  name =
+    String(name || "?").trim();
 
-  toast.textContent =
-    message;
-
-  toast.classList.add("show");
-
-  clearTimeout(toastTimer);
-
-  toastTimer =
-    setTimeout(
-      () => toast.classList.remove("show"),
-      2800
-    );
-}
-
-
-/* =========================================================
-   DISPLAY PLAYER
-========================================================= */
-
-function displayPlayer(player){
-
-  if(!player){
-    return;
+  if(!name){
+    return "?";
   }
 
-  currentPlayer =
-    player;
-
-
-  const username =
-    player.username ||
-    player.displayName ||
-    "PLAYER";
-
-
-  const level =
-    Number(player.level || 1);
-
-
-  const vbucks =
-    Number(player.vbucks || 0);
-
-
-  const letter =
-    username
-      .charAt(0)
-      .toUpperCase();
-
-
-  playerName.textContent =
-    username;
-
-
-  playerLevel.textContent =
-    "LEVEL " + level;
-
-
-  topVbucks.textContent =
-    vbucks.toLocaleString();
-
-
-  topAvatar.textContent =
-    letter;
-
-
-  bottomAvatar.textContent =
-    letter;
+  return name
+    .substring(0,2)
+    .toUpperCase();
 }
 
 
 /* =========================================================
-   LOAD CURRENT PLAYER
+   LOAD REAL PLAYER
 ========================================================= */
 
-async function loadCurrentPlayer(){
+if(
+  !window.PlayerDB ||
+  typeof PlayerDB.watchPlayer !== "function"
+){
 
-  try{
+  console.error(
+    "[BattleZone] PlayerDB is unavailable."
+  );
 
-    /*
-      Wait for Firebase authentication.
-    */
+}else{
 
-    const player =
-      await new Promise(
-        function(resolve,reject){
+  PlayerDB.watchPlayer(
+    function(player){
 
-          let finished = false;
+      if(!player){
 
-          const unsubscribe =
-            PlayerDB.auth.onAuthStateChanged(
-              async function(user){
+        /*
+          Not authenticated.
 
-                if(finished){
-                  return;
-                }
-
-                finished = true;
-
-                unsubscribe();
-
-                if(!user){
-
-                  reject(
-                    new Error(
-                      "You are not logged in."
-                    )
-                  );
-
-                  return;
-                }
-
-                try{
-
-                  const data =
-                    await PlayerDB.getCurrentPlayer();
-
-                  resolve(data);
-
-                }catch(error){
-
-                  reject(error);
-                }
-
-              }
-            );
-
-        }
-      );
-
-
-    if(!player){
-
-      throw new Error(
-        "Player profile not found."
-      );
-    }
-
-
-    displayPlayer(player);
-
-
-    /*
-      Make sure URL username is synchronized
-      with the actual Firebase PlayerDB username.
-    */
-
-    const expected =
-      encodeURIComponent(
-        player.username || ""
-      );
-
-
-    const currentUrl =
-      new URL(
-        window.location.href
-      );
-
-
-    if(
-      player.username &&
-      currentUrl.searchParams.get("user") !==
-      player.username
-    ){
-
-      currentUrl.searchParams.set(
-        "user",
-        player.username
-      );
-
-      window.history.replaceState(
-        {},
-        "",
-        currentUrl.toString()
-      );
-    }
-
-
-    loading.classList.add("hidden");
-
-
-    /*
-      Load invitations after login.
-    */
-
-    loadInvitations();
-
-  }catch(error){
-
-    console.error(
-      "[BattleZone]",
-      error
-    );
-
-
-    loading.querySelector(".loader-text")
-      .textContent =
-      "LOGIN REQUIRED";
-
-
-    setTimeout(
-      function(){
+          Return to login.
+        */
 
         window.location.href =
           "./index.html";
 
-      },
-      1500
-    );
-  }
-}
-
-
-/* =========================================================
-   LOAD PLAYERS
-========================================================= */
-
-async function loadPlayers(){
-
-  playerList.innerHTML =
-    '<div class="empty">Loading PlayerDB...</div>';
-
-
-  try{
-
-    allPlayers =
-      await PlayerDB.getPlayers();
-
-
-    renderPlayers(
-      playerSearch.value
-    );
-
-  }catch(error){
-
-    console.error(
-      "[BattleZone] PlayerDB error:",
-      error
-    );
-
-
-    playerList.innerHTML =
-      '<div class="empty">Unable to load players.</div>';
-  }
-}
-
-
-/* =========================================================
-   RENDER PLAYERS
-========================================================= */
-
-function renderPlayers(search){
-
-  search =
-    String(search || "")
-      .trim()
-      .toLowerCase();
-
-
-  const filtered =
-    allPlayers.filter(
-      function(player){
-
-        if(
-          !player ||
-          !player.username
-        ){
-          return false;
-        }
-
-
-        /*
-          Never show the current player
-          in the invitation list.
-        */
-
-        if(
-          currentPlayer &&
-          player.uid === currentPlayer.uid
-        ){
-          return false;
-        }
-
-
-        if(!search){
-          return true;
-        }
-
-
-        return player.username
-          .toLowerCase()
-          .includes(search);
+        return;
       }
-    );
 
 
-  if(!filtered.length){
-
-    playerList.innerHTML =
-      '<div class="empty">No players found.</div>';
-
-    return;
-  }
+      const username =
+        player.username ||
+        player.displayName ||
+        "PLAYER";
 
 
-  playerList.innerHTML = "";
+      profileName.textContent =
+        username;
 
-
-  filtered.forEach(
-    function(player){
-
-      const row =
-        document.createElement("div");
-
-      row.className =
-        "player";
-
-
-      const avatar =
-        document.createElement("div");
-
-      avatar.className =
-        "player-avatar";
+      profileAvatar.textContent =
+        initials(username);
 
       avatar.textContent =
-        player.username
-          .charAt(0)
-          .toUpperCase();
+        initials(username);
 
 
-      const info =
-        document.createElement("div");
-
-      info.className =
-        "player-info";
-
-
-      const name =
-        document.createElement("div");
-
-      name.className =
-        "player-name";
-
-      name.textContent =
-        player.username;
-
-
-      const level =
-        document.createElement("div");
-
-      level.className =
-        "player-level";
-
-      level.textContent =
+      profileLevel.textContent =
         "LEVEL " +
         Number(player.level || 1);
 
 
-      info.appendChild(name);
-      info.appendChild(level);
-
-
-      const button =
-        document.createElement("button");
-
-      button.className =
-        "invite";
-
-      button.textContent =
-        "INVITE";
+      vbucks.textContent =
+        Number(player.vbucks || 0)
+          .toLocaleString();
 
 
       /*
-        This player came directly from
-        Firestore PlayerDB, so it is a valid
-        database player.
+        Tell matchmaking who the real player is.
       */
 
-      button.addEventListener(
-        "click",
-        function(){
+      if(
+        window.Matchmaking &&
+        typeof Matchmaking.setPlayer === "function"
+      ){
 
-          invitePlayer(
-            player.username
-          );
+        Matchmaking.setPlayer(player);
 
-        }
-      );
-
-
-      row.appendChild(avatar);
-      row.appendChild(info);
-      row.appendChild(button);
-
-      playerList.appendChild(row);
+      }
 
     }
   );
+
 }
 
 
 /* =========================================================
-   INVITE PLAYER
+   PLAY
 ========================================================= */
 
-async function invitePlayer(username){
+playButton.addEventListener(
+  "click",
+  async function(){
 
-  if(!currentPlayer){
+    playButton.disabled = true;
 
-    showToast(
-      "You are not logged in."
-    );
+    playButton.textContent =
+      "SEARCHING...";
 
-    return;
-  }
+    try{
+
+      if(
+        !window.Matchmaking
+      ){
+
+        throw new Error(
+          "Matchmaking system is unavailable."
+        );
+      }
 
 
-  try{
+      await Matchmaking.start();
 
-    /*
-      Verify target AGAIN through Firebase.
 
-      This prevents an invitation from being
-      sent to a username that isn't in PlayerDB.
-    */
+    }catch(error){
 
-    const target =
-      await PlayerDB.getPlayer(
-        username
+      console.error(error);
+
+      showError(
+        error.message ||
+        "Could not start matchmaking."
       );
 
+      playButton.disabled = false;
 
-    if(!target){
-
-      showToast(
-        "Player is not in the database."
-      );
-
-      return;
+      playButton.textContent =
+        "PLAY";
     }
 
-
-    if(
-      target.uid ===
-      currentPlayer.uid
-    ){
-
-      showToast(
-        "You cannot invite yourself."
-      );
-
-      return;
-    }
-
-
-    await PlayerDB.sendInvitation(
-      currentPlayer.username,
-      target.username
-    );
-
-
-    showToast(
-      "Invitation sent to " +
-      target.username
-    );
-
-  }catch(error){
-
-    console.error(
-      "[BattleZone] Invitation error:",
-      error
-    );
-
-
-    showToast(
-      error.message ||
-      "Unable to send invitation."
-    );
   }
-}
+);
 
 
 /* =========================================================
-   LOAD INVITATIONS
+   MATCHMAKING EVENTS
 ========================================================= */
 
-async function loadInvitations(){
+window.addEventListener(
+  "battlezone-matchmaking-started",
+  function(){
 
-  if(!currentPlayer){
-    return;
+    playButton.disabled =
+      true;
+
+    playButton.textContent =
+      "SEARCHING...";
+
   }
+);
 
 
-  try{
+window.addEventListener(
+  "battlezone-matchmaking-cancelled",
+  function(){
 
-    const invitations =
-      await PlayerDB.getInvitations();
+    playButton.disabled =
+      false;
 
+    playButton.textContent =
+      "PLAY";
 
-    renderInvitations(
-      invitations
-    );
-
-  }catch(error){
-
-    console.error(
-      "[BattleZone] Invitation load error:",
-      error
-    );
-
-
-    invitationList.innerHTML =
-      '<div class="empty">Unable to load invitations.</div>';
   }
-}
+);
 
 
 /* =========================================================
-   RENDER INVITATIONS
+   ERROR
 ========================================================= */
 
-function renderInvitations(
-  invitations
-){
+function showError(message){
 
-  invitationList.innerHTML = "";
+  const box =
+    document.getElementById(
+      "errorBox"
+    );
 
+  box.textContent =
+    message;
 
-  if(
-    !invitations ||
-    !invitations.length
-  ){
-
-    invitationList.innerHTML =
-      '<div class="empty">No pending invitations.</div>';
-
-    return;
-  }
-
-
-  invitations.forEach(
-    function(invitation){
-
-      const box =
-        document.createElement("div");
-
-      box.className =
-        "invitation";
-
-
-      const name =
-        document.createElement("div");
-
-      name.className =
-        "invitation-name";
-
-      name.textContent =
-        invitation.fromUsername ||
-        "PLAYER";
-
-
-      const text =
-        document.createElement("div");
-
-      text.style.color =
-        "#8292aa";
-
-      text.style.fontSize =
-        "14px";
-
-      text.textContent =
-        "wants to play with you";
-
-
-      const actions =
-        document.createElement("div");
-
-      actions.className =
-        "invitation-actions";
-
-
-      const accept =
-        document.createElement("button");
-
-      accept.className =
-        "accept";
-
-      accept.textContent =
-        "ACCEPT";
-
-
-      const decline =
-        document.createElement("button");
-
-      decline.className =
-        "decline";
-
-      decline.textContent =
-        "DECLINE";
-
-
-      accept.addEventListener(
-        "click",
-        async function(){
-
-          try{
-
-            await PlayerDB.acceptInvitation(
-              invitation.id
-            );
-
-            showToast(
-              "Invitation accepted."
-            );
-
-            loadInvitations();
-
-          }catch(error){
-
-            showToast(
-              error.message ||
-              "Unable to accept invitation."
-            );
-
-          }
-
-        }
-      );
-
-
-      decline.addEventListener(
-        "click",
-        async function(){
-
-          try{
-
-            await PlayerDB.declineInvitation(
-              invitation.id
-            );
-
-            showToast(
-              "Invitation declined."
-            );
-
-            loadInvitations();
-
-          }catch(error){
-
-            showToast(
-              error.message ||
-              "Unable to decline invitation."
-            );
-
-          }
-
-        }
-      );
-
-
-      actions.appendChild(
-        accept
-      );
-
-      actions.appendChild(
-        decline
-      );
-
-
-      box.appendChild(name);
-      box.appendChild(text);
-      box.appendChild(actions);
-
-
-      invitationList.appendChild(box);
-
-    }
+  box.classList.add(
+    "visible"
   );
-}
 
+  setTimeout(
+    function(){
 
-/* =========================================================
-   OPEN PANEL
-========================================================= */
+      box.classList.remove(
+        "visible"
+      );
 
-function openPanel(panel){
-
-  panel.classList.add("open");
-}
-
-
-/* =========================================================
-   CLOSE PANELS
-========================================================= */
-
-function closePanels(){
-
-  playersPanel.classList.remove("open");
-  invitePanel.classList.remove("open");
+    },
+    4500
+  );
 }
 
 
@@ -1791,259 +1199,30 @@ function closePanels(){
 
 document
   .querySelectorAll("nav button")
-  .forEach(
-    function(button){
+  .forEach(function(button){
 
-      button.addEventListener(
-        "click",
-        function(){
+    button.addEventListener(
+      "click",
+      function(){
 
-          document
-            .querySelectorAll("nav button")
-            .forEach(
-              function(item){
-                item.classList.remove("active");
-              }
+        document
+          .querySelectorAll("nav button")
+          .forEach(function(item){
+
+            item.classList.remove(
+              "active"
             );
 
+          });
 
-          button.classList.add(
-            "active"
-          );
+        button.classList.add(
+          "active"
+        );
 
-
-          const page =
-            button.dataset.page;
-
-
-          if(page === "play"){
-
-            closePanels();
-
-            return;
-          }
-
-
-          if(page === "locker"){
-
-            showToast(
-              "Locker is coming soon."
-            );
-
-            return;
-          }
-
-
-          if(page === "shop"){
-
-            showToast(
-              "Shop is coming soon."
-            );
-
-            return;
-          }
-
-
-          if(page === "battlepass"){
-
-            showToast(
-              "Battle Pass is coming soon."
-            );
-
-            return;
-          }
-
-
-          if(page === "quests"){
-
-            showToast(
-              "Quests are coming soon."
-            );
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   AVATAR CLICK
-========================================================= */
-
-topAvatar.addEventListener(
-  "click",
-  function(){
-
-    if(
-      playersPanel.classList.contains("open")
-    ){
-
-      closePanels();
-
-    }else{
-
-      openPanel(
-        playersPanel
-      );
-
-      loadPlayers();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   PROFILE CLICK
-========================================================= */
-
-bottomAvatar.addEventListener(
-  "click",
-  function(){
-
-    openPanel(
-      invitePanel
+      }
     );
 
-    loadInvitations();
-
-  }
-);
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-playerSearch.addEventListener(
-  "input",
-  function(){
-
-    renderPlayers(
-      playerSearch.value
-    );
-
-  }
-);
-
-
-document
-  .getElementById("searchButton")
-  .addEventListener(
-    "click",
-    function(){
-
-      renderPlayers(
-        playerSearch.value
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   CLOSE BUTTONS
-========================================================= */
-
-document
-  .querySelectorAll("[data-close]")
-  .forEach(
-    function(button){
-
-      button.addEventListener(
-        "click",
-        closePanels
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   PLAY
-========================================================= */
-
-document
-  .getElementById("playButton")
-  .addEventListener(
-    "click",
-    function(){
-
-      const button =
-        this;
-
-
-      button.disabled =
-        true;
-
-      button.textContent =
-        "MATCHMAKING...";
-
-
-      setTimeout(
-        function(){
-
-          button.disabled =
-            false;
-
-          button.textContent =
-            "PLAY";
-
-          showToast(
-            "No matchmaking server connected yet."
-          );
-
-        },
-        1600
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   ESC
-========================================================= */
-
-document.addEventListener(
-  "keydown",
-  function(event){
-
-    if(event.key === "Escape"){
-
-      closePanels();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   START
-========================================================= */
-
-if(
-  window.PlayerDB
-){
-
-  loadCurrentPlayer();
-
-}else{
-
-  console.error(
-    "[BattleZone] PlayerDB was not loaded."
-  );
-
-  loading.querySelector(".loader-text")
-    .textContent =
-    "PLAYER DATABASE ERROR";
-
-}
+  });
 
 </script>
 
