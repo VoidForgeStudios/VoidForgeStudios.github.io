@@ -8,13 +8,14 @@
   "use strict";
 
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.firebasestorage.app",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+  apiKey: "AIzaSyCigGCB83OCay67rudCX5vH-goxHAorC1c",
+  authDomain: "battlezone-a01dd.firebaseapp.com",
+  projectId: "battlezone-a01dd",
+  storageBucket: "battlezone-a01dd.firebasestorage.app",
+  messagingSenderId: "308958906592",
+  appId: "1:308958906592:web:ce91f3d0e35f212598a885",
+  measurementId: "G-ZJTKHQ5TLH"
+};
 
   if (!window.firebase) {
     console.error(
