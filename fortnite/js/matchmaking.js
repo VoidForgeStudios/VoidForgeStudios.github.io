@@ -11,397 +11,174 @@
 ========================================================= */
 
 (function () {
-
   "use strict";
 
-
-  /* =======================================================
-     CHECK PLAYERDB
-  ======================================================= */
-
   if (!window.PlayerDB) {
-
-    console.error(
-      "[BattleMatchmaking] PlayerDB is not loaded."
-    );
-
-    return;
+    console.error("[BattleMatchmaking] PlayerDB is not loaded.");
+    throw new Error("BattleMatchmaking requires PlayerDB.");
   }
-
-
-  /* =======================================================
-     GET REGISTERED PLAYERS
-  ======================================================= */
 
   async function getRegisteredPlayers() {
-
-    const currentUser =
-      PlayerDB.getCurrentUser();
-
+    const currentUser = PlayerDB.getCurrentUser();
 
     if (!currentUser) {
-
-      throw new Error(
-        "You are not logged in."
-      );
-
+      throw new Error("You are not logged in.");
     }
 
+    const players = await PlayerDB.getPlayers();
 
-    const players =
-      await PlayerDB.getPlayers();
-
-
-    /*
-      Remove the current player from the list.
-    */
-
-    return players.filter(
-      function (player) {
-
-        return player.uid !==
-          currentUser.uid;
-
-      }
-    );
-
+    return players.filter(function (player) {
+      return player.uid !== currentUser.uid;
+    });
   }
 
-
-  /* =======================================================
-     SEND INVITATION
-  ======================================================= */
-
-  async function sendInvitation(
-    uid,
-    username
-  ) {
-
-    const currentUser =
-      PlayerDB.getCurrentUser();
-
+  async function sendInvitation(uid, username) {
+    const currentUser = PlayerDB.getCurrentUser();
 
     if (!currentUser) {
-
-      throw new Error(
-        "You are not logged in."
-      );
-
+      throw new Error("You are not logged in.");
     }
-
 
     if (!uid || !username) {
-
-      throw new Error(
-        "Invalid player."
-      );
-
+      throw new Error("Invalid player.");
     }
 
+    const target = await PlayerDB.getPlayer(username);
 
-    const currentPlayer =
-      await PlayerDB.getCurrentPlayer();
+    if (!target) {
+      throw new Error("That player is no longer available.");
+    }
 
+    if (target.uid !== uid) {
+      throw new Error(
+        "Player information is out of date. Please refresh the page."
+      );
+    }
+
+    if (target.uid === currentUser.uid) {
+      throw new Error("You cannot invite yourself.");
+    }
+
+    const currentPlayer = await PlayerDB.getCurrentPlayer();
 
     if (!currentPlayer) {
-
-      throw new Error(
-        "Your player profile could not be loaded."
-      );
-
+      throw new Error("Your player profile could not be loaded.");
     }
-
-
-    /*
-      PlayerDB handles:
-      - sender verification
-      - target verification
-      - self-invite prevention
-      - invitation creation
-    */
 
     return PlayerDB.sendInvitation(
       currentPlayer.username,
-      username
+      target.username
     );
-
   }
 
-
-  /* =======================================================
-     ACCEPT INVITATION
-  ======================================================= */
-
-  async function acceptInvitation(
-    invitationId
-  ) {
-
+  async function acceptInvitation(invitationId) {
     if (!invitationId) {
-
-      throw new Error(
-        "Invitation ID is required."
-      );
-
+      throw new Error("Invitation ID is required.");
     }
 
-
-    return PlayerDB.acceptInvitation(
-      invitationId
-    );
-
+    return PlayerDB.acceptInvitation(invitationId);
   }
 
-
-  /* =======================================================
-     DECLINE INVITATION
-  ======================================================= */
-
-  async function declineInvitation(
-    invitationId
-  ) {
-
+  async function declineInvitation(invitationId) {
     if (!invitationId) {
-
-      throw new Error(
-        "Invitation ID is required."
-      );
-
+      throw new Error("Invitation ID is required.");
     }
 
-
-    return PlayerDB.declineInvitation(
-      invitationId
-    );
-
+    return PlayerDB.declineInvitation(invitationId);
   }
-
-
-  /* =======================================================
-     WATCH INVITATIONS
-  ======================================================= */
 
   function watchInvitations(callback) {
-
-    if (
-      typeof callback !==
-      "function"
-    ) {
-
-      throw new Error(
-        "watchInvitations requires a callback."
-      );
-
+    if (typeof callback !== "function") {
+      throw new Error("watchInvitations requires a callback.");
     }
-
-
-    /*
-      Firestore realtime listener.
-
-      This is better than repeatedly polling
-      getInvitations().
-    */
 
     let unsubscribe = null;
 
-
     function startListener(user) {
-
-      /*
-        Remove previous listener.
-      */
-
       if (unsubscribe) {
-
         unsubscribe();
         unsubscribe = null;
-
       }
-
-
-      /*
-        Logged out.
-      */
 
       if (!user) {
-
         callback([]);
-
         return;
-
       }
 
+      unsubscribe = PlayerDB.db
+        .collection("invitations")
+        .where("toUid", "==", user.uid)
+        .onSnapshot(
+          function (snapshot) {
+            const invitations = snapshot.docs
+              .map(function (doc) {
+                return {
+                  id: doc.id,
+                  ...doc.data()
+                };
+              })
+              .filter(function (invitation) {
+                return invitation.status === "pending";
+              });
 
-      unsubscribe =
-        PlayerDB.db
-          .collection("invitations")
-          .where(
-            "toUid",
-            "==",
-            user.uid
-          )
-          .where(
-            "status",
-            "==",
-            "pending"
-          )
-          .onSnapshot(
+            callback(invitations);
+          },
+          function (error) {
+            console.error(
+              "[BattleMatchmaking] Invitation listener error:",
+              error
+            );
 
-            function (snapshot) {
-
-              const invitations =
-                snapshot.docs.map(
-                  function (doc) {
-
-                    return {
-
-                      id:
-                        doc.id,
-
-                      ...doc.data()
-
-                    };
-
-                  }
-                );
-
-
-              callback(
-                invitations
-              );
-
-            },
-
-            function (error) {
-
-              console.error(
-                "[BattleMatchmaking] Invitation listener error:",
-                error
-              );
-
-
-              callback([]);
-
-            }
-
-          );
-
+            callback([]);
+          }
+        );
     }
 
-
-    /*
-      Listen for authentication changes.
-    */
-
     const stopAuth =
-      PlayerDB.auth.onAuthStateChanged(
-        startListener
-      );
-
-
-    /*
-      Return one cleanup function.
-    */
+      PlayerDB.auth.onAuthStateChanged(startListener);
 
     return function () {
-
       stopAuth();
 
       if (unsubscribe) {
-
         unsubscribe();
-
         unsubscribe = null;
-
       }
-
     };
-
   }
 
-
-  /* =======================================================
-     FIND MATCH
-  ======================================================= */
-
   async function findMatch() {
-
-    const user =
-      PlayerDB.getCurrentUser();
-
+    const user = PlayerDB.getCurrentUser();
 
     if (!user) {
-
-      throw new Error(
-        "You are not logged in."
-      );
-
+      throw new Error("You are not logged in.");
     }
 
-
-    const player =
-      await PlayerDB.getCurrentPlayer();
-
+    const player = await PlayerDB.getCurrentPlayer();
 
     if (!player) {
-
-      throw new Error(
-        "Your player profile could not be loaded."
-      );
-
+      throw new Error("Your player profile could not be loaded.");
     }
-
-
-    /*
-      Basic matchmaking placeholder.
-
-      For now this confirms that the player
-      is authenticated and has a PlayerDB profile.
-
-      A real queue/match system can be added here.
-    */
 
     console.log(
       "[BattleMatchmaking] Searching for match:",
       player.username
     );
 
-
     return null;
-
   }
 
-
-  /* =======================================================
-     PUBLIC API
-  ======================================================= */
-
   window.BattleMatchmaking = {
-
-    getRegisteredPlayers:
-      getRegisteredPlayers,
-
-    sendInvitation:
-      sendInvitation,
-
-    acceptInvitation:
-      acceptInvitation,
-
-    declineInvitation:
-      declineInvitation,
-
-    watchInvitations:
-      watchInvitations,
-
-    findMatch:
-      findMatch
-
+    getRegisteredPlayers,
+    sendInvitation,
+    acceptInvitation,
+    declineInvitation,
+    watchInvitations,
+    findMatch
   };
 
-
   console.log(
-    "[BattleMatchmaking] Initialized."
+    "[BattleMatchmaking] Initialized:",
+    window.BattleMatchmaking
   );
-
-
 })();
-
