@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Battle Royale Main Menu</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&display=swap');
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:'Barlow Condensed',Arial,sans-serif;color:#fff;background:
+radial-gradient(circle at 68% 35%,rgba(255,225,170,.35),transparent 22%),
+linear-gradient(135deg,#182d54,#416d9a 48%,#d68b58)}
+body:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 35%,rgba(0,0,0,.35))}
+.menu{position:relative;width:100%;height:100%;isolation:isolate}
+.top{height:82px;display:flex;align-items:center;padding:0 28px;background:linear-gradient(#07101eee,transparent);position:relative;z-index:2}
+.logo{font-size:31px;font-weight:900;font-style:italic;text-shadow:3px 4px #111;letter-spacing:1px}
+.logo span{color:#ffd02f}
+nav{display:flex;margin-left:45px;gap:6px}
+nav button{height:48px;padding:0 20px;background:transparent;border:0;color:white;font-size:18px;font-weight:900;cursor:pointer;transform:skew(-5deg)}
+nav button:hover,nav button.active{background:#ffffff1c}
+nav button.active{border-bottom:4px solid #ffd42e}
+.account{margin-left:auto;display:flex;align-items:center;gap:12px}
+.vbucks{background:#07101dcc;border:1px solid #ffffff45;padding:9px 14px;border-radius:5px;font-weight:800}
+.coin{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#62d8ff;color:#16466d;margin-right:5px}
+.avatar{width:43px;height:43px;display:grid;place-items:center;font-weight:900;background:linear-gradient(135deg,#202b4a,#d79769);border:2px solid white}
+.center{position:absolute;inset:82px 0 0;display:grid;place-items:center;text-align:center}
+.content{margin-top:-15px}
+.eyebrow{font-size:22px;letter-spacing:4px;font-weight:800}
+h1{font-size:clamp(70px,11vw,155px);line-height:.8;margin:13px 0;font-weight:900;font-style:italic;text-shadow:6px 7px #202b43,12px 15px 25px #0008}
+.tagline{font-size:23px;font-weight:800;letter-spacing:2px}
+.play{margin-top:30px;padding:16px 65px;background:#f5c82e;color:#172139;border:3px solid white;font-size:29px;font-weight:900;letter-spacing:2px;cursor:pointer;clip-path:polygon(3% 0,100% 0,97% 100%,0 100%)}
+.play:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.bottom{position:absolute;left:24px;right:24px;bottom:20px;display:flex;justify-content:space-between;align-items:end}
+.profile{display:flex;gap:12px;align-items:center;background:#07101dcc;padding:10px 15px;border:1px solid #ffffff30}
+.pfp{width:48px;height:48px;background:linear-gradient(135deg,#273557,#d99a71);display:grid;place-items:center;font-size:20px;font-weight:900}
+.name{font-size:21px;font-weight:900}.level{font-size:15px;opacity:.75}
+.news{background:#07101dcc;border:1px solid #ffffff30;padding:10px 18px;text-align:center}
+.news b{font-size:17px}.news small{display:block;opacity:.7}
+@media(max-width:750px){nav{display:none}.top{padding:0 14px}.logo{font-size:24px}.eyebrow{font-size:16px}.tagline{font-size:17px}h1{font-size:65px}.play{font-size:23px;padding:13px 45px}.news{display:none}.bottom{left:12px;right:12px}.vbucks{font-size:14px;padding:7px}.avatar{width:37px;height:37px}}
+</style>
+</head>
+<body>
+<div class="menu">
+<header class="top">
+<div class="logo">BATTLE<span>ZONE</span></div>
+<nav>
+<button class="active">PLAY</button><button>LOCKER</button><button>SHOP</button><button>BATTLE PASS</button><button>QUESTS</button>
+</nav>
+<div class="account"><div class="vbucks"><span class="coin">V</span>2,850</div><div class="avatar">K</div></div>
+</header>
+
+<main class="center">
+<section class="content">
+<div class="eyebrow">CHAPTER 2 • SEASON 9</div>
+<h1>BATTLE<br>ROYAL</h1>
+<div class="tagline">DROP IN. SURVIVE. CONQUER.</div>
+<button class="play" id="play">PLAY</button>
+</section>
+</main>
+
+<footer class="bottom">
+<div class="profile"><div class="pfp">K</div><div><div class="name">PLAYER ONE</div><div class="level">LEVEL 42</div></div></div>
+<div class="news"><b>SEASON UPDATE</b><small>New challenges are waiting.</small></div>
+</footer>
+</div>
+<script>
+document.getElementById('play').onclick=()=>{const b=document.getElementById('play');b.textContent='MATCHMAKING…';setTimeout(()=>b.textContent='PLAY',1600)}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')})
+</script>
+</body>
+</html>
