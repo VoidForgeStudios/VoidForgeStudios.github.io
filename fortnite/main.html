@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,21 +10,27 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&display=swap');
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
-html,body{
+html,
+body{
   margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
   font-family:'Barlow Condensed',Arial,sans-serif;
   color:#fff;
-  background:
-    radial-gradient(circle at 70% 35%,#d99b7080,transparent 25%),
-    linear-gradient(135deg,#182d54,#416d9a 48%,#d68b58);
+  background:#07101e;
 }
 
-button,input{
+body{
+  user-select:none;
+}
+
+button,
+input{
   font:inherit;
 }
 
@@ -31,43 +38,78 @@ button{
   cursor:pointer;
 }
 
-#app{
-  width:100%;
-  height:100%;
-  position:relative;
+/* =========================================================
+   BACKGROUND
+========================================================= */
+
+.app{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+
+  background:
+    radial-gradient(
+      circle at 70% 30%,
+      rgba(255,225,170,.38),
+      transparent 25%
+    ),
+    linear-gradient(
+      135deg,
+      #182d54,
+      #416d9a 48%,
+      #d68b58
+    );
 }
 
-#app:before{
+.app:before{
   content:"";
   position:absolute;
   inset:0;
+
   background:
     linear-gradient(
       180deg,
-      #0008,
+      rgba(0,0,0,.45),
       transparent 35%,
-      #0008
+      rgba(0,0,0,.5)
     );
+
   pointer-events:none;
 }
 
-/* HEADER */
+/* =========================================================
+   TOP BAR
+========================================================= */
 
-header{
-  position:relative;
-  z-index:5;
+.top{
+  position:absolute;
+  z-index:20;
+  top:0;
+  left:0;
+  right:0;
+
   height:82px;
+
   display:flex;
   align-items:center;
+
   padding:0 28px;
-  background:linear-gradient(#07101eee,transparent);
+
+  background:
+    linear-gradient(
+      rgba(5,12,25,.94),
+      transparent
+    );
 }
 
 .logo{
   font-size:31px;
   font-weight:900;
   font-style:italic;
-  text-shadow:3px 4px #111;
+  letter-spacing:1px;
+
+  text-shadow:
+    3px 4px #111;
 }
 
 .logo span{
@@ -76,18 +118,27 @@ header{
 
 nav{
   display:flex;
-  margin-left:45px;
   gap:5px;
+  margin-left:40px;
 }
 
 nav button{
   height:48px;
   padding:0 20px;
-  border:0;
+
+  color:white;
   background:transparent;
-  color:#fff;
-  font-weight:900;
+
+  border:0;
+
   font-size:18px;
+  font-weight:900;
+
+  transform:skew(-5deg);
+
+  transition:
+    background .2s,
+    color .2s;
 }
 
 nav button:hover,
@@ -101,49 +152,71 @@ nav button.active{
 
 .account{
   margin-left:auto;
+
   display:flex;
   align-items:center;
   gap:12px;
 }
 
 .vbucks{
-  background:#07101dcc;
-  border:1px solid #ffffff35;
   padding:9px 14px;
+
+  background:#07101dcc;
+  border:1px solid #ffffff45;
+
   border-radius:5px;
+
   font-weight:800;
 }
 
 .coin{
   display:inline-grid;
   place-items:center;
+
   width:20px;
   height:20px;
+
+  margin-right:5px;
+
   border-radius:50%;
+
   background:#62d8ff;
   color:#16466d;
-  margin-right:5px;
 }
 
 .avatar{
   width:43px;
   height:43px;
+
   display:grid;
   place-items:center;
+
   font-weight:900;
-  background:linear-gradient(135deg,#202b4a,#d79769);
+
+  background:
+    linear-gradient(
+      135deg,
+      #202b4a,
+      #d79769
+    );
+
   border:2px solid white;
 }
 
-/* MAIN */
+/* =========================================================
+   CENTER
+========================================================= */
 
 .center{
   position:absolute;
+  z-index:2;
+
   inset:82px 0 0;
+
   display:grid;
   place-items:center;
+
   text-align:center;
-  z-index:2;
 }
 
 .content{
@@ -159,9 +232,12 @@ nav button.active{
 .hero-title{
   font-size:clamp(70px,11vw,155px);
   line-height:.8;
+
   margin:13px 0;
+
   font-weight:900;
   font-style:italic;
+
   text-shadow:
     6px 7px #202b43,
     12px 15px 25px #0008;
@@ -175,14 +251,30 @@ nav button.active{
 
 .play{
   margin-top:30px;
+
   padding:16px 65px;
+
   background:#f5c82e;
   color:#172139;
+
   border:3px solid white;
+
   font-size:29px;
   font-weight:900;
+
   letter-spacing:2px;
-  clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);
+
+  clip-path:
+    polygon(
+      3% 0,
+      100% 0,
+      97% 100%,
+      0 100%
+    );
+
+  transition:
+    transform .2s,
+    filter .2s;
 }
 
 .play:hover{
@@ -190,14 +282,18 @@ nav button.active{
   transform:translateY(-2px);
 }
 
-/* PROFILE */
+/* =========================================================
+   BOTTOM PROFILE
+========================================================= */
 
 .bottom{
   position:absolute;
-  z-index:5;
+  z-index:10;
+
   left:24px;
   right:24px;
   bottom:20px;
+
   display:flex;
   justify-content:space-between;
   align-items:end;
@@ -207,17 +303,30 @@ nav button.active{
   display:flex;
   gap:12px;
   align-items:center;
-  background:#07101dcc;
+
   padding:10px 15px;
+
+  background:#07101dcc;
+
   border:1px solid #ffffff30;
+
+  backdrop-filter:blur(8px);
 }
 
 .pfp{
   width:48px;
   height:48px;
+
   display:grid;
   place-items:center;
-  background:linear-gradient(135deg,#273557,#d99a71);
+
+  background:
+    linear-gradient(
+      135deg,
+      #273557,
+      #d99a71
+    );
+
   font-size:20px;
   font-weight:900;
 }
@@ -229,150 +338,192 @@ nav button.active{
 
 .level{
   font-size:15px;
+  opacity:.75;
+}
+
+.news{
+  padding:10px 18px;
+
+  background:#07101dcc;
+  border:1px solid #ffffff30;
+
+  text-align:center;
+
+  backdrop-filter:blur(8px);
+}
+
+.news b{
+  font-size:17px;
+}
+
+.news small{
+  display:block;
   opacity:.7;
 }
 
-/* FRIENDS */
-
-.friends-button{
-  position:absolute;
-  right:24px;
-  top:100px;
-  z-index:10;
-  padding:12px 20px;
-  border:1px solid #ffffff40;
-  background:#07101ddd;
-  color:white;
-  font-weight:900;
-}
+/* =========================================================
+   PANEL
+========================================================= */
 
 .panel{
   position:fixed;
-  z-index:30;
-  top:82px;
-  right:0;
-  width:min(430px,100%);
-  height:calc(100% - 82px);
-  padding:22px;
-  background:#07101ef5;
-  border-left:1px solid #ffffff25;
-  backdrop-filter:blur(18px);
-  transform:translateX(100%);
-  transition:.3s ease;
+  z-index:50;
+
+  top:95px;
+  right:25px;
+
+  width:min(420px,calc(100vw - 30px));
+
+  max-height:
+    calc(100vh - 125px);
+
   overflow:auto;
+
+  padding:20px;
+
+  background:
+    rgba(5,13,27,.94);
+
+  border:1px solid #ffffff25;
+
+  box-shadow:
+    0 20px 70px #0008;
+
+  backdrop-filter:blur(18px);
+
+  transform:
+    translateX(110%);
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:
+    transform .35s ease,
+    opacity .35s ease;
 }
 
 .panel.open{
   transform:translateX(0);
+  opacity:1;
+  pointer-events:auto;
 }
 
-.panel-header{
+.panel-title{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  margin-bottom:20px;
+  align-items:center;
+
+  margin-bottom:15px;
 }
 
-.panel-header h2{
+.panel-title h3{
   margin:0;
+
   font-size:30px;
+  font-weight:900;
   font-style:italic;
 }
 
 .close{
-  width:38px;
-  height:38px;
-  border:1px solid #ffffff30;
+  width:35px;
+  height:35px;
+
+  border:1px solid #ffffff25;
   background:#ffffff10;
   color:white;
+
   font-size:20px;
 }
 
-/* INVITE */
+/* =========================================================
+   SEARCH
+========================================================= */
 
-.invite-box{
-  padding:16px;
-  background:#ffffff08;
-  border:1px solid #ffffff18;
+.search{
+  display:flex;
+  gap:8px;
+
   margin-bottom:15px;
 }
 
-.invite-box label{
-  display:block;
-  margin-bottom:8px;
-  font-weight:800;
-  color:#aebdd2;
-}
-
-.invite-row{
-  display:flex;
-  gap:8px;
-}
-
-.invite-row input{
+.search input{
   flex:1;
+
   min-width:0;
-  height:48px;
+
+  height:46px;
+
   padding:0 12px;
-  border:1px solid #ffffff20;
-  background:#101c31;
+
   color:white;
+
+  background:#111d31;
+
+  border:1px solid #ffffff20;
+
   outline:none;
 }
 
-.invite-row input:focus{
+.search input:focus{
   border-color:#ffd02f;
 }
 
-.invite-row button{
-  width:90px;
+.search button{
+  padding:0 15px;
+
   border:0;
-  background:#f5c82e;
+
+  background:#ffd02f;
   color:#172139;
+
   font-weight:900;
 }
 
-.invite-status{
-  min-height:22px;
-  margin-top:10px;
-  font-size:14px;
-  color:#9fb1cb;
-}
+/* =========================================================
+   PLAYER LIST
+========================================================= */
 
-.invite-status.error{
-  color:#ff7777;
-}
-
-.invite-status.success{
-  color:#72e3a1;
-}
-
-/* ONLINE */
-
-.section-title{
-  margin:22px 0 10px;
-  color:#91a5c2;
-  font-size:13px;
-  letter-spacing:2px;
-  font-weight:900;
+.player-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 .player{
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:12px;
-  margin-bottom:7px;
+  gap:10px;
+
+  padding:10px;
+
   background:#ffffff08;
+
   border:1px solid #ffffff12;
+
+  transition:
+    background .2s;
+}
+
+.player:hover{
+  background:#ffffff15;
 }
 
 .player-avatar{
   width:40px;
   height:40px;
+
+  flex:none;
+
   display:grid;
   place-items:center;
-  background:#263653;
+
+  background:
+    linear-gradient(
+      135deg,
+      #273557,
+      #d99a71
+    );
+
   font-weight:900;
 }
 
@@ -382,96 +533,192 @@ nav button.active{
 }
 
 .player-name{
+  overflow:hidden;
+
+  white-space:nowrap;
+  text-overflow:ellipsis;
+
   font-size:18px;
   font-weight:900;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
 }
 
-.player-status{
-  color:#6ee29d;
+.player-level{
+  color:#8292aa;
   font-size:13px;
 }
 
-.invite-small{
+.invite{
   padding:8px 12px;
-  background:#f5c82e;
-  color:#172139;
+
   border:0;
+
+  background:#ffd02f;
+  color:#172139;
+
   font-weight:900;
 }
 
-.empty{
-  padding:25px 10px;
-  text-align:center;
-  color:#71829c;
+.invite:disabled{
+  opacity:.5;
+  cursor:not-allowed;
 }
 
-/* TOAST */
+.empty{
+  padding:25px;
+
+  text-align:center;
+
+  color:#8494ad;
+}
+
+/* =========================================================
+   INVITATIONS
+========================================================= */
+
+.invitation{
+  padding:12px;
+
+  margin-bottom:8px;
+
+  background:#ffffff08;
+
+  border:1px solid #ffffff15;
+}
+
+.invitation-name{
+  font-size:19px;
+  font-weight:900;
+}
+
+.invitation-actions{
+  display:flex;
+  gap:8px;
+
+  margin-top:10px;
+}
+
+.accept,
+.decline{
+  flex:1;
+
+  height:38px;
+
+  border:0;
+
+  font-weight:900;
+}
+
+.accept{
+  background:#ffd02f;
+  color:#172139;
+}
+
+.decline{
+  background:#ffffff12;
+  color:white;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
   position:fixed;
   z-index:100;
+
   left:50%;
   bottom:35px;
-  transform:translate(-50%,20px);
-  padding:13px 22px;
-  background:#07101eee;
-  border:1px solid #ffffff30;
-  box-shadow:0 10px 40px #0008;
+
+  transform:
+    translate(-50%,30px);
+
   opacity:0;
   pointer-events:none;
-  transition:.3s;
+
+  padding:13px 20px;
+
+  background:#07101eec;
+
+  border:1px solid #ffffff25;
+
+  box-shadow:0 10px 35px #0008;
+
   font-weight:800;
+
+  transition:
+    opacity .3s,
+    transform .3s;
 }
 
 .toast.show{
   opacity:1;
-  transform:translate(-50%,0);
+  transform:
+    translate(-50%,0);
 }
 
-/* MOBILE */
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading{
+  position:fixed;
+  z-index:200;
+
+  inset:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:#07101e;
+}
+
+.loading.hidden{
+  display:none;
+}
+
+.loader-content{
+  text-align:center;
+}
+
+.loader-logo{
+  font-size:60px;
+
+  font-weight:900;
+  font-style:italic;
+
+  text-shadow:4px 5px #000;
+}
+
+.loader-logo span{
+  color:#ffd02f;
+}
+
+.loader-text{
+  margin-top:10px;
+
+  color:#8292aa;
+
+  letter-spacing:3px;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
 
 @media(max-width:750px){
 
-  header{
-    padding:0 14px;
-  }
-
-  nav{
-    display:none;
+  .top{
+    height:70px;
+    padding:0 12px;
   }
 
   .logo{
     font-size:24px;
   }
 
-  .eyebrow{
-    font-size:16px;
-  }
-
-  .tagline{
-    font-size:17px;
-  }
-
-  .hero-title{
-    font-size:65px;
-  }
-
-  .play{
-    font-size:23px;
-    padding:13px 45px;
-  }
-
-  .bottom{
-    left:12px;
-    right:12px;
-  }
-
-  .friends-button{
-    right:12px;
-    top:92px;
+  nav{
+    display:none;
   }
 
   .vbucks{
@@ -484,9 +731,46 @@ nav button.active{
     height:37px;
   }
 
+  .center{
+    inset:70px 0 0;
+  }
+
+  .eyebrow{
+    font-size:16px;
+  }
+
+  .hero-title{
+    font-size:65px;
+  }
+
+  .tagline{
+    font-size:17px;
+  }
+
+  .play{
+    font-size:23px;
+    padding:13px 45px;
+  }
+
+  .bottom{
+    left:12px;
+    right:12px;
+    bottom:12px;
+  }
+
+  .news{
+    display:none;
+  }
+
   .panel{
-    top:70px;
-    height:calc(100% - 70px);
+    top:78px;
+    right:10px;
+
+    width:
+      calc(100vw - 20px);
+
+    max-height:
+      calc(100vh - 90px);
   }
 }
 </style>
@@ -494,499 +778,622 @@ nav button.active{
 
 <body>
 
-<div id="app">
+<!-- =======================================================
+     LOADING
+======================================================= -->
 
-<header>
+<div id="loading" class="loading">
 
-  <div class="logo">
-    BATTLE<span>ZONE</span>
-  </div>
+  <div class="loader-content">
 
-  <nav>
-    <button class="active">PLAY</button>
-    <button>LOCKER</button>
-    <button>SHOP</button>
-    <button>BATTLE PASS</button>
-    <button>QUESTS</button>
-  </nav>
-
-  <div class="account">
-
-    <div class="vbucks">
-      <span class="coin">V</span>
-      2,850
+    <div class="loader-logo">
+      BATTLE<span>ZONE</span>
     </div>
 
-    <div id="headerAvatar" class="avatar">
-      ?
+    <div class="loader-text">
+      LOADING PLAYER PROFILE...
     </div>
 
   </div>
-
-</header>
-
-<button id="friendsButton" class="friends-button">
-  FRIENDS
-</button>
-
-<main class="center">
-
-  <section class="content">
-
-    <div class="eyebrow">
-      CHAPTER 2 • SEASON 9
-    </div>
-
-    <div class="hero-title">
-      BATTLE<br>ROYAL
-    </div>
-
-    <div class="tagline">
-      DROP IN. SURVIVE. CONQUER.
-    </div>
-
-    <button id="playButton" class="play">
-      PLAY
-    </button>
-
-  </section>
-
-</main>
-
-<footer class="bottom">
-
-  <div class="profile">
-
-    <div id="profileAvatar" class="pfp">
-      ?
-    </div>
-
-    <div>
-
-      <div id="profileName" class="name">
-        LOADING...
-      </div>
-
-      <div class="level">
-        LEVEL 1
-      </div>
-
-    </div>
-
-  </div>
-
-</footer>
 
 </div>
 
 
-<!-- FRIENDS / INVITATION PANEL -->
+<!-- =======================================================
+     APP
+======================================================= -->
 
-<aside id="friendsPanel" class="panel">
+<div class="app">
 
-  <div class="panel-header">
+  <!-- TOP -->
 
-    <h2>FRIENDS</h2>
+  <header class="top">
 
-    <button id="closeFriends" class="close">
+    <div class="logo">
+      BATTLE<span>ZONE</span>
+    </div>
+
+    <nav>
+
+      <button class="active" data-page="play">
+        PLAY
+      </button>
+
+      <button data-page="locker">
+        LOCKER
+      </button>
+
+      <button data-page="shop">
+        SHOP
+      </button>
+
+      <button data-page="battlepass">
+        BATTLE PASS
+      </button>
+
+      <button data-page="quests">
+        QUESTS
+      </button>
+
+    </nav>
+
+    <div class="account">
+
+      <div class="vbucks">
+        <span class="coin">V</span>
+        <span id="topVbucks">0</span>
+      </div>
+
+      <div id="topAvatar" class="avatar">
+        ?
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- CENTER -->
+
+  <main class="center">
+
+    <section class="content">
+
+      <div class="eyebrow">
+        CHAPTER 2 • SEASON 9
+      </div>
+
+      <div class="hero-title">
+        BATTLE<br>
+        ROYAL
+      </div>
+
+      <div class="tagline">
+        DROP IN. SURVIVE. CONQUER.
+      </div>
+
+      <button id="playButton" class="play">
+        PLAY
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- BOTTOM -->
+
+  <footer class="bottom">
+
+    <div class="profile">
+
+      <div id="bottomAvatar" class="pfp">
+        ?
+      </div>
+
+      <div>
+
+        <div id="playerName" class="name">
+          LOADING...
+        </div>
+
+        <div id="playerLevel" class="level">
+          LEVEL 1
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="news">
+
+      <b>
+        SEASON UPDATE
+      </b>
+
+      <small>
+        New challenges are waiting.
+      </small>
+
+    </div>
+
+  </footer>
+
+</div>
+
+
+<!-- =======================================================
+     PLAYER PANEL
+======================================================= -->
+
+<section id="playersPanel" class="panel">
+
+  <div class="panel-title">
+
+    <h3>
+      PLAYERS
+    </h3>
+
+    <button class="close" data-close="playersPanel">
       ×
     </button>
 
   </div>
 
+  <div class="search">
 
-  <div class="invite-box">
+    <input
+      id="playerSearch"
+      type="text"
+      placeholder="Search username..."
+      autocomplete="off"
+    >
 
-    <label>
-      INVITE PLAYER
-    </label>
-
-    <div class="invite-row">
-
-      <input
-        id="inviteUsername"
-        type="text"
-        placeholder="Enter username"
-        autocomplete="off"
-      >
-
-      <button id="inviteButton">
-        INVITE
-      </button>
-
-    </div>
-
-    <div
-      id="inviteStatus"
-      class="invite-status"
-    ></div>
+    <button id="searchButton">
+      SEARCH
+    </button>
 
   </div>
 
-
-  <div class="section-title">
-    DATABASE PLAYERS
-  </div>
-
-  <div id="playersList">
+  <div id="playerList" class="player-list">
 
     <div class="empty">
-      Loading players...
+      Loading PlayerDB...
     </div>
 
   </div>
 
-</aside>
+</section>
 
+
+<!-- =======================================================
+     INVITATIONS PANEL
+======================================================= -->
+
+<section id="invitePanel" class="panel">
+
+  <div class="panel-title">
+
+    <h3>
+      INVITATIONS
+    </h3>
+
+    <button class="close" data-close="invitePanel">
+      ×
+    </button>
+
+  </div>
+
+  <div id="invitationList">
+
+    <div class="empty">
+      Loading invitations...
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     TOAST
+======================================================= -->
 
 <div id="toast" class="toast"></div>
 
 
-<script type="module">
+<!-- =======================================================
+     FIREBASE
+======================================================= -->
 
-/*
-=========================================================
-  BATTLEZONE MAIN
-=========================================================
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
-  URL expected:
+<!-- IMPORTANT:
+     playerdb.js is a CLASSIC SCRIPT.
+     Do NOT use type="module".
+-->
 
-  main.html?user=YourUsername
-
-  Example:
-
-  main.html?user=Krv
-
-  The username is decoded from the URL and displayed.
-
-  Authentication/database functions are loaded from:
-
-  ./js/playerdb.js
-=========================================================
-*/
-
-import * as PlayerDBModule from "./js/playerdb.js";
-
-const PlayerDB =
-  PlayerDBModule.default || PlayerDBModule;
+<script src="./js/playerdb.js"></script>
 
 
-/* =======================================================
-   DOM
-======================================================= */
+<!-- =======================================================
+     MAIN APPLICATION
+======================================================= -->
 
-const profileName =
-  document.getElementById("profileName");
+<script>
 
-const profileAvatar =
-  document.getElementById("profileAvatar");
+"use strict";
 
-const headerAvatar =
-  document.getElementById("headerAvatar");
 
-const friendsButton =
-  document.getElementById("friendsButton");
+/* =========================================================
+   STATE
+========================================================= */
 
-const friendsPanel =
-  document.getElementById("friendsPanel");
+let currentPlayer = null;
+let allPlayers = [];
 
-const closeFriends =
-  document.getElementById("closeFriends");
 
-const inviteUsername =
-  document.getElementById("inviteUsername");
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-const inviteButton =
-  document.getElementById("inviteButton");
+const loading =
+  document.getElementById("loading");
 
-const inviteStatus =
-  document.getElementById("inviteStatus");
+const playerName =
+  document.getElementById("playerName");
 
-const playersList =
-  document.getElementById("playersList");
+const playerLevel =
+  document.getElementById("playerLevel");
+
+const topVbucks =
+  document.getElementById("topVbucks");
+
+const topAvatar =
+  document.getElementById("topAvatar");
+
+const bottomAvatar =
+  document.getElementById("bottomAvatar");
+
+const playersPanel =
+  document.getElementById("playersPanel");
+
+const invitePanel =
+  document.getElementById("invitePanel");
+
+const playerList =
+  document.getElementById("playerList");
+
+const invitationList =
+  document.getElementById("invitationList");
+
+const playerSearch =
+  document.getElementById("playerSearch");
 
 const toast =
   document.getElementById("toast");
 
 
-/* =======================================================
-   GET USERNAME FROM URL
-======================================================= */
+/* =========================================================
+   TOAST
+========================================================= */
 
-function getUsernameFromURL(){
+let toastTimer;
 
-  const params =
-    new URLSearchParams(
-      window.location.search
+function showToast(message){
+
+  toast.textContent =
+    message;
+
+  toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer =
+    setTimeout(
+      () => toast.classList.remove("show"),
+      2800
     );
-
-  const user =
-    params.get("user");
-
-  if(!user){
-    return null;
-  }
-
-  return user.trim();
 }
 
 
-/* =======================================================
-   CURRENT USER
-======================================================= */
+/* =========================================================
+   DISPLAY PLAYER
+========================================================= */
 
-let currentUsername =
-  getUsernameFromURL();
+function displayPlayer(player){
 
-
-/*
-  IMPORTANT:
-
-  Do NOT immediately use "PLAYER".
-
-  If main.html was opened without ?user=,
-  redirect back to the login page.
-*/
-
-if(!currentUsername){
-
-  const saved =
-    localStorage.getItem("battlezone-user");
-
-  if(saved){
-
-    currentUsername =
-      saved.trim();
-
-  }else{
-
-    window.location.replace(
-      "./index.html"
-    );
-
-  }
-
-}
-
-
-/* =======================================================
-   DISPLAY USERNAME
-======================================================= */
-
-function updateUserUI(username){
-
-  if(!username){
+  if(!player){
     return;
   }
 
-  const visibleName =
-    username;
+  currentPlayer =
+    player;
 
-  profileName.textContent =
-    visibleName;
 
-  const firstLetter =
-    visibleName
+  const username =
+    player.username ||
+    player.displayName ||
+    "PLAYER";
+
+
+  const level =
+    Number(player.level || 1);
+
+
+  const vbucks =
+    Number(player.vbucks || 0);
+
+
+  const letter =
+    username
       .charAt(0)
       .toUpperCase();
 
-  profileAvatar.textContent =
-    firstLetter;
 
-  headerAvatar.textContent =
-    firstLetter;
+  playerName.textContent =
+    username;
 
-  document.title =
-    "BattleZone • " + visibleName;
+
+  playerLevel.textContent =
+    "LEVEL " + level;
+
+
+  topVbucks.textContent =
+    vbucks.toLocaleString();
+
+
+  topAvatar.textContent =
+    letter;
+
+
+  bottomAvatar.textContent =
+    letter;
 }
 
 
-/* =======================================================
-   PLAYER DATABASE HELPERS
-======================================================= */
+/* =========================================================
+   LOAD CURRENT PLAYER
+========================================================= */
 
-/*
-  Different versions of playerdb.js may export
-  different function names.
-
-  These helpers support common names.
-*/
-
-
-async function findPlayer(username){
-
-  if(typeof PlayerDB.getPlayer === "function"){
-    return await PlayerDB.getPlayer(username);
-  }
-
-  if(typeof PlayerDB.findPlayer === "function"){
-    return await PlayerDB.findPlayer(username);
-  }
-
-  if(typeof PlayerDB.getPlayerByUsername === "function"){
-    return await PlayerDB.getPlayerByUsername(username);
-  }
-
-  if(typeof PlayerDB.findUser === "function"){
-    return await PlayerDB.findUser(username);
-  }
-
-  return null;
-}
-
-
-async function getPlayers(){
-
-  if(typeof PlayerDB.getPlayers === "function"){
-    return await PlayerDB.getPlayers();
-  }
-
-  if(typeof PlayerDB.getAllPlayers === "function"){
-    return await PlayerDB.getAllPlayers();
-  }
-
-  if(typeof PlayerDB.listPlayers === "function"){
-    return await PlayerDB.listPlayers();
-  }
-
-  return [];
-}
-
-
-/* =======================================================
-   VERIFY CURRENT PLAYER
-======================================================= */
-
-async function verifyCurrentPlayer(){
+async function loadCurrentPlayer(){
 
   try{
 
-    const player =
-      await findPlayer(currentUsername);
-
     /*
-      If playerdb.js provides a lookup function,
-      make sure the account actually exists.
+      Wait for Firebase authentication.
     */
 
-    if(player === null ||
-       player === undefined){
+    const player =
+      await new Promise(
+        function(resolve,reject){
 
-      /*
-        Do not destroy the URL username just because
-        this particular playerdb implementation doesn't
-        expose lookup.
-      */
+          let finished = false;
 
-      if(
-        typeof PlayerDB.getPlayer === "function" ||
-        typeof PlayerDB.findPlayer === "function" ||
-        typeof PlayerDB.getPlayerByUsername === "function" ||
-        typeof PlayerDB.findUser === "function"
-      ){
+          const unsubscribe =
+            PlayerDB.auth.onAuthStateChanged(
+              async function(user){
 
-        throw new Error(
-          "PLAYER_NOT_FOUND"
-        );
-      }
+                if(finished){
+                  return;
+                }
 
+                finished = true;
+
+                unsubscribe();
+
+                if(!user){
+
+                  reject(
+                    new Error(
+                      "You are not logged in."
+                    )
+                  );
+
+                  return;
+                }
+
+                try{
+
+                  const data =
+                    await PlayerDB.getCurrentPlayer();
+
+                  resolve(data);
+
+                }catch(error){
+
+                  reject(error);
+                }
+
+              }
+            );
+
+        }
+      );
+
+
+    if(!player){
+
+      throw new Error(
+        "Player profile not found."
+      );
     }
 
-    updateUserUI(currentUsername);
 
-    return true;
+    displayPlayer(player);
+
+
+    /*
+      Make sure URL username is synchronized
+      with the actual Firebase PlayerDB username.
+    */
+
+    const expected =
+      encodeURIComponent(
+        player.username || ""
+      );
+
+
+    const currentUrl =
+      new URL(
+        window.location.href
+      );
+
+
+    if(
+      player.username &&
+      currentUrl.searchParams.get("user") !==
+      player.username
+    ){
+
+      currentUrl.searchParams.set(
+        "user",
+        player.username
+      );
+
+      window.history.replaceState(
+        {},
+        "",
+        currentUrl.toString()
+      );
+    }
+
+
+    loading.classList.add("hidden");
+
+
+    /*
+      Load invitations after login.
+    */
+
+    loadInvitations();
 
   }catch(error){
 
     console.error(
-      "Player verification failed:",
+      "[BattleZone]",
       error
     );
 
-    profileName.textContent =
+
+    loading.querySelector(".loader-text")
+      .textContent =
       "LOGIN REQUIRED";
 
-    setTimeout(() => {
 
-      window.location.replace(
-        "./index.html"
-      );
+    setTimeout(
+      function(){
 
-    },1200);
+        window.location.href =
+          "./index.html";
 
-    return false;
+      },
+      1500
+    );
   }
 }
 
 
-/* =======================================================
-   LOAD DATABASE PLAYERS
-======================================================= */
+/* =========================================================
+   LOAD PLAYERS
+========================================================= */
 
 async function loadPlayers(){
 
-  playersList.innerHTML =
-    '<div class="empty">Loading players...</div>';
+  playerList.innerHTML =
+    '<div class="empty">Loading PlayerDB...</div>';
+
 
   try{
 
-    const players =
-      await getPlayers();
-
-    if(!Array.isArray(players) ||
-       players.length === 0){
-
-      playersList.innerHTML =
-        '<div class="empty">No players available.</div>';
-
-      return;
-    }
+    allPlayers =
+      await PlayerDB.getPlayers();
 
 
-    /*
-      Only database players are rendered.
-    */
+    renderPlayers(
+      playerSearch.value
+    );
 
-    const validPlayers =
-      players
-        .map(player => {
+  }catch(error){
 
-          if(typeof player === "string"){
-            return {
-              username:player
-            };
-          }
-
-          return player;
-
-        })
-        .filter(player =>
-          player &&
-          typeof player.username === "string" &&
-          player.username.trim()
-        )
-        .filter(player =>
-          player.username.toLowerCase() !==
-          currentUsername.toLowerCase()
-        );
+    console.error(
+      "[BattleZone] PlayerDB error:",
+      error
+    );
 
 
-    if(validPlayers.length === 0){
-
-      playersList.innerHTML =
-        '<div class="empty">No other database players.</div>';
-
-      return;
-    }
+    playerList.innerHTML =
+      '<div class="empty">Unable to load players.</div>';
+  }
+}
 
 
-    playersList.innerHTML = "";
+/* =========================================================
+   RENDER PLAYERS
+========================================================= */
+
+function renderPlayers(search){
+
+  search =
+    String(search || "")
+      .trim()
+      .toLowerCase();
 
 
-    validPlayers.forEach(player => {
+  const filtered =
+    allPlayers.filter(
+      function(player){
 
-      const username =
-        player.username.trim();
+        if(
+          !player ||
+          !player.username
+        ){
+          return false;
+        }
+
+
+        /*
+          Never show the current player
+          in the invitation list.
+        */
+
+        if(
+          currentPlayer &&
+          player.uid === currentPlayer.uid
+        ){
+          return false;
+        }
+
+
+        if(!search){
+          return true;
+        }
+
+
+        return player.username
+          .toLowerCase()
+          .includes(search);
+      }
+    );
+
+
+  if(!filtered.length){
+
+    playerList.innerHTML =
+      '<div class="empty">No players found.</div>';
+
+    return;
+  }
+
+
+  playerList.innerHTML = "";
+
+
+  filtered.forEach(
+    function(player){
 
       const row =
         document.createElement("div");
@@ -1002,7 +1409,9 @@ async function loadPlayers(){
         "player-avatar";
 
       avatar.textContent =
-        username.charAt(0).toUpperCase();
+        player.username
+          .charAt(0)
+          .toUpperCase();
 
 
       const info =
@@ -1019,405 +1428,622 @@ async function loadPlayers(){
         "player-name";
 
       name.textContent =
-        username;
+        player.username;
 
 
-      const status =
+      const level =
         document.createElement("div");
 
-      status.className =
-        "player-status";
+      level.className =
+        "player-level";
 
-      status.textContent =
-        "DATABASE PLAYER";
-
-
-      const invite =
-        document.createElement("button");
-
-      invite.className =
-        "invite-small";
-
-      invite.textContent =
-        "INVITE";
-
-
-      invite.onclick = () => {
-
-        invitePlayer(username);
-
-      };
+      level.textContent =
+        "LEVEL " +
+        Number(player.level || 1);
 
 
       info.appendChild(name);
-      info.appendChild(status);
+      info.appendChild(level);
+
+
+      const button =
+        document.createElement("button");
+
+      button.className =
+        "invite";
+
+      button.textContent =
+        "INVITE";
+
+
+      /*
+        This player came directly from
+        Firestore PlayerDB, so it is a valid
+        database player.
+      */
+
+      button.addEventListener(
+        "click",
+        function(){
+
+          invitePlayer(
+            player.username
+          );
+
+        }
+      );
+
 
       row.appendChild(avatar);
       row.appendChild(info);
-      row.appendChild(invite);
+      row.appendChild(button);
 
-      playersList.appendChild(row);
+      playerList.appendChild(row);
 
-    });
-
-  }catch(error){
-
-    console.error(
-      "Could not load players:",
-      error
-    );
-
-    playersList.innerHTML =
-      '<div class="empty">Unable to load player database.</div>';
-  }
+    }
+  );
 }
 
 
-/* =======================================================
+/* =========================================================
    INVITE PLAYER
-======================================================= */
+========================================================= */
 
 async function invitePlayer(username){
 
-  inviteStatus.textContent = "";
-  inviteStatus.className =
-    "invite-status";
+  if(!currentPlayer){
 
-  username =
-    String(username || "").trim();
-
-
-  if(!username){
-
-    showInviteError(
-      "Enter a username."
+    showToast(
+      "You are not logged in."
     );
 
     return;
   }
-
-
-  if(
-    username.toLowerCase() ===
-    currentUsername.toLowerCase()
-  ){
-
-    showInviteError(
-      "You cannot invite yourself."
-    );
-
-    return;
-  }
-
-
-  inviteButton.disabled = true;
-  inviteButton.textContent = "...";
 
 
   try{
 
     /*
-      FIRST:
-      Verify the target player exists in Firebase.
+      Verify target AGAIN through Firebase.
+
+      This prevents an invitation from being
+      sent to a username that isn't in PlayerDB.
     */
 
     const target =
-      await findPlayer(username);
+      await PlayerDB.getPlayer(
+        username
+      );
 
 
-    /*
-      If playerdb.js supports lookup and returns
-      nothing, the target is NOT allowed.
-    */
+    if(!target){
+
+      showToast(
+        "Player is not in the database."
+      );
+
+      return;
+    }
+
 
     if(
-      target === null ||
-      target === undefined
+      target.uid ===
+      currentPlayer.uid
     ){
 
-      if(
-        typeof PlayerDB.getPlayer === "function" ||
-        typeof PlayerDB.findPlayer === "function" ||
-        typeof PlayerDB.getPlayerByUsername === "function" ||
-        typeof PlayerDB.findUser === "function"
-      ){
+      showToast(
+        "You cannot invite yourself."
+      );
 
-        throw new Error(
-          "PLAYER_NOT_FOUND"
-        );
-      }
+      return;
     }
 
 
-    /*
-      SECOND:
-      Send invitation through playerdb.js.
-    */
-
-    if(typeof PlayerDB.sendInvitation === "function"){
-
-      await PlayerDB.sendInvitation(
-        currentUsername,
-        username
-      );
-
-    }else if(typeof PlayerDB.sendInvite === "function"){
-
-      await PlayerDB.sendInvite(
-        currentUsername,
-        username
-      );
-
-    }else if(typeof PlayerDB.invitePlayer === "function"){
-
-      await PlayerDB.invitePlayer(
-        currentUsername,
-        username
-      );
-
-    }else{
-
-      /*
-        If there is no invitation function, don't pretend
-        that a Firebase invitation was created.
-      */
-
-      throw new Error(
-        "INVITE_FUNCTION_MISSING"
-      );
-    }
-
-
-    inviteStatus.className =
-      "invite-status success";
-
-    inviteStatus.textContent =
-      "Invitation sent to " + username;
-
-    showToast(
-      "Invitation sent to " + username
+    await PlayerDB.sendInvitation(
+      currentPlayer.username,
+      target.username
     );
 
+
+    showToast(
+      "Invitation sent to " +
+      target.username
+    );
 
   }catch(error){
 
     console.error(
-      "Invitation failed:",
+      "[BattleZone] Invitation error:",
       error
     );
 
-    if(error.message === "PLAYER_NOT_FOUND"){
 
-      showInviteError(
-        "That player is not in the database."
-      );
-
-    }else if(
-      error.message ===
-      "INVITE_FUNCTION_MISSING"
-    ){
-
-      showInviteError(
-        "playerdb.js has no invitation function."
-      );
-
-    }else{
-
-      showInviteError(
-        error.message ||
-        "Could not send invitation."
-      );
-
-    }
-
-  }finally{
-
-    inviteButton.disabled = false;
-    inviteButton.textContent = "INVITE";
-
+    showToast(
+      error.message ||
+      "Unable to send invitation."
+    );
   }
 }
 
 
-/* =======================================================
-   INVITE FORM
-======================================================= */
+/* =========================================================
+   LOAD INVITATIONS
+========================================================= */
 
-inviteButton.addEventListener(
+async function loadInvitations(){
+
+  if(!currentPlayer){
+    return;
+  }
+
+
+  try{
+
+    const invitations =
+      await PlayerDB.getInvitations();
+
+
+    renderInvitations(
+      invitations
+    );
+
+  }catch(error){
+
+    console.error(
+      "[BattleZone] Invitation load error:",
+      error
+    );
+
+
+    invitationList.innerHTML =
+      '<div class="empty">Unable to load invitations.</div>';
+  }
+}
+
+
+/* =========================================================
+   RENDER INVITATIONS
+========================================================= */
+
+function renderInvitations(
+  invitations
+){
+
+  invitationList.innerHTML = "";
+
+
+  if(
+    !invitations ||
+    !invitations.length
+  ){
+
+    invitationList.innerHTML =
+      '<div class="empty">No pending invitations.</div>';
+
+    return;
+  }
+
+
+  invitations.forEach(
+    function(invitation){
+
+      const box =
+        document.createElement("div");
+
+      box.className =
+        "invitation";
+
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "invitation-name";
+
+      name.textContent =
+        invitation.fromUsername ||
+        "PLAYER";
+
+
+      const text =
+        document.createElement("div");
+
+      text.style.color =
+        "#8292aa";
+
+      text.style.fontSize =
+        "14px";
+
+      text.textContent =
+        "wants to play with you";
+
+
+      const actions =
+        document.createElement("div");
+
+      actions.className =
+        "invitation-actions";
+
+
+      const accept =
+        document.createElement("button");
+
+      accept.className =
+        "accept";
+
+      accept.textContent =
+        "ACCEPT";
+
+
+      const decline =
+        document.createElement("button");
+
+      decline.className =
+        "decline";
+
+      decline.textContent =
+        "DECLINE";
+
+
+      accept.addEventListener(
+        "click",
+        async function(){
+
+          try{
+
+            await PlayerDB.acceptInvitation(
+              invitation.id
+            );
+
+            showToast(
+              "Invitation accepted."
+            );
+
+            loadInvitations();
+
+          }catch(error){
+
+            showToast(
+              error.message ||
+              "Unable to accept invitation."
+            );
+
+          }
+
+        }
+      );
+
+
+      decline.addEventListener(
+        "click",
+        async function(){
+
+          try{
+
+            await PlayerDB.declineInvitation(
+              invitation.id
+            );
+
+            showToast(
+              "Invitation declined."
+            );
+
+            loadInvitations();
+
+          }catch(error){
+
+            showToast(
+              error.message ||
+              "Unable to decline invitation."
+            );
+
+          }
+
+        }
+      );
+
+
+      actions.appendChild(
+        accept
+      );
+
+      actions.appendChild(
+        decline
+      );
+
+
+      box.appendChild(name);
+      box.appendChild(text);
+      box.appendChild(actions);
+
+
+      invitationList.appendChild(box);
+
+    }
+  );
+}
+
+
+/* =========================================================
+   OPEN PANEL
+========================================================= */
+
+function openPanel(panel){
+
+  panel.classList.add("open");
+}
+
+
+/* =========================================================
+   CLOSE PANELS
+========================================================= */
+
+function closePanels(){
+
+  playersPanel.classList.remove("open");
+  invitePanel.classList.remove("open");
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+document
+  .querySelectorAll("nav button")
+  .forEach(
+    function(button){
+
+      button.addEventListener(
+        "click",
+        function(){
+
+          document
+            .querySelectorAll("nav button")
+            .forEach(
+              function(item){
+                item.classList.remove("active");
+              }
+            );
+
+
+          button.classList.add(
+            "active"
+          );
+
+
+          const page =
+            button.dataset.page;
+
+
+          if(page === "play"){
+
+            closePanels();
+
+            return;
+          }
+
+
+          if(page === "locker"){
+
+            showToast(
+              "Locker is coming soon."
+            );
+
+            return;
+          }
+
+
+          if(page === "shop"){
+
+            showToast(
+              "Shop is coming soon."
+            );
+
+            return;
+          }
+
+
+          if(page === "battlepass"){
+
+            showToast(
+              "Battle Pass is coming soon."
+            );
+
+            return;
+          }
+
+
+          if(page === "quests"){
+
+            showToast(
+              "Quests are coming soon."
+            );
+
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   AVATAR CLICK
+========================================================= */
+
+topAvatar.addEventListener(
   "click",
-  () => {
+  function(){
 
-    invitePlayer(
-      inviteUsername.value
+    if(
+      playersPanel.classList.contains("open")
+    ){
+
+      closePanels();
+
+    }else{
+
+      openPanel(
+        playersPanel
+      );
+
+      loadPlayers();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   PROFILE CLICK
+========================================================= */
+
+bottomAvatar.addEventListener(
+  "click",
+  function(){
+
+    openPanel(
+      invitePanel
+    );
+
+    loadInvitations();
+
+  }
+);
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+playerSearch.addEventListener(
+  "input",
+  function(){
+
+    renderPlayers(
+      playerSearch.value
     );
 
   }
 );
 
 
-inviteUsername.addEventListener(
-  "keydown",
-  event => {
+document
+  .getElementById("searchButton")
+  .addEventListener(
+    "click",
+    function(){
 
-    if(event.key === "Enter"){
-
-      event.preventDefault();
-
-      invitePlayer(
-        inviteUsername.value
+      renderPlayers(
+        playerSearch.value
       );
 
     }
-
-  }
-);
+  );
 
 
-/* =======================================================
-   INVITE STATUS
-======================================================= */
+/* =========================================================
+   CLOSE BUTTONS
+========================================================= */
 
-function showInviteError(message){
+document
+  .querySelectorAll("[data-close]")
+  .forEach(
+    function(button){
 
-  inviteStatus.className =
-    "invite-status error";
+      button.addEventListener(
+        "click",
+        closePanels
+      );
 
-  inviteStatus.textContent =
-    message;
-}
-
-
-/* =======================================================
-   FRIENDS PANEL
-======================================================= */
-
-friendsButton.addEventListener(
-  "click",
-  async () => {
-
-    friendsPanel.classList.add("open");
-
-    await loadPlayers();
-
-  }
-);
+    }
+  );
 
 
-closeFriends.addEventListener(
-  "click",
-  () => {
-
-    friendsPanel.classList.remove("open");
-
-  }
-);
-
-
-/* =======================================================
-   TOAST
-======================================================= */
-
-let toastTimer;
-
-function showToast(message){
-
-  toast.textContent =
-    message;
-
-  toast.classList.add("show");
-
-  clearTimeout(toastTimer);
-
-  toastTimer =
-    setTimeout(() => {
-
-      toast.classList.remove("show");
-
-    },3000);
-}
-
-
-/* =======================================================
+/* =========================================================
    PLAY
-======================================================= */
+========================================================= */
 
 document
   .getElementById("playButton")
   .addEventListener(
     "click",
-    event => {
+    function(){
 
       const button =
-        event.currentTarget;
+        this;
+
+
+      button.disabled =
+        true;
 
       button.textContent =
         "MATCHMAKING...";
 
-      setTimeout(() => {
 
-        button.textContent =
-          "PLAY";
+      setTimeout(
+        function(){
 
-      },1600);
+          button.disabled =
+            false;
+
+          button.textContent =
+            "PLAY";
+
+          showToast(
+            "No matchmaking server connected yet."
+          );
+
+        },
+        1600
+      );
 
     }
   );
 
 
-/* =======================================================
-   NAV
-======================================================= */
+/* =========================================================
+   ESC
+========================================================= */
 
-document
-  .querySelectorAll("nav button")
-  .forEach(button => {
+document.addEventListener(
+  "keydown",
+  function(event){
 
-    button.addEventListener(
-      "click",
-      () => {
+    if(event.key === "Escape"){
 
-        document
-          .querySelectorAll("nav button")
-          .forEach(item =>
-            item.classList.remove("active")
-          );
+      closePanels();
 
-        button.classList.add("active");
+    }
 
-      }
-    );
-
-  });
-
-
-/* =======================================================
-   START
-======================================================= */
-
-(async function(){
-
-  if(!currentUsername){
-    return;
   }
+);
 
-  /*
-    Immediately show the URL username.
-    This prevents the old "PLAYER" fallback.
-  */
 
-  updateUserUI(
-    currentUsername
+/* =========================================================
+   START
+========================================================= */
+
+if(
+  window.PlayerDB
+){
+
+  loadCurrentPlayer();
+
+}else{
+
+  console.error(
+    "[BattleZone] PlayerDB was not loaded."
   );
 
+  loading.querySelector(".loader-text")
+    .textContent =
+    "PLAYER DATABASE ERROR";
 
-  const valid =
-    await verifyCurrentPlayer();
-
-  if(!valid){
-    return;
-  }
-
-})();
+}
 
 </script>
 
