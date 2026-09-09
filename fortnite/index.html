@@ -1,71 +1,1271 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Battle Royale Main Menu</title>
+<meta name="theme-color" content="#0b1428">
+<title>BattleZone</title>
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&display=swap');
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{font-family:'Barlow Condensed',Arial,sans-serif;color:#fff;background:
-radial-gradient(circle at 68% 35%,rgba(255,225,170,.35),transparent 22%),
-linear-gradient(135deg,#182d54,#416d9a 48%,#d68b58)}
-body:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 35%,rgba(0,0,0,.35))}
-.menu{position:relative;width:100%;height:100%;isolation:isolate}
-.top{height:82px;display:flex;align-items:center;padding:0 28px;background:linear-gradient(#07101eee,transparent);position:relative;z-index:2}
-.logo{font-size:31px;font-weight:900;font-style:italic;text-shadow:3px 4px #111;letter-spacing:1px}
-.logo span{color:#ffd02f}
-nav{display:flex;margin-left:45px;gap:6px}
-nav button{height:48px;padding:0 20px;background:transparent;border:0;color:white;font-size:18px;font-weight:900;cursor:pointer;transform:skew(-5deg)}
-nav button:hover,nav button.active{background:#ffffff1c}
-nav button.active{border-bottom:4px solid #ffd42e}
-.account{margin-left:auto;display:flex;align-items:center;gap:12px}
-.vbucks{background:#07101dcc;border:1px solid #ffffff45;padding:9px 14px;border-radius:5px;font-weight:800}
-.coin{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#62d8ff;color:#16466d;margin-right:5px}
-.avatar{width:43px;height:43px;display:grid;place-items:center;font-weight:900;background:linear-gradient(135deg,#202b4a,#d79769);border:2px solid white}
-.center{position:absolute;inset:82px 0 0;display:grid;place-items:center;text-align:center}
-.content{margin-top:-15px}
-.eyebrow{font-size:22px;letter-spacing:4px;font-weight:800}
-h1{font-size:clamp(70px,11vw,155px);line-height:.8;margin:13px 0;font-weight:900;font-style:italic;text-shadow:6px 7px #202b43,12px 15px 25px #0008}
-.tagline{font-size:23px;font-weight:800;letter-spacing:2px}
-.play{margin-top:30px;padding:16px 65px;background:#f5c82e;color:#172139;border:3px solid white;font-size:29px;font-weight:900;letter-spacing:2px;cursor:pointer;clip-path:polygon(3% 0,100% 0,97% 100%,0 100%)}
-.play:hover{filter:brightness(1.1);transform:translateY(-2px)}
-.bottom{position:absolute;left:24px;right:24px;bottom:20px;display:flex;justify-content:space-between;align-items:end}
-.profile{display:flex;gap:12px;align-items:center;background:#07101dcc;padding:10px 15px;border:1px solid #ffffff30}
-.pfp{width:48px;height:48px;background:linear-gradient(135deg,#273557,#d99a71);display:grid;place-items:center;font-size:20px;font-weight:900}
-.name{font-size:21px;font-weight:900}.level{font-size:15px;opacity:.75}
-.news{background:#07101dcc;border:1px solid #ffffff30;padding:10px 18px;text-align:center}
-.news b{font-size:17px}.news small{display:block;opacity:.7}
-@media(max-width:750px){nav{display:none}.top{padding:0 14px}.logo{font-size:24px}.eyebrow{font-size:16px}.tagline{font-size:17px}h1{font-size:65px}.play{font-size:23px;padding:13px 45px}.news{display:none}.bottom{left:12px;right:12px}.vbucks{font-size:14px;padding:7px}.avatar{width:37px;height:37px}}
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&display=swap');
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:'Barlow Condensed',Arial,sans-serif;
+  background:#07101e;
+  color:#fff;
+}
+
+body{
+  user-select:none;
+}
+
+button,
+input{
+  font:inherit;
+}
+
+/* =========================================================
+   GLOBAL SCREEN
+========================================================= */
+
+.screen{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:
+    opacity .6s ease,
+    transform .6s ease,
+    visibility .6s ease;
+}
+
+.screen.hidden{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:scale(1.03);
+}
+
+/* =========================================================
+   BOOT SCREEN
+========================================================= */
+
+#bootScreen{
+  z-index:100;
+  flex-direction:column;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(55,115,210,.35),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #050914,
+      #0c1930 55%,
+      #101c31
+    );
+}
+
+.boot-logo{
+  font-size:clamp(55px,10vw,125px);
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:3px;
+  text-shadow:
+    5px 6px #000,
+    0 0 40px rgba(76,150,255,.35);
+  animation:logoIn 1s ease both;
+}
+
+.boot-logo span{
+  color:#ffd02f;
+}
+
+.boot-subtitle{
+  margin-top:5px;
+  color:#9eb2d1;
+  font-size:16px;
+  letter-spacing:7px;
+  font-weight:700;
+  animation:fadeUp .8s .3s both;
+}
+
+.boot-loader{
+  width:min(420px,70vw);
+  margin-top:45px;
+}
+
+.boot-track{
+  height:5px;
+  overflow:hidden;
+  background:#ffffff18;
+}
+
+.boot-progress{
+  width:0%;
+  height:100%;
+  background:#ffd02f;
+  box-shadow:0 0 16px #ffd02f;
+  transition:width .25s ease;
+}
+
+.boot-status{
+  margin-top:12px;
+  text-align:center;
+  font-size:14px;
+  letter-spacing:2px;
+  color:#9caecc;
+}
+
+.boot-version{
+  position:absolute;
+  bottom:22px;
+  opacity:.45;
+  font-size:12px;
+  letter-spacing:2px;
+}
+
+@keyframes logoIn{
+  from{
+    opacity:0;
+    transform:scale(.8);
+  }
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(15px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* =========================================================
+   LOGIN SCREEN
+========================================================= */
+
+#loginScreen{
+  z-index:90;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(71,120,190,.35),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #111f3b,
+      #375f8c 50%,
+      #b66e4d
+    );
+}
+
+#loginScreen:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.55),
+      transparent 40%,
+      rgba(0,0,0,.65)
+    );
+  pointer-events:none;
+}
+
+.login-wrap{
+  position:relative;
+  width:min(450px,92vw);
+  animation:loginIn .7s ease both;
+}
+
+@keyframes loginIn{
+  from{
+    opacity:0;
+    transform:translateY(30px) scale(.96);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.login-brand{
+  text-align:center;
+  margin-bottom:25px;
+}
+
+.login-brand h1{
+  margin:0;
+  font-size:58px;
+  font-weight:900;
+  font-style:italic;
+  text-shadow:4px 5px #111;
+}
+
+.login-brand h1 span{
+  color:#ffd02f;
+}
+
+.login-brand p{
+  margin:5px 0 0;
+  color:#d5dfef;
+  letter-spacing:4px;
+  font-weight:700;
+}
+
+.login-card{
+  padding:32px;
+  background:rgba(5,13,27,.88);
+  border:1px solid rgba(255,255,255,.2);
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.45),
+    inset 0 1px rgba(255,255,255,.06);
+  backdrop-filter:blur(14px);
+}
+
+.login-title{
+  margin:0;
+  font-size:34px;
+  font-weight:900;
+  font-style:italic;
+}
+
+.login-description{
+  margin:4px 0 25px;
+  color:#94a6c2;
+  font-size:16px;
+}
+
+.field{
+  margin-bottom:16px;
+}
+
+.field label{
+  display:block;
+  margin-bottom:7px;
+  color:#b9c7dc;
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.field input{
+  width:100%;
+  height:52px;
+  padding:0 15px;
+  color:white;
+  background:#111d31;
+  border:1px solid #ffffff20;
+  outline:none;
+  border-radius:3px;
+  transition:
+    border-color .2s,
+    box-shadow .2s;
+  user-select:text;
+}
+
+.field input:focus{
+  border-color:#ffd02f;
+  box-shadow:0 0 0 2px #ffd02f22;
+}
+
+.login-button{
+  width:100%;
+  height:58px;
+  margin-top:7px;
+  border:2px solid white;
+  background:#f5c82e;
+  color:#162039;
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:2px;
+  cursor:pointer;
+  clip-path:polygon(
+    3% 0,
+    100% 0,
+    97% 100%,
+    0 100%
+  );
+  transition:
+    filter .2s,
+    transform .2s;
+}
+
+.login-button:hover{
+  filter:brightness(1.1);
+  transform:translateY(-2px);
+}
+
+.login-button:disabled{
+  opacity:.65;
+  cursor:wait;
+  transform:none;
+}
+
+.login-error{
+  min-height:22px;
+  margin:13px 0 0;
+  color:#ff7070;
+  font-size:14px;
+  font-weight:700;
+  text-align:center;
+}
+
+.login-hint{
+  margin-top:20px;
+  text-align:center;
+  color:#72829d;
+  font-size:13px;
+}
+
+.login-hint span{
+  color:#ffd02f;
+}
+
+/* =========================================================
+   MAIN MENU PREVIEW
+========================================================= */
+
+#menuScreen{
+  z-index:50;
+  background:
+    radial-gradient(
+      circle at 68% 35%,
+      rgba(255,225,170,.35),
+      transparent 22%
+    ),
+    linear-gradient(
+      135deg,
+      #182d54,
+      #416d9a 48%,
+      #d68b58
+    );
+}
+
+#menuScreen:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.35),
+      transparent 35%,
+      rgba(0,0,0,.35)
+    );
+}
+
+.menu{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+
+.top{
+  height:82px;
+  display:flex;
+  align-items:center;
+  padding:0 28px;
+  background:linear-gradient(#07101eee,transparent);
+  position:relative;
+  z-index:2;
+}
+
+.logo{
+  font-size:31px;
+  font-weight:900;
+  font-style:italic;
+  text-shadow:3px 4px #111;
+  letter-spacing:1px;
+}
+
+.logo span{
+  color:#ffd02f;
+}
+
+nav{
+  display:flex;
+  margin-left:45px;
+  gap:6px;
+}
+
+nav button{
+  height:48px;
+  padding:0 20px;
+  background:transparent;
+  border:0;
+  color:white;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+  transform:skew(-5deg);
+}
+
+nav button:hover,
+nav button.active{
+  background:#ffffff1c;
+}
+
+nav button.active{
+  border-bottom:4px solid #ffd42e;
+}
+
+.account{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.vbucks{
+  background:#07101dcc;
+  border:1px solid #ffffff45;
+  padding:9px 14px;
+  border-radius:5px;
+  font-weight:800;
+}
+
+.coin{
+  display:inline-grid;
+  place-items:center;
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#62d8ff;
+  color:#16466d;
+  margin-right:5px;
+}
+
+.avatar{
+  width:43px;
+  height:43px;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  background:linear-gradient(135deg,#202b4a,#d79769);
+  border:2px solid white;
+}
+
+.center{
+  position:absolute;
+  inset:82px 0 0;
+  display:grid;
+  place-items:center;
+  text-align:center;
+}
+
+.content{
+  margin-top:-15px;
+}
+
+.eyebrow{
+  font-size:22px;
+  letter-spacing:4px;
+  font-weight:800;
+}
+
+h2{
+  font-size:clamp(70px,11vw,155px);
+  line-height:.8;
+  margin:13px 0;
+  font-weight:900;
+  font-style:italic;
+  text-shadow:
+    6px 7px #202b43,
+    12px 15px 25px #0008;
+}
+
+.tagline{
+  font-size:23px;
+  font-weight:800;
+  letter-spacing:2px;
+}
+
+.play{
+  margin-top:30px;
+  padding:16px 65px;
+  background:#f5c82e;
+  color:#172139;
+  border:3px solid white;
+  font-size:29px;
+  font-weight:900;
+  letter-spacing:2px;
+  cursor:pointer;
+  clip-path:polygon(
+    3% 0,
+    100% 0,
+    97% 100%,
+    0 100%
+  );
+}
+
+.play:hover{
+  filter:brightness(1.1);
+  transform:translateY(-2px);
+}
+
+.bottom{
+  position:absolute;
+  left:24px;
+  right:24px;
+  bottom:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+}
+
+.profile{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  background:#07101dcc;
+  padding:10px 15px;
+  border:1px solid #ffffff30;
+}
+
+.pfp{
+  width:48px;
+  height:48px;
+  background:linear-gradient(135deg,#273557,#d99a71);
+  display:grid;
+  place-items:center;
+  font-size:20px;
+  font-weight:900;
+}
+
+.name{
+  font-size:21px;
+  font-weight:900;
+}
+
+.level{
+  font-size:15px;
+  opacity:.75;
+}
+
+.news{
+  background:#07101dcc;
+  border:1px solid #ffffff30;
+  padding:10px 18px;
+  text-align:center;
+}
+
+.news b{
+  font-size:17px;
+}
+
+.news small{
+  display:block;
+  opacity:.7;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:750px){
+
+  nav{
+    display:none;
+  }
+
+  .top{
+    padding:0 14px;
+  }
+
+  .logo{
+    font-size:24px;
+  }
+
+  .eyebrow{
+    font-size:16px;
+  }
+
+  .tagline{
+    font-size:17px;
+  }
+
+  h2{
+    font-size:65px;
+  }
+
+  .play{
+    font-size:23px;
+    padding:13px 45px;
+  }
+
+  .news{
+    display:none;
+  }
+
+  .bottom{
+    left:12px;
+    right:12px;
+  }
+
+  .vbucks{
+    font-size:14px;
+    padding:7px;
+  }
+
+  .avatar{
+    width:37px;
+    height:37px;
+  }
+
+  .login-card{
+    padding:25px 20px;
+  }
+
+  .login-brand h1{
+    font-size:48px;
+  }
+}
 </style>
 </head>
+
 <body>
-<div class="menu">
-<header class="top">
-<div class="logo">BATTLE<span>ZONE</span></div>
-<nav>
-<button class="active">PLAY</button><button>LOCKER</button><button>SHOP</button><button>BATTLE PASS</button><button>QUESTS</button>
-</nav>
-<div class="account"><div class="vbucks"><span class="coin">V</span>2,850</div><div class="avatar">K</div></div>
-</header>
 
-<main class="center">
-<section class="content">
-<div class="eyebrow">CHAPTER 2 • SEASON 9</div>
-<h1>BATTLE<br>ROYAL</h1>
-<div class="tagline">DROP IN. SURVIVE. CONQUER.</div>
-<button class="play" id="play">PLAY</button>
+<!-- =======================================================
+     BOOT SCREEN
+======================================================== -->
+<section id="bootScreen" class="screen">
+
+  <div class="boot-logo">
+    BATTLE<span>ZONE</span>
+  </div>
+
+  <div class="boot-subtitle">
+    BATTLE ROYALE
+  </div>
+
+  <div class="boot-loader">
+    <div class="boot-track">
+      <div id="bootProgress" class="boot-progress"></div>
+    </div>
+
+    <div id="bootStatus" class="boot-status">
+      INITIALIZING...
+    </div>
+  </div>
+
+  <div class="boot-version">
+    BATTLEZONE • CLIENT 1.0
+  </div>
+
 </section>
-</main>
 
-<footer class="bottom">
-<div class="profile"><div class="pfp">K</div><div><div class="name">PLAYER ONE</div><div class="level">LEVEL 42</div></div></div>
-<div class="news"><b>SEASON UPDATE</b><small>New challenges are waiting.</small></div>
-</footer>
-</div>
-<script>
-document.getElementById('play').onclick=()=>{const b=document.getElementById('play');b.textContent='MATCHMAKING…';setTimeout(()=>b.textContent='PLAY',1600)}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')})
+
+<!-- =======================================================
+     LOGIN SCREEN
+======================================================== -->
+<section id="loginScreen" class="screen hidden">
+
+  <div class="login-wrap">
+
+    <div class="login-brand">
+      <h1>BATTLE<span>ZONE</span></h1>
+      <p>ONLINE SERVICES</p>
+    </div>
+
+    <div class="login-card">
+
+      <h2 class="login-title">
+        SIGN IN
+      </h2>
+
+      <p class="login-description">
+        Log in to continue to BattleZone.
+      </p>
+
+      <form id="loginForm">
+
+        <div class="field">
+          <label for="username">
+            USERNAME
+          </label>
+
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            placeholder="Enter username"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="password">
+            PASSWORD
+          </label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Enter password"
+            required
+          >
+        </div>
+
+        <button
+          id="loginButton"
+          class="login-button"
+          type="submit"
+        >
+          LOGIN
+        </button>
+
+        <div
+          id="loginError"
+          class="login-error"
+          aria-live="polite"
+        ></div>
+
+      </form>
+
+      <div class="login-hint">
+        SECURE PLAYER DATABASE
+        <span>•</span>
+        ONLINE
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     MAIN MENU FALLBACK / PREVIEW
+======================================================== -->
+<section id="menuScreen" class="screen hidden">
+
+  <div class="menu">
+
+    <header class="top">
+
+      <div class="logo">
+        BATTLE<span>ZONE</span>
+      </div>
+
+      <nav>
+        <button class="active">PLAY</button>
+        <button>LOCKER</button>
+        <button>SHOP</button>
+        <button>BATTLE PASS</button>
+        <button>QUESTS</button>
+      </nav>
+
+      <div class="account">
+
+        <div class="vbucks">
+          <span class="coin">V</span>
+          2,850
+        </div>
+
+        <div id="menuAvatar" class="avatar">
+          K
+        </div>
+
+      </div>
+
+    </header>
+
+    <main class="center">
+
+      <section class="content">
+
+        <div class="eyebrow">
+          CHAPTER 2 • SEASON 9
+        </div>
+
+        <h2>
+          BATTLE<br>
+          ROYAL
+        </h2>
+
+        <div class="tagline">
+          DROP IN. SURVIVE. CONQUER.
+        </div>
+
+        <button class="play" id="play">
+          PLAY
+        </button>
+
+      </section>
+
+    </main>
+
+    <footer class="bottom">
+
+      <div class="profile">
+
+        <div id="menuPfp" class="pfp">
+          K
+        </div>
+
+        <div>
+          <div id="menuName" class="name">
+            PLAYER
+          </div>
+
+          <div class="level">
+            LEVEL 1
+          </div>
+        </div>
+
+      </div>
+
+      <div class="news">
+        <b>SEASON UPDATE</b>
+        <small>New challenges are waiting.</small>
+      </div>
+
+    </footer>
+
+  </div>
+
+</section>
+
+
+<script type="module">
+
+/*
+=========================================================
+   PLAYER DATABASE
+=========================================================
+
+   Your existing database remains responsible for
+   authentication.
+
+   This file supports common playerdb.js exports:
+
+   - loginPlayer(username,password)
+   - login(username,password)
+   - authenticate(username,password)
+   - signIn(username,password)
+
+   If playerdb.js exports a default object, that is
+   supported as well.
+=========================================================
+*/
+
+import * as PlayerDBModule from "./js/playerdb.js";
+
+const PlayerDB =
+  PlayerDBModule.default || PlayerDBModule;
+
+
+/* =======================================================
+   ELEMENTS
+======================================================= */
+
+const bootScreen =
+  document.getElementById("bootScreen");
+
+const loginScreen =
+  document.getElementById("loginScreen");
+
+const menuScreen =
+  document.getElementById("menuScreen");
+
+const bootProgress =
+  document.getElementById("bootProgress");
+
+const bootStatus =
+  document.getElementById("bootStatus");
+
+const loginForm =
+  document.getElementById("loginForm");
+
+const loginButton =
+  document.getElementById("loginButton");
+
+const loginError =
+  document.getElementById("loginError");
+
+const usernameInput =
+  document.getElementById("username");
+
+const passwordInput =
+  document.getElementById("password");
+
+
+/* =======================================================
+   SCREEN HELPERS
+======================================================= */
+
+function showScreen(screen){
+
+  [
+    bootScreen,
+    loginScreen,
+    menuScreen
+  ].forEach(s => {
+
+    if(s === screen){
+      s.classList.remove("hidden");
+    }else{
+      s.classList.add("hidden");
+    }
+
+  });
+
+}
+
+
+/* =======================================================
+   BOOT
+======================================================= */
+
+function bootStep(progress,status){
+
+  bootProgress.style.width =
+    progress + "%";
+
+  bootStatus.textContent =
+    status;
+}
+
+
+async function boot(){
+
+  bootStep(10,"INITIALIZING CLIENT...");
+  await wait(350);
+
+  bootStep(30,"LOADING PLAYER DATABASE...");
+  await wait(350);
+
+  bootStep(50,"CHECKING ONLINE SERVICES...");
+  await wait(350);
+
+  bootStep(70,"LOADING BATTLEZONE...");
+  await wait(350);
+
+  bootStep(90,"PREPARING LOGIN...");
+  await wait(350);
+
+  bootStep(100,"READY");
+  await wait(450);
+
+  showScreen(loginScreen);
+
+  setTimeout(() => {
+    usernameInput.focus();
+  },500);
+}
+
+
+/* =======================================================
+   LOGIN
+========================================================= */
+
+loginForm.addEventListener("submit",async event => {
+
+  event.preventDefault();
+
+  loginError.textContent = "";
+
+  const username =
+    usernameInput.value.trim();
+
+  const password =
+    passwordInput.value;
+
+  if(!username || !password){
+
+    loginError.textContent =
+      "Enter your username and password.";
+
+    return;
+  }
+
+  loginButton.disabled = true;
+  loginButton.textContent = "LOGGING IN...";
+
+  try{
+
+    /*
+      Try the real playerdb.js functions.
+    */
+
+    let result;
+
+    if(typeof PlayerDB.loginPlayer === "function"){
+
+      result =
+        await PlayerDB.loginPlayer(
+          username,
+          password
+        );
+
+    }else if(typeof PlayerDB.login === "function"){
+
+      result =
+        await PlayerDB.login(
+          username,
+          password
+        );
+
+    }else if(typeof PlayerDB.authenticate === "function"){
+
+      result =
+        await PlayerDB.authenticate(
+          username,
+          password
+        );
+
+    }else if(typeof PlayerDB.signIn === "function"){
+
+      result =
+        await PlayerDB.signIn(
+          username,
+          password
+        );
+
+    }else{
+
+      throw new Error(
+        "No login function was exported by ./js/playerdb.js"
+      );
+    }
+
+
+    /*
+      playerdb.js can return:
+
+      {
+        username: "PlayerName"
+      }
+
+      or
+
+      {
+        user: {
+          username: "PlayerName"
+        }
+      }
+
+      or simply true.
+    */
+
+    let finalUsername =
+      username;
+
+    if(result){
+
+      if(typeof result.username === "string"){
+        finalUsername =
+          result.username;
+      }
+
+      else if(
+        result.user &&
+        typeof result.user.username === "string"
+      ){
+        finalUsername =
+          result.user.username;
+      }
+
+      else if(
+        result.player &&
+        typeof result.player.username === "string"
+      ){
+        finalUsername =
+          result.player.username;
+      }
+
+      else if(
+        typeof result.name === "string"
+      ){
+        finalUsername =
+          result.name;
+      }
+    }
+
+
+    if(!finalUsername){
+
+      throw new Error(
+        "Login succeeded but no username was returned."
+      );
+    }
+
+
+    /*
+      Save the player locally as a convenience.
+      Authentication itself remains handled by
+      playerdb.js.
+    */
+
+    localStorage.setItem(
+      "battlezone-user",
+      finalUsername
+    );
+
+
+    /*
+      IMPORTANT:
+      Redirect exactly to:
+
+      main.html?user=username
+
+      encodeURIComponent prevents usernames containing
+      spaces or special characters from breaking the URL.
+    */
+
+    loginButton.textContent =
+      "LOADING...";
+
+    await wait(450);
+
+    window.location.href =
+      "./main.html?user=" +
+      encodeURIComponent(finalUsername);
+
+  }catch(error){
+
+    console.error(
+      "BattleZone login failed:",
+      error
+    );
+
+    loginError.textContent =
+      getLoginError(error);
+
+    loginButton.disabled = false;
+    loginButton.textContent = "LOGIN";
+  }
+
+});
+
+
+/* =======================================================
+   ERROR HANDLING
+========================================================= */
+
+function getLoginError(error){
+
+  const code =
+    error?.code || "";
+
+  const message =
+    error?.message || "";
+
+  if(
+    code === "auth/invalid-credential" ||
+    code === "auth/wrong-password"
+  ){
+    return "Incorrect username or password.";
+  }
+
+  if(code === "auth/user-not-found"){
+    return "Player account not found.";
+  }
+
+  if(code === "auth/network-request-failed"){
+    return "Network error. Check your connection.";
+  }
+
+  if(message){
+    return message;
+  }
+
+  return "Login failed. Please try again.";
+}
+
+
+/* =======================================================
+   MAIN MENU NAVIGATION
+========================================================= */
+
+document
+  .querySelectorAll("nav button")
+  .forEach(button => {
+
+    button.addEventListener("click",() => {
+
+      document
+        .querySelectorAll("nav button")
+        .forEach(item =>
+          item.classList.remove("active")
+        );
+
+      button.classList.add("active");
+    });
+
+  });
+
+
+/* =======================================================
+   PLAY BUTTON
+========================================================= */
+
+document
+  .getElementById("play")
+  .addEventListener("click",event => {
+
+    const button =
+      event.currentTarget;
+
+    button.textContent =
+      "MATCHMAKING...";
+
+    setTimeout(() => {
+
+      button.textContent =
+        "PLAY";
+
+    },1600);
+
+  });
+
+
+/* =======================================================
+   UTILITY
+========================================================= */
+
+function wait(ms){
+
+  return new Promise(
+    resolve => setTimeout(resolve,ms)
+  );
+
+}
+
+
+/* =======================================================
+   START
+========================================================= */
+
+boot();
+
 </script>
+
 </body>
 </html>
