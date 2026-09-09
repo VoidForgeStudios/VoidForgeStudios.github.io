@@ -22,205 +22,125 @@ html,body{
   background:#07101e;
 }
 
-button,input{
-  font:inherit;
-}
+button,input{font:inherit}
+button{cursor:pointer}
 
-button{
-  cursor:pointer;
-}
-
-.hidden{
-  display:none!important;
-}
-
-/* =========================================================
-   BACKGROUND
-========================================================= */
+.hidden{display:none!important}
 
 .app{
   position:relative;
   width:100%;
   height:100%;
   overflow:hidden;
-
   background:
-    radial-gradient(
-      circle at 72% 32%,
-      rgba(255,220,170,.35),
-      transparent 22%
-    ),
-    linear-gradient(
-      135deg,
-      #172c52,
-      #416f9d 48%,
-      #c57c55
-    );
+    radial-gradient(circle at 72% 30%,rgba(255,220,170,.35),transparent 23%),
+    linear-gradient(135deg,#172c52,#416f9d 48%,#c57c55);
 }
 
 .app:before{
   content:"";
   position:absolute;
   inset:0;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.48),
-      transparent 35%,
-      rgba(0,0,0,.55)
-    );
-
   pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.52),transparent 38%,rgba(0,0,0,.62));
 }
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .header{
   position:absolute;
+  top:0;
   left:0;
   right:0;
-  top:0;
-
-  height:76px;
-
+  height:78px;
+  z-index:20;
   display:flex;
   align-items:center;
-
   padding:0 24px;
-
-  z-index:10;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(4,10,20,.95),
-      rgba(4,10,20,.45),
-      transparent
-    );
+  background:linear-gradient(#07101ef2,transparent);
 }
 
 .logo{
-  font-size:30px;
+  font-size:31px;
   font-weight:900;
   font-style:italic;
   letter-spacing:1px;
   text-shadow:3px 4px #111;
 }
 
-.logo span{
-  color:#ffd02f;
-}
+.logo span{color:#ffd02f}
 
 .header-right{
   margin-left:auto;
-
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:9px;
 }
 
-.header-button{
-  min-width:45px;
-  height:43px;
-
+.icon-btn{
+  position:relative;
+  width:44px;
+  height:44px;
   border:1px solid #ffffff28;
   background:#07101dcc;
-  color:white;
-
-  display:grid;
-  place-items:center;
-
-  font-weight:900;
-
+  color:#fff;
+  font-size:18px;
   transition:.2s;
 }
 
-.header-button:hover{
+.icon-btn:hover{
   background:#ffffff20;
   transform:translateY(-1px);
 }
 
-.notification{
-  position:relative;
-}
-
-.notification-dot{
+.dot{
   position:absolute;
   right:5px;
   top:5px;
-
   width:8px;
   height:8px;
-
   border-radius:50%;
-  background:#ff4d5e;
-
-  box-shadow:0 0 10px #ff4d5e;
+  background:#ff4f62;
+  box-shadow:0 0 12px #ff4f62;
 }
 
 .vbucks{
   padding:9px 14px;
-
   border:1px solid #ffffff35;
   background:#07101dcc;
-
   font-weight:900;
 }
 
 .coin{
   display:inline-grid;
   place-items:center;
-
   width:20px;
   height:20px;
-
   border-radius:50%;
-
   background:#62d8ff;
   color:#16466d;
-
   margin-right:5px;
 }
 
 .avatar{
   width:43px;
   height:43px;
-
   display:grid;
   place-items:center;
-
-  border:2px solid white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #202b4a,
-      #d79769
-    );
-
+  border:2px solid #fff;
+  background:linear-gradient(135deg,#202b4a,#d79769);
   font-weight:900;
 }
 
-/* =========================================================
-   CENTER
-========================================================= */
-
 .center{
   position:absolute;
-
-  inset:76px 0 0;
-
+  inset:78px 0 0;
   display:grid;
   place-items:center;
-
   text-align:center;
 }
 
 .center-content{
-  margin-top:-20px;
+  margin-top:-15px;
 }
 
 .eyebrow{
@@ -230,17 +150,12 @@ button{
 }
 
 .title{
-  margin:12px 0;
-
+  margin:13px 0;
   font-size:clamp(70px,11vw,150px);
   line-height:.78;
-
   font-weight:900;
   font-style:italic;
-
-  text-shadow:
-    6px 7px #202b43,
-    12px 15px 25px #0008;
+  text-shadow:6px 7px #202b43,12px 15px 25px #0008;
 }
 
 .tagline{
@@ -251,185 +166,134 @@ button{
 
 .play{
   margin-top:28px;
-
   padding:15px 70px;
-
+  border:3px solid white;
   background:#f5c82e;
   color:#172139;
-
-  border:3px solid white;
-
   font-size:29px;
   font-weight:900;
   letter-spacing:2px;
-
-  clip-path:polygon(
-    3% 0,
-    100% 0,
-    97% 100%,
-    0 100%
-  );
-
+  clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);
   transition:.2s;
 }
 
 .play:hover{
+  transform:translateY(-2px);
   filter:brightness(1.1);
-  transform:translateY(-2px) scale(1.02);
 }
 
-/* =========================================================
-   PARTY PANEL
-========================================================= */
+/* PARTY */
 
 .party{
   position:absolute;
-
   left:20px;
-  top:95px;
-
-  width:285px;
-
+  top:98px;
+  width:300px;
+  z-index:15;
   padding:15px;
-
-  background:rgba(5,13,27,.9);
-
-  border:
-    1px solid
-    rgba(255,255,255,.18);
-
-  box-shadow:
-    0 20px 50px #0005;
-
-  backdrop-filter:blur(12px);
-
-  z-index:9;
+  background:#050d1bea;
+  border:1px solid #ffffff20;
+  box-shadow:0 20px 60px #0006;
+  backdrop-filter:blur(14px);
 }
 
-.party-title{
+.party-header{
   display:flex;
-  justify-content:space-between;
   align-items:center;
-
+  justify-content:space-between;
   margin-bottom:12px;
 }
 
-.party-title strong{
-  font-size:20px;
-  font-weight:900;
+.party-header strong{
+  font-size:21px;
 }
 
 .party-count{
-  font-size:12px;
-  color:#8ea1be;
+  color:#8da0bb;
+  font-size:13px;
 }
 
-.party-player{
+.party-slot{
+  min-height:61px;
   display:flex;
   align-items:center;
   gap:10px;
-
-  padding:9px;
-
-  background:#ffffff0b;
-
+  margin-bottom:7px;
+  padding:8px;
+  background:#ffffff08;
   border:1px solid #ffffff12;
 }
 
 .party-avatar{
-  width:38px;
-  height:38px;
-
+  width:42px;
+  height:42px;
   display:grid;
   place-items:center;
-
-  background:
-    linear-gradient(
-      135deg,
-      #26375d,
-      #d79769
-    );
-
   border:1px solid white;
-
+  background:linear-gradient(135deg,#26375d,#d79769);
   font-weight:900;
 }
 
 .party-info{
   min-width:0;
+  flex:1;
 }
 
 .party-name{
-  font-weight:900;
   font-size:17px;
-
-  white-space:nowrap;
+  font-weight:900;
   overflow:hidden;
   text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 .party-status{
-  color:#7ee0a5;
   font-size:12px;
+  color:#76dfa1;
 }
 
-.invite-button{
-  margin-left:auto;
+.slot-empty{
+  color:#64748a;
+  font-size:14px;
+}
 
+.invite-small{
   padding:7px 10px;
-
-  border:1px solid #ffffff25;
-
+  border:0;
   background:#ffd02f;
-  color:#182039;
-
+  color:#172139;
   font-weight:900;
 }
 
-/* =========================================================
-   BOTTOM
-========================================================= */
+/* BOTTOM */
 
 .bottom{
   position:absolute;
-
   left:20px;
   right:20px;
   bottom:18px;
-
+  z-index:10;
   display:flex;
   justify-content:space-between;
   align-items:end;
-
-  z-index:8;
 }
 
 .profile{
   display:flex;
   align-items:center;
   gap:12px;
-
   padding:10px 15px;
-
   background:#07101ddd;
-
   border:1px solid #ffffff30;
 }
 
 .profile-avatar{
   width:50px;
   height:50px;
-
   display:grid;
   place-items:center;
-
-  background:
-    linear-gradient(
-      135deg,
-      #273557,
-      #d99a71
-    );
-
+  background:linear-gradient(135deg,#273557,#d99a71);
+  border:1px solid #ffffff55;
   font-size:21px;
   font-weight:900;
 }
@@ -440,73 +304,56 @@ button{
 }
 
 .profile-level{
-  color:#a5b4ca;
+  color:#a6b4c8;
   font-size:14px;
 }
 
 .news{
   padding:11px 18px;
-
-  text-align:center;
-
   background:#07101ddd;
-
   border:1px solid #ffffff30;
+  text-align:center;
 }
 
-.news b{
-  font-size:17px;
-}
-
+.news b{font-size:17px}
 .news small{
   display:block;
   color:#aab6c8;
 }
 
-/* =========================================================
-   OVERLAY
-========================================================= */
+/* MODAL */
 
 .overlay{
   position:fixed;
   inset:0;
-
+  z-index:100;
   display:flex;
-  align-items:center;
   justify-content:center;
-
-  background:rgba(0,0,0,.62);
-
-  z-index:50;
-
-  backdrop-filter:blur(8px);
+  align-items:center;
+  background:#000a;
+  backdrop-filter:blur(9px);
 }
 
 .modal{
-  width:min(470px,92vw);
-
-  padding:25px;
-
-  background:#07101ef5;
-
+  width:min(520px,94vw);
+  max-height:85vh;
+  overflow:hidden;
+  padding:24px;
+  background:#07101ef7;
   border:1px solid #ffffff25;
-
-  box-shadow:
-    0 30px 90px #0009;
+  box-shadow:0 30px 100px #0009;
 }
 
 .modal-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-
   margin-bottom:18px;
 }
 
 .modal-title{
   margin:0;
-
-  font-size:30px;
+  font-size:32px;
   font-weight:900;
   font-style:italic;
 }
@@ -514,339 +361,228 @@ button{
 .close{
   width:38px;
   height:38px;
-
   border:1px solid #ffffff20;
-
   background:#ffffff0b;
-  color:white;
-
-  font-size:20px;
+  color:#fff;
+  font-size:22px;
 }
 
-.close:hover{
-  background:#ffffff20;
+.close:hover{background:#ffffff20}
+
+/* PLAYER SEARCH */
+
+.search{
+  display:flex;
+  gap:8px;
+  margin-bottom:15px;
 }
 
-/* =========================================================
-   INVITATION
-========================================================= */
+.search input{
+  flex:1;
+  min-width:0;
+  height:48px;
+  padding:0 13px;
+  outline:none;
+  border:1px solid #ffffff20;
+  background:#111d31;
+  color:#fff;
+}
+
+.search input:focus{
+  border-color:#ffd02f;
+}
+
+.search button{
+  padding:0 16px;
+  border:0;
+  background:#ffd02f;
+  color:#172139;
+  font-weight:900;
+}
+
+.results{
+  max-height:390px;
+  overflow:auto;
+}
+
+.player{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px;
+  margin-bottom:7px;
+  background:#ffffff08;
+  border:1px solid #ffffff12;
+}
+
+.player-avatar{
+  width:43px;
+  height:43px;
+  flex:none;
+  display:grid;
+  place-items:center;
+  border:1px solid #ffffff80;
+  background:linear-gradient(135deg,#26375d,#a96f5b);
+  font-weight:900;
+}
+
+.player-info{
+  min-width:0;
+  flex:1;
+}
+
+.player-name{
+  font-size:18px;
+  font-weight:900;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.player-status{
+  color:#7bdba0;
+  font-size:12px;
+}
+
+.player-action{
+  padding:8px 11px;
+  border:0;
+  background:#ffd02f;
+  color:#172139;
+  font-weight:900;
+}
+
+.player-action:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.empty{
+  padding:30px 10px;
+  text-align:center;
+  color:#8190a7;
+}
+
+/* INVITATION */
 
 .invite-card{
-  padding:16px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #152b4d,
-      #0c1729
-    );
-
+  padding:18px;
+  background:linear-gradient(135deg,#162e50,#0a1425);
   border:1px solid #ffffff18;
 }
 
 .invite-player{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:13px;
 }
 
 .big-avatar{
-  width:55px;
-  height:55px;
-
+  width:58px;
+  height:58px;
   display:grid;
   place-items:center;
-
   border:2px solid white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #354a79,
-      #d79a70
-    );
-
-  font-size:22px;
+  background:linear-gradient(135deg,#354a79,#d79a70);
+  font-size:23px;
   font-weight:900;
 }
 
 .invite-name{
-  font-size:22px;
+  font-size:23px;
   font-weight:900;
 }
 
-.invite-text{
-  color:#98a8c0;
-  font-size:14px;
+.invite-description{
+  color:#91a1b9;
 }
 
 .invite-actions{
   display:flex;
   gap:10px;
-
-  margin-top:18px;
+  margin-top:20px;
 }
 
 .accept,
 .decline{
   flex:1;
-
-  height:48px;
-
+  height:49px;
   border:2px solid white;
-
   font-weight:900;
   font-size:18px;
 }
 
 .accept{
-  background:#f5c82e;
+  background:#ffd02f;
   color:#172139;
 }
 
 .decline{
   background:#263246;
-  color:white;
+  color:#fff;
 }
 
-/* =========================================================
-   FRIENDS
-========================================================= */
-
-.friend-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-
-  max-height:350px;
-  overflow:auto;
-}
-
-.friend{
-  display:flex;
-  align-items:center;
-  gap:10px;
-
-  padding:10px;
-
-  background:#ffffff08;
-
-  border:1px solid #ffffff12;
-}
-
-.friend-avatar{
-  width:40px;
-  height:40px;
-
-  display:grid;
-  place-items:center;
-
-  border:1px solid white;
-
-  background:#26375d;
-
-  font-weight:900;
-}
-
-.friend-info{
-  flex:1;
-}
-
-.friend-name{
-  font-weight:900;
-}
-
-.friend-status{
-  color:#75d99a;
-  font-size:12px;
-}
-
-.friend-invite{
-  padding:7px 11px;
-
-  background:#ffd02f;
-  color:#172139;
-
-  border:0;
-
-  font-weight:900;
-}
-
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
-
-.notification-item{
-  display:flex;
-  gap:12px;
-
-  padding:13px 0;
-
-  border-bottom:1px solid #ffffff12;
-}
-
-.notification-icon{
-  width:38px;
-  height:38px;
-
-  display:grid;
-  place-items:center;
-
-  background:#ffffff0c;
-}
-
-.notification-item strong{
-  display:block;
-  font-size:16px;
-}
-
-.notification-item small{
-  color:#8191a9;
-}
-
-/* =========================================================
-   SETTINGS
-========================================================= */
+/* SETTINGS */
 
 .setting{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-
-  padding:13px 0;
-
+  align-items:center;
+  padding:14px 0;
   border-bottom:1px solid #ffffff12;
 }
 
-.setting-label{
-  font-weight:800;
-}
+.setting-label{font-weight:800}
 
 .toggle{
   width:48px;
   height:25px;
-
-  border-radius:20px;
-
-  border:0;
-
-  background:#34435a;
-
   position:relative;
+  border:0;
+  border-radius:20px;
+  background:#34435a;
 }
 
 .toggle:after{
   content:"";
-
   position:absolute;
-
-  top:4px;
   left:4px;
-
+  top:4px;
   width:17px;
   height:17px;
-
   border-radius:50%;
-
-  background:white;
-
+  background:#fff;
   transition:.2s;
 }
 
-.toggle.on{
-  background:#ffd02f;
-}
-
-.toggle.on:after{
-  left:27px;
-}
-
-/* =========================================================
-   SEARCH / ADD FRIEND
-========================================================= */
-
-.friend-search{
-  display:flex;
-  gap:8px;
-
-  margin-bottom:15px;
-}
-
-.friend-search input{
-  flex:1;
-
-  height:45px;
-
-  padding:0 12px;
-
-  color:white;
-
-  background:#111d31;
-
-  border:1px solid #ffffff20;
-
-  outline:none;
-}
-
-.friend-search button{
-  padding:0 15px;
-
-  border:0;
-
-  background:#ffd02f;
-
-  color:#172139;
-
-  font-weight:900;
-}
-
-/* =========================================================
-   LOGOUT
-========================================================= */
+.toggle.on{background:#ffd02f}
+.toggle.on:after{left:27px}
 
 .logout{
   width:100%;
   height:45px;
-
-  margin-top:18px;
-
-  background:#401f28;
-
-  color:#ff8998;
-
+  margin-top:20px;
   border:1px solid #ff526d44;
-
+  background:#401f28;
+  color:#ff8998;
   font-weight:900;
 }
 
-/* =========================================================
-   TOAST
-========================================================= */
+/* TOAST */
 
 .toast{
   position:fixed;
-
   left:50%;
   bottom:30px;
-
-  transform:
-    translate(-50%,20px);
-
+  z-index:300;
   padding:12px 20px;
-
-  background:#07101ef2;
-
+  background:#07101ef5;
   border:1px solid #ffffff25;
-
   box-shadow:0 15px 40px #0007;
-
   opacity:0;
   visibility:hidden;
-
+  transform:translate(-50%,20px);
   transition:.3s;
-
-  z-index:100;
-
   font-weight:800;
 }
 
@@ -856,28 +592,24 @@ button{
   transform:translate(-50%,0);
 }
 
-/* =========================================================
-   MOBILE
-========================================================= */
+/* MOBILE */
 
 @media(max-width:750px){
 
   .header{
-    padding:0 12px;
+    padding:0 10px;
   }
 
-  .logo{
-    font-size:23px;
+  .logo{font-size:23px}
+
+  .icon-btn{
+    width:38px;
+    height:38px;
   }
 
   .vbucks{
-    font-size:13px;
     padding:7px;
-  }
-
-  .header-button{
-    width:38px;
-    min-width:38px;
+    font-size:13px;
   }
 
   .avatar{
@@ -886,39 +618,25 @@ button{
   }
 
   .party{
-    left:10px;
-    top:82px;
-    width:250px;
+    left:8px;
+    top:84px;
+    width:260px;
   }
 
-  .center{
-    inset:65px 0 0;
-  }
-
-  .eyebrow{
-    font-size:15px;
-  }
-
-  .title{
-    font-size:65px;
-  }
-
-  .tagline{
-    font-size:16px;
-  }
+  .title{font-size:64px}
+  .eyebrow{font-size:15px}
+  .tagline{font-size:16px}
 
   .play{
-    font-size:23px;
     padding:13px 45px;
+    font-size:23px;
   }
+
+  .news{display:none}
 
   .bottom{
-    left:10px;
-    right:10px;
-  }
-
-  .news{
-    display:none;
+    left:8px;
+    right:8px;
   }
 
   .profile{
@@ -935,7 +653,7 @@ button{
   }
 
   .modal{
-    padding:20px;
+    padding:19px;
   }
 }
 </style>
@@ -946,10 +664,6 @@ button{
 
 <div class="app">
 
-<!-- =======================================================
-     HEADER
-======================================================= -->
-
 <header class="header">
 
   <div class="logo">
@@ -959,31 +673,16 @@ button{
   <div class="header-right">
 
 ```
-<button
-  class="header-button"
-  id="friendsButton"
-  title="Friends"
->
+<button class="icon-btn" id="friendsButton">
   👥
 </button>
 
-<button
-  class="header-button notification"
-  id="notificationsButton"
-  title="Notifications"
->
+<button class="icon-btn" id="notificationsButton">
   🔔
-  <span
-    class="notification-dot"
-    id="notificationDot"
-  ></span>
+  <span class="dot hidden" id="notificationDot"></span>
 </button>
 
-<button
-  class="header-button"
-  id="settingsButton"
-  title="Settings"
->
+<button class="icon-btn" id="settingsButton">
   ⚙
 </button>
 
@@ -992,81 +691,29 @@ button{
   <span id="vbucks">2,850</span>
 </div>
 
-<div
-  class="avatar"
-  id="headerAvatar"
->
-  K
-</div>
+<div class="avatar" id="headerAvatar">?</div>
 ```
 
   </div>
 
 </header>
 
-<!-- =======================================================
-     PARTY
-======================================================= -->
+<!-- PARTY -->
 
 <section class="party">
 
-  <div class="party-title">
-
-```
-<strong>
-  YOUR PARTY
-</strong>
-
-<span
-  class="party-count"
-  id="partyCount"
->
-  1 / 4
-</span>
-```
-
+  <div class="party-header">
+    <strong>YOUR PARTY</strong>
+    <span class="party-count" id="partyCount">
+      1 / 4
+    </span>
   </div>
 
-  <div class="party-player">
-
-```
-<div
-  class="party-avatar"
-  id="partyAvatar"
->
-  K
-</div>
-
-<div class="party-info">
-
-  <div
-    class="party-name"
-    id="partyName"
-  >
-    PLAYER
-  </div>
-
-  <div class="party-status">
-    ONLINE
-  </div>
-
-</div>
-
-<button
-  class="invite-button"
-  id="inviteButton"
->
-  INVITE
-</button>
-```
-
-  </div>
+  <div id="partySlots"></div>
 
 </section>
 
-<!-- =======================================================
-     CENTER
-======================================================= -->
+<!-- CENTER -->
 
 <main class="center">
 
@@ -1078,18 +725,14 @@ button{
 </div>
 
 <h1 class="title">
-  BATTLE<br>
-  ROYALE
+  BATTLE<br>ROYALE
 </h1>
 
 <div class="tagline">
   DROP IN. SURVIVE. CONQUER.
 </div>
 
-<button
-  class="play"
-  id="playButton"
->
+<button class="play" id="playButton">
   PLAY
 </button>
 ```
@@ -1098,28 +741,18 @@ button{
 
 </main>
 
-<!-- =======================================================
-     BOTTOM
-======================================================= -->
-
 <footer class="bottom">
 
   <div class="profile">
 
 ```
-<div
-  class="profile-avatar"
-  id="profileAvatar"
->
-  K
+<div class="profile-avatar" id="profileAvatar">
+  ?
 </div>
 
 <div>
 
-  <div
-    class="profile-name"
-    id="profileName"
-  >
+  <div class="profile-name" id="profileName">
     PLAYER
   </div>
 
@@ -1133,17 +766,8 @@ button{
   </div>
 
   <div class="news">
-
-```
-<b>
-  SEASON UPDATE
-</b>
-
-<small>
-  New challenges are waiting.
-</small>
-```
-
+    <b>SEASON UPDATE</b>
+    <small>New challenges are waiting.</small>
   </div>
 
 </footer>
@@ -1151,13 +775,10 @@ button{
 </div>
 
 <!-- =======================================================
-     INVITE MODAL
+     FRIEND / INVITE MODAL
 ======================================================= -->
 
-<div
-  class="overlay hidden"
-  id="inviteModal"
->
+<div class="overlay hidden" id="friendsModal">
 
   <div class="modal">
 
@@ -1165,93 +786,34 @@ button{
 <div class="modal-header">
 
   <h2 class="modal-title">
-    INVITE PLAYER
+    PLAYERS
   </h2>
 
-  <button
-    class="close"
-    data-close="inviteModal"
-  >
+  <button class="close" data-close="friendsModal">
     ×
   </button>
 
 </div>
 
-
-<div class="friend-search">
+<div class="search">
 
   <input
-    id="friendSearch"
+    id="playerSearch"
     type="text"
-    placeholder="Enter username..."
+    placeholder="Search username..."
     autocomplete="off"
   >
 
-  <button id="searchFriend">
+  <button id="searchButton">
     SEARCH
   </button>
 
 </div>
 
+<div class="results" id="playerResults">
 
-<div
-  class="friend-list"
-  id="friendResults"
->
-
-  <div class="friend">
-
-    <div class="friend-avatar">
-      A
-    </div>
-
-    <div class="friend-info">
-
-      <div class="friend-name">
-        Alex
-      </div>
-
-      <div class="friend-status">
-        ONLINE
-      </div>
-
-    </div>
-
-    <button
-      class="friend-invite"
-      data-friend="Alex"
-    >
-      INVITE
-    </button>
-
-  </div>
-
-
-  <div class="friend">
-
-    <div class="friend-avatar">
-      J
-    </div>
-
-    <div class="friend-info">
-
-      <div class="friend-name">
-        Jay
-      </div>
-
-      <div class="friend-status">
-        ONLINE
-      </div>
-
-    </div>
-
-    <button
-      class="friend-invite"
-      data-friend="Jay"
-    >
-      INVITE
-    </button>
-
+  <div class="empty">
+    Search for a player in the database.
   </div>
 
 </div>
@@ -1262,13 +824,10 @@ button{
 </div>
 
 <!-- =======================================================
-     FRIENDS MODAL
+     INCOMING INVITATION
 ======================================================= -->
 
-<div
-  class="overlay hidden"
-  id="friendsModal"
->
+<div class="overlay hidden" id="inviteModal">
 
   <div class="modal">
 
@@ -1276,102 +835,42 @@ button{
 <div class="modal-header">
 
   <h2 class="modal-title">
-    FRIENDS
+    PARTY INVITE
   </h2>
 
-  <button
-    class="close"
-    data-close="friendsModal"
-  >
-    ×
-  </button>
-
 </div>
 
+<div class="invite-card">
 
-<div class="friend-search">
+  <div class="invite-player">
 
-  <input
-    id="addFriendInput"
-    type="text"
-    placeholder="Username..."
-  >
-
-  <button id="addFriend">
-    ADD
-  </button>
-
-</div>
-
-
-<div class="friend-list">
-
-  <div class="friend">
-
-    <div class="friend-avatar">
-      A
+    <div class="big-avatar" id="inviteAvatar">
+      ?
     </div>
 
-    <div class="friend-info">
+    <div>
 
-      <div class="friend-name">
-        Alex
+      <div class="invite-name" id="inviteFrom">
+        PLAYER
       </div>
 
-      <div class="friend-status">
-        ONLINE
+      <div class="invite-description">
+        invited you to join their party.
       </div>
 
     </div>
 
-    <button
-      class="friend-invite"
-      data-friend="Alex"
-    >
-      INVITE
+  </div>
+
+  <div class="invite-actions">
+
+    <button class="accept" id="acceptInvite">
+      ACCEPT
     </button>
 
-  </div>
-
-
-  <div class="friend">
-
-    <div class="friend-avatar">
-      J
-    </div>
-
-    <div class="friend-info">
-
-      <div class="friend-name">
-        Jay
-      </div>
-
-      <div class="friend-status">
-        AWAY
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div class="friend">
-
-    <div class="friend-avatar">
-      M
-    </div>
-
-    <div class="friend-info">
-
-      <div class="friend-name">
-        Max
-      </div>
-
-      <div class="friend-status">
-        OFFLINE
-      </div>
-
-    </div>
+    <button class="decline" id="declineInvite">
+      DECLINE
+    </button>
 
   </div>
 
@@ -1386,10 +885,7 @@ button{
      NOTIFICATIONS
 ======================================================= -->
 
-<div
-  class="overlay hidden"
-  id="notificationsModal"
->
+<div class="overlay hidden" id="notificationsModal">
 
   <div class="modal">
 
@@ -1400,53 +896,16 @@ button{
     NOTIFICATIONS
   </h2>
 
-  <button
-    class="close"
-    data-close="notificationsModal"
-  >
+  <button class="close" data-close="notificationsModal">
     ×
   </button>
 
 </div>
 
+<div id="notificationList">
 
-<div class="notification-item">
-
-  <div class="notification-icon">
-    👥
-  </div>
-
-  <div>
-
-    <strong>
-      Party invitation
-    </strong>
-
-    <small>
-      Alex invited you to join their party.
-    </small>
-
-  </div>
-
-</div>
-
-
-<div class="notification-item">
-
-  <div class="notification-icon">
-    🎁
-  </div>
-
-  <div>
-
-    <strong>
-      Season reward
-    </strong>
-
-    <small>
-      You have a new reward waiting.
-    </small>
-
+  <div class="empty">
+    No new notifications.
   </div>
 
 </div>
@@ -1460,10 +919,7 @@ button{
      SETTINGS
 ======================================================= -->
 
-<div
-  class="overlay hidden"
-  id="settingsModal"
->
+<div class="overlay hidden" id="settingsModal">
 
   <div class="modal">
 
@@ -1474,62 +930,28 @@ button{
     SETTINGS
   </h2>
 
-  <button
-    class="close"
-    data-close="settingsModal"
-  >
+  <button class="close" data-close="settingsModal">
     ×
   </button>
 
 </div>
 
-
 <div class="setting">
-
-  <span class="setting-label">
-    Music
-  </span>
-
-  <button
-    class="toggle on"
-    data-setting="music"
-  ></button>
-
+  <span class="setting-label">Music</span>
+  <button class="toggle on"></button>
 </div>
 
-
 <div class="setting">
-
-  <span class="setting-label">
-    Sound Effects
-  </span>
-
-  <button
-    class="toggle on"
-    data-setting="sound"
-  ></button>
-
+  <span class="setting-label">Sound Effects</span>
+  <button class="toggle on"></button>
 </div>
 
-
 <div class="setting">
-
-  <span class="setting-label">
-    Notifications
-  </span>
-
-  <button
-    class="toggle on"
-    data-setting="notifications"
-  ></button>
-
+  <span class="setting-label">Notifications</span>
+  <button class="toggle on"></button>
 </div>
 
-
-<button
-  class="logout"
-  id="logoutButton"
->
+<button class="logout" id="logoutButton">
   LOG OUT
 </button>
 ```
@@ -1538,117 +960,106 @@ button{
 
 </div>
 
-<!-- =======================================================
-     INCOMING INVITATION
-======================================================= -->
+<div class="toast" id="toast"></div>
 
-<div
-  class="overlay hidden"
-  id="incomingInvite"
->
+<!-- FIREBASE -->
 
-  <div class="modal">
+<script type="module">
 
-```
-<div class="modal-header">
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 
-  <h2 class="modal-title">
-    PARTY INVITATION
-  </h2>
+import {
+  getAuth,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
-</div>
-
-
-<div class="invite-card">
-
-  <div class="invite-player">
-
-    <div class="big-avatar">
-      A
-    </div>
-
-    <div>
-
-      <div class="invite-name">
-        Alex
-      </div>
-
-      <div class="invite-text">
-        wants you to join their party.
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div class="invite-actions">
-
-    <button
-      class="accept"
-      id="acceptInvite"
-    >
-      ACCEPT
-    </button>
-
-    <button
-      class="decline"
-      id="declineInvite"
-    >
-      DECLINE
-    </button>
-
-  </div>
-
-</div>
-```
-
-  </div>
-
-</div>
-
-<!-- =======================================================
-     TOAST
-======================================================= -->
-
-<div
-  class="toast"
-  id="toast"
-></div>
-
-<script>
-
-"use strict";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  onSnapshot,
+  serverTimestamp,
+  orderBy,
+  limit
+} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
 
 /* =========================================================
-   USER
+   FIREBASE CONFIG
+=========================================================
+
+   USE THE SAME CONFIG AS playerdb.js.
+
+========================================================= */
+
+const firebaseConfig = {
+
+  apiKey:"YOUR_FIREBASE_API_KEY",
+
+  authDomain:"YOUR_PROJECT.firebaseapp.com",
+
+  projectId:"YOUR_PROJECT_ID",
+
+  storageBucket:"YOUR_PROJECT.firebasestorage.app",
+
+  messagingSenderId:"YOUR_SENDER_ID",
+
+  appId:"YOUR_APP_ID"
+
+};
+
+
+const app =
+  initializeApp(firebaseConfig);
+
+const auth =
+  getAuth(app);
+
+const db =
+  getFirestore(app);
+
+
+/* =========================================================
+   CURRENT PLAYER
 ========================================================= */
 
 const params =
   new URLSearchParams(
-    window.location.search
+    location.search
   );
 
 let username =
-  params.get("user");
+  params.get("user") ||
+  localStorage.getItem(
+    "battlezone-user"
+  );
 
 
 if(!username){
 
-  username =
-    localStorage.getItem(
-      "battlezone-user"
-    );
-}
-
-
-if(!username){
-
-  window.location.href =
-    "./index.html";
+  location.href="./index.html";
 
 }
+
+
+/* =========================================================
+   PLAYER STATE
+========================================================= */
+
+let currentPlayer = null;
+
+let partyMembers = [];
+
+let pendingInvite = null;
 
 
 /* =========================================================
@@ -1660,24 +1071,34 @@ const profileName =
     "profileName"
   );
 
-const partyName =
-  document.getElementById(
-    "partyName"
-  );
-
 const profileAvatar =
   document.getElementById(
     "profileAvatar"
   );
 
-const partyAvatar =
-  document.getElementById(
-    "partyAvatar"
-  );
-
 const headerAvatar =
   document.getElementById(
     "headerAvatar"
+  );
+
+const partySlots =
+  document.getElementById(
+    "partySlots"
+  );
+
+const partyCount =
+  document.getElementById(
+    "partyCount"
+  );
+
+const playerResults =
+  document.getElementById(
+    "playerResults"
+  );
+
+const playerSearch =
+  document.getElementById(
+    "playerSearch"
   );
 
 const toast =
@@ -1687,28 +1108,1015 @@ const toast =
 
 
 /* =========================================================
+   NORMALIZE USERNAME
+========================================================= */
+
+function normalizeName(name){
+
+  return String(name || "")
+    .trim()
+    .toLowerCase();
+
+}
+
+
+/* =========================================================
+   PLAYER LOOKUP
+========================================================= */
+
+async function findPlayerByUsername(name){
+
+  const normalized =
+    normalizeName(name);
+
+  if(!normalized){
+    return null;
+  }
+
+  /*
+    Primary lookup:
+
+    players.usernameLower
+
+    Your registration system should store this
+    field for every account.
+  */
+
+  const q =
+    query(
+      collection(db,"players"),
+      where(
+        "usernameLower",
+        "==",
+        normalized
+      ),
+      limit(1)
+    );
+
+  const snapshot =
+    await getDocs(q);
+
+  if(snapshot.empty){
+    return null;
+  }
+
+  const result =
+    snapshot.docs[0];
+
+  return {
+    id:result.id,
+    ...result.data()
+  };
+
+}
+
+
+/* =========================================================
+   LOAD CURRENT PLAYER
+========================================================= */
+
+async function loadCurrentPlayer(){
+
+  /*
+    First try username lookup.
+  */
+
+  currentPlayer =
+    await findPlayerByUsername(
+      username
+    );
+
+  if(!currentPlayer){
+
+    showToast(
+      "Player account was not found."
+    );
+
+    setTimeout(
+      () => {
+        location.href="./index.html";
+      },
+      1800
+    );
+
+    return;
+  }
+
+
+  username =
+    currentPlayer.username ||
+    username;
+
+
+  localStorage.setItem(
+    "battlezone-user",
+    username
+  );
+
+
+  updatePlayerUI();
+
+  subscribeToInvitations();
+
+}
+
+
+/* =========================================================
    PLAYER UI
 ========================================================= */
 
-const initial =
-  username.charAt(0)
-    .toUpperCase();
+function updatePlayerUI(){
+
+  const name =
+    currentPlayer.username ||
+    username;
+
+  const initial =
+    name.charAt(0).toUpperCase();
 
 
-profileName.textContent =
-  username;
+  profileName.textContent =
+    name;
 
-partyName.textContent =
-  username;
+  profileAvatar.textContent =
+    initial;
 
-profileAvatar.textContent =
-  initial;
+  headerAvatar.textContent =
+    initial;
 
-partyAvatar.textContent =
-  initial;
 
-headerAvatar.textContent =
-  initial;
+  partyMembers = [
+    {
+      username:name,
+      uid:
+        currentPlayer.uid ||
+        currentPlayer.id,
+      owner:true
+    }
+  ];
+
+
+  renderParty();
+
+}
+
+
+/* =========================================================
+   PARTY
+========================================================= */
+
+function renderParty(){
+
+  partySlots.innerHTML = "";
+
+  partyMembers
+    .slice(0,4)
+    .forEach(member => {
+
+      const name =
+        member.username ||
+        "PLAYER";
+
+      const initial =
+        name.charAt(0).toUpperCase();
+
+      const slot =
+        document.createElement(
+          "div"
+        );
+
+      slot.className =
+        "party-slot";
+
+      slot.innerHTML = `
+
+        <div class="party-avatar">
+          ${escapeHTML(initial)}
+        </div>
+
+        <div class="party-info">
+
+          <div class="party-name">
+            ${escapeHTML(name)}
+          </div>
+
+          <div class="party-status">
+            ${member.owner ? "PARTY LEADER" : "IN PARTY"}
+          </div>
+
+        </div>
+
+      `;
+
+      partySlots.appendChild(slot);
+
+    });
+
+
+  while(
+    partySlots.children.length < 4
+  ){
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "party-slot";
+
+    empty.innerHTML = `
+      <div class="party-avatar">+</div>
+      <div class="slot-empty">
+        Empty party slot
+      </div>
+    `;
+
+    partySlots.appendChild(empty);
+
+  }
+
+
+  partyCount.textContent =
+    partyMembers.length +
+    " / 4";
+
+}
+
+
+/* =========================================================
+   SEARCH ONLY REAL DATABASE PLAYERS
+========================================================= */
+
+async function searchPlayers(){
+
+  const search =
+    normalizeName(
+      playerSearch.value
+    );
+
+  if(!search){
+
+    playerResults.innerHTML = `
+      <div class="empty">
+        Enter a username.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  playerResults.innerHTML = `
+    <div class="empty">
+      SEARCHING DATABASE...
+    </div>
+  `;
+
+
+  try{
+
+    /*
+      Firestore does not support normal
+      "contains" queries.
+
+      We therefore query a usernameLower
+      prefix range.
+
+      Example:
+      alex -> alex...
+    */
+
+    const end =
+      search +
+      "\uf8ff";
+
+
+    const q =
+      query(
+        collection(db,"players"),
+        where(
+          "usernameLower",
+          ">=",
+          search
+        ),
+        where(
+          "usernameLower",
+          "<=",
+          end
+        ),
+        limit(20)
+      );
+
+
+    const snapshot =
+      await getDocs(q);
+
+
+    const players =
+      snapshot.docs.map(
+        d => ({
+          id:d.id,
+          ...d.data()
+        })
+      );
+
+
+    /*
+      NEVER display users that are not
+      returned from Firebase.
+    */
+
+    const filtered =
+      players.filter(
+        player =>
+          normalizeName(
+            player.username
+          ) !==
+          normalizeName(username)
+      );
+
+
+    if(!filtered.length){
+
+      playerResults.innerHTML = `
+        <div class="empty">
+          No registered players found.
+        </div>
+      `;
+
+      return;
+    }
+
+
+    playerResults.innerHTML = "";
+
+
+    filtered.forEach(
+      player => {
+
+        renderPlayer(
+          player
+        );
+
+      }
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+    playerResults.innerHTML = `
+      <div class="empty">
+        Could not search the player database.
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER PLAYER
+========================================================= */
+
+function renderPlayer(player){
+
+  const name =
+    player.username ||
+    "PLAYER";
+
+  const initial =
+    name.charAt(0).toUpperCase();
+
+
+  const element =
+    document.createElement(
+      "div"
+    );
+
+  element.className =
+    "player";
+
+
+  const alreadyParty =
+    partyMembers.some(
+      member =>
+        normalizeName(
+          member.username
+        ) ===
+        normalizeName(name)
+    );
+
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+  button.className =
+    "player-action";
+
+  button.textContent =
+    alreadyParty
+      ? "IN PARTY"
+      : "INVITE";
+
+
+  button.disabled =
+    alreadyParty ||
+    partyMembers.length >= 4;
+
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      invitePlayer(
+        player
+      );
+
+    }
+  );
+
+
+  element.innerHTML = `
+
+    <div class="player-avatar">
+      ${escapeHTML(initial)}
+    </div>
+
+    <div class="player-info">
+
+      <div class="player-name">
+        ${escapeHTML(name)}
+      </div>
+
+      <div class="player-status">
+        REGISTERED PLAYER
+      </div>
+
+    </div>
+
+  `;
+
+
+  element.appendChild(
+    button
+  );
+
+
+  playerResults.appendChild(
+    element
+  );
+
+}
+
+
+/* =========================================================
+   SEND INVITATION
+========================================================= */
+
+async function invitePlayer(player){
+
+  /*
+    Final database verification.
+
+    Even if the search result was valid,
+    verify that the player still exists before
+    creating an invitation.
+  */
+
+  if(partyMembers.length >= 4){
+
+    showToast(
+      "Your party is full."
+    );
+
+    return;
+  }
+
+
+  const target =
+    await findPlayerByUsername(
+      player.username
+    );
+
+
+  if(!target){
+
+    showToast(
+      "That player no longer exists."
+    );
+
+    return;
+  }
+
+
+  if(
+    normalizeName(
+      target.username
+    ) ===
+    normalizeName(username)
+  ){
+
+    showToast(
+      "You cannot invite yourself."
+    );
+
+    return;
+  }
+
+
+  /*
+    A deterministic invitation ID prevents
+    duplicate invitations.
+  */
+
+  const senderId =
+    currentPlayer.uid ||
+    currentPlayer.id;
+
+  const receiverId =
+    target.uid ||
+    target.id;
+
+
+  const inviteId =
+    senderId +
+    "_" +
+    receiverId;
+
+
+  const inviteRef =
+    doc(
+      db,
+      "invitations",
+      inviteId
+    );
+
+
+  const existing =
+    await getDoc(
+      inviteRef
+    );
+
+
+  if(existing.exists()){
+
+    const old =
+      existing.data();
+
+
+    if(
+      old.status ===
+      "pending"
+    ){
+
+      showToast(
+        "Invitation already sent."
+      );
+
+      return;
+    }
+
+  }
+
+
+  await setDoc(
+    inviteRef,
+    {
+
+      id:inviteId,
+
+      fromUid:senderId,
+
+      fromUsername:
+        username,
+
+      toUid:receiverId,
+
+      toUsername:
+        target.username,
+
+      status:"pending",
+
+      createdAt:
+        serverTimestamp()
+
+    }
+  );
+
+
+  showToast(
+    "Invitation sent to " +
+    target.username
+  );
+
+}
+
+
+/* =========================================================
+   REAL-TIME INVITATIONS
+========================================================= */
+
+function subscribeToInvitations(){
+
+  const receiverId =
+    currentPlayer.uid ||
+    currentPlayer.id;
+
+
+  const q =
+    query(
+      collection(
+        db,
+        "invitations"
+      ),
+      where(
+        "toUid",
+        "==",
+        receiverId
+      ),
+      where(
+        "status",
+        "==",
+        "pending"
+      ),
+      orderBy(
+        "createdAt",
+        "desc"
+      ),
+      limit(10)
+    );
+
+
+  onSnapshot(
+    q,
+    snapshot => {
+
+      if(snapshot.empty){
+
+        return;
+      }
+
+
+      const invitation =
+        snapshot.docs[0];
+
+
+      const data =
+        invitation.data();
+
+
+      pendingInvite = {
+        id:invitation.id,
+        ...data
+      };
+
+
+      showIncomingInvite(
+        pendingInvite
+      );
+
+      loadNotifications(
+        snapshot
+      );
+
+    },
+    error => {
+
+      console.error(
+        "Invitation listener:",
+        error
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   SHOW INVITATION
+========================================================= */
+
+function showIncomingInvite(invite){
+
+  const from =
+    invite.fromUsername ||
+    "PLAYER";
+
+  document.getElementById(
+    "inviteFrom"
+  ).textContent =
+    from;
+
+  document.getElementById(
+    "inviteAvatar"
+  ).textContent =
+    from.charAt(0).toUpperCase();
+
+
+  document
+    .getElementById(
+      "inviteModal"
+    )
+    .classList.remove(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "notificationDot"
+    )
+    .classList.remove(
+      "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   ACCEPT INVITE
+========================================================= */
+
+async function acceptInvitation(){
+
+  if(!pendingInvite){
+    return;
+  }
+
+
+  try{
+
+    const invite =
+      pendingInvite;
+
+
+    /*
+      Verify sender still exists.
+    */
+
+    const sender =
+      await findPlayerByUsername(
+        invite.fromUsername
+      );
+
+
+    if(!sender){
+
+      showToast(
+        "The player no longer exists."
+      );
+
+      await removeInvitation(
+        invite.id
+      );
+
+      return;
+    }
+
+
+    /*
+      Verify receiver is still the
+      currently registered player.
+    */
+
+    if(
+      normalizeName(
+        invite.toUsername
+      ) !==
+      normalizeName(username)
+    ){
+
+      showToast(
+        "Invalid invitation."
+      );
+
+      await removeInvitation(
+        invite.id
+      );
+
+      return;
+    }
+
+
+    await updateDoc(
+      doc(
+        db,
+        "invitations",
+        invite.id
+      ),
+      {
+
+        status:"accepted",
+
+        acceptedAt:
+          serverTimestamp()
+
+      }
+    );
+
+
+    /*
+      Add sender to the local party UI.
+      A production party backend should store
+      the actual party ID here.
+    */
+
+    if(
+      partyMembers.length < 4
+    ){
+
+      partyMembers.push({
+
+        username:
+          sender.username,
+
+        uid:
+          sender.uid ||
+          sender.id,
+
+        owner:false
+
+      });
+
+    }
+
+
+    renderParty();
+
+
+    closeModal(
+      "inviteModal"
+    );
+
+
+    showToast(
+      "Joined " +
+      sender.username +
+      "'s party."
+    );
+
+
+    pendingInvite = null;
+
+
+  }catch(error){
+
+    console.error(error);
+
+    showToast(
+      "Could not accept invitation."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   DECLINE
+========================================================= */
+
+async function declineInvitation(){
+
+  if(!pendingInvite){
+    return;
+  }
+
+
+  try{
+
+    await updateDoc(
+      doc(
+        db,
+        "invitations",
+        pendingInvite.id
+      ),
+      {
+
+        status:"declined",
+
+        declinedAt:
+          serverTimestamp()
+
+      }
+    );
+
+
+    closeModal(
+      "inviteModal"
+    );
+
+
+    showToast(
+      "Invitation declined."
+    );
+
+
+    pendingInvite = null;
+
+
+  }catch(error){
+
+    console.error(error);
+
+    showToast(
+      "Could not decline invitation."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   REMOVE INVITATION
+========================================================= */
+
+async function removeInvitation(id){
+
+  await updateDoc(
+    doc(
+      db,
+      "invitations",
+      id
+    ),
+    {
+      status:"expired"
+    }
+  );
+
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function loadNotifications(snapshot){
+
+  const list =
+    document.getElementById(
+      "notificationList"
+    );
+
+  list.innerHTML = "";
+
+
+  snapshot.docs.forEach(
+    item => {
+
+      const data =
+        item.data();
+
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+      row.className =
+        "player";
+
+
+      row.innerHTML = `
+
+        <div class="player-avatar">
+          👥
+        </div>
+
+        <div class="player-info">
+
+          <div class="player-name">
+            Party invitation
+          </div>
+
+          <div class="player-status">
+            ${escapeHTML(
+              data.fromUsername ||
+              "PLAYER"
+            )} invited you
+          </div>
+
+        </div>
+
+      `;
+
+
+      list.appendChild(
+        row
+      );
+
+    }
+  );
+
+}
 
 
 /* =========================================================
@@ -1717,68 +2125,75 @@ headerAvatar.textContent =
 
 function openModal(id){
 
-  const modal =
-    document.getElementById(id);
-
-  if(modal){
-    modal.classList.remove("hidden");
-  }
+  document
+    .getElementById(id)
+    .classList.remove(
+      "hidden"
+    );
 
 }
 
 
 function closeModal(id){
 
-  const modal =
-    document.getElementById(id);
-
-  if(modal){
-    modal.classList.add("hidden");
-  }
+  document
+    .getElementById(id)
+    .classList.add(
+      "hidden"
+    );
 
 }
 
 
 document
-  .querySelectorAll("[data-close]")
-  .forEach(button => {
+  .querySelectorAll(
+    "[data-close]"
+  )
+  .forEach(
+    button => {
 
-    button.addEventListener(
-      "click",
-      () => {
+      button.addEventListener(
+        "click",
+        () => {
 
-        closeModal(
-          button.dataset.close
-        );
-
-      }
-    );
-
-  });
-
-
-document
-  .querySelectorAll(".overlay")
-  .forEach(overlay => {
-
-    overlay.addEventListener(
-      "click",
-      event => {
-
-        if(
-          event.target === overlay
-        ){
-
-          overlay.classList.add(
-            "hidden"
+          closeModal(
+            button.dataset.close
           );
 
         }
+      );
 
-      }
-    );
+    }
+  );
 
-  });
+
+document
+  .querySelectorAll(
+    ".overlay"
+  )
+  .forEach(
+    overlay => {
+
+      overlay.addEventListener(
+        "click",
+        event => {
+
+          if(
+            event.target ===
+            overlay
+          ){
+
+            overlay.classList.add(
+              "hidden"
+            );
+
+          }
+
+        }
+      );
+
+    }
+  );
 
 
 /* =========================================================
@@ -1791,9 +2206,43 @@ document
   )
   .addEventListener(
     "click",
-    () => openModal(
-      "friendsModal"
-    )
+    () => {
+
+      openModal(
+        "friendsModal"
+      );
+
+      playerSearch.focus();
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "searchButton"
+  )
+  .addEventListener(
+    "click",
+    searchPlayers
+  );
+
+
+playerSearch
+  .addEventListener(
+    "keydown",
+    event => {
+
+      if(
+        event.key ===
+        "Enter"
+      ){
+
+        searchPlayers();
+
+      }
+
+    }
   );
 
 
@@ -1817,10 +2266,35 @@ document
         .getElementById(
           "notificationDot"
         )
-        .style.display =
-        "none";
+        .classList.add(
+          "hidden"
+        );
 
     }
+  );
+
+
+/* =========================================================
+   ACCEPT / DECLINE
+========================================================= */
+
+document
+  .getElementById(
+    "acceptInvite"
+  )
+  .addEventListener(
+    "click",
+    acceptInvitation
+  );
+
+
+document
+  .getElementById(
+    "declineInvite"
+  )
+  .addEventListener(
+    "click",
+    declineInvitation
   );
 
 
@@ -1840,162 +2314,26 @@ document
   );
 
 
-/* =========================================================
-   INVITE
-========================================================= */
-
-document
-  .getElementById(
-    "inviteButton"
-  )
-  .addEventListener(
-    "click",
-    () => openModal(
-      "inviteModal"
-    )
-  );
-
-
-document
-  .querySelectorAll(
-    ".friend-invite"
-  )
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        const friend =
-          button.dataset.friend ||
-          "PLAYER";
-
-        showToast(
-          "Invitation sent to " +
-          friend
-        );
-
-        closeModal(
-          "inviteModal"
-        );
-
-      }
-    );
-
-  });
-
-
-/* =========================================================
-   FRIEND SEARCH
-========================================================= */
-
-document
-  .getElementById(
-    "searchFriend"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      const value =
-        document
-          .getElementById(
-            "friendSearch"
-          )
-          .value
-          .trim();
-
-      if(!value){
-
-        showToast(
-          "Enter a username."
-        );
-
-        return;
-      }
-
-      showToast(
-        "Searching for " +
-        value +
-        "..."
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   ADD FRIEND
-========================================================= */
-
-document
-  .getElementById(
-    "addFriend"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      const value =
-        document
-          .getElementById(
-            "addFriendInput"
-          )
-          .value
-          .trim();
-
-      if(!value){
-
-        showToast(
-          "Enter a username."
-        );
-
-        return;
-      }
-
-      if(
-        value.toLowerCase() ===
-        username.toLowerCase()
-      ){
-
-        showToast(
-          "You cannot add yourself."
-        );
-
-        return;
-      }
-
-      showToast(
-        "Friend request sent to " +
-        value
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   SETTINGS TOGGLES
-========================================================= */
-
 document
   .querySelectorAll(
     ".toggle"
   )
-  .forEach(toggle => {
+  .forEach(
+    toggle => {
 
-    toggle.addEventListener(
-      "click",
-      () => {
+      toggle.addEventListener(
+        "click",
+        () => {
 
-        toggle.classList.toggle(
-          "on"
-        );
+          toggle.classList.toggle(
+            "on"
+          );
 
-      }
-    );
+        }
+      );
 
-  });
+    }
+  );
 
 
 /* =========================================================
@@ -2008,13 +2346,28 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
+
+      try{
+
+        await signOut(auth);
+
+      }catch(error){
+
+        console.warn(
+          "Firebase logout:",
+          error
+        );
+
+      }
+
 
       localStorage.removeItem(
         "battlezone-user"
       );
 
-      window.location.href =
+
+      location.href =
         "./index.html";
 
     }
@@ -2036,12 +2389,15 @@ document
       const button =
         event.currentTarget;
 
+
       button.textContent =
         "MATCHMAKING...";
+
 
       showToast(
         "Finding a BattleZone match..."
       );
+
 
       setTimeout(
         () => {
@@ -2050,7 +2406,8 @@ document
             "PLAY";
 
           showToast(
-            "No match found yet."
+            "Matchmaking is ready."
+
           );
 
         },
@@ -2062,54 +2419,19 @@ document
 
 
 /* =========================================================
-   INCOMING INVITATION
+   SAFE HTML
 ========================================================= */
 
-document
-  .getElementById(
-    "acceptInvite"
-  )
-  .addEventListener(
-    "click",
-    () => {
+function escapeHTML(value){
 
-      closeModal(
-        "incomingInvite"
-      );
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 
-      showToast(
-        "You joined Alex's party."
-      );
-
-      document
-        .getElementById(
-          "partyCount"
-        )
-        .textContent =
-        "2 / 4";
-
-    }
-  );
-
-
-document
-  .getElementById(
-    "declineInvite"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      closeModal(
-        "incomingInvite"
-      );
-
-      showToast(
-        "Invitation declined."
-      );
-
-    }
-  );
+}
 
 
 /* =========================================================
@@ -2117,7 +2439,6 @@ document
 ========================================================= */
 
 let toastTimer;
-
 
 function showToast(message){
 
@@ -2141,38 +2462,17 @@ function showToast(message){
         );
 
       },
-      2600
+      2800
     );
 
 }
 
 
 /* =========================================================
-   DEMO INVITATION
+   START
 ========================================================= */
 
-/*
-  This demonstrates the invitation UI.
-
-  Remove this timeout when you connect
-  the real Firebase invitation system.
-*/
-
-setTimeout(
-  () => {
-
-    /*
-      Only show the demo invitation if
-      the user is still on the main menu.
-    */
-
-    openModal(
-      "incomingInvite"
-    );
-
-  },
-  5000
-);
+loadCurrentPlayer();
 
 </script>
 
