@@ -419,8 +419,9 @@ PlayerDB.watchPlayer(async function (player) {
 
   headerUsername.textContent = username;
   headerLevel.textContent =
-    "LEVEL " + Number(player.level || 1);
+    "LEVEL " + String(player.level ?? 1);
   headerAvatar.textContent = playerInitial(username);
+  updateVbucks(player.vbucks);
 
   loadingText.textContent = "LOADING PLAYERS...";
 
@@ -487,8 +488,19 @@ document
   const vbucksBalance = document.getElementById("vbucksBalance");
   const addVbucks = document.getElementById("addVbucks");
 
-  let savedVbucks = Number(localStorage.getItem("battlezone_vbucks") || 0);
-  vbucksBalance.textContent = savedVbucks.toLocaleString();
+  // V-Bucks are read from the logged-in player's Firestore/PlayerDB record.
+  // Keep the value as a string so very large values such as "9e10000000"
+  // do not become Infinity when converted to a JavaScript Number.
+  function formatVbucks(value) {
+    if (value === undefined || value === null || value === "") return "0";
+    return String(value);
+  }
+
+  function updateVbucks(value) {
+    vbucksBalance.textContent = formatVbucks(value);
+  }
+
+  updateVbucks(0);
 
   topNavButtons.forEach(function (button) {
     button.addEventListener("click", function () {
@@ -508,11 +520,10 @@ document
     });
   });
 
+  // The + button is intentionally display-only until a PlayerDB update method
+  // is available. This prevents changing the database with a local-only value.
   addVbucks.addEventListener("click", function () {
-    savedVbucks += 100;
-    localStorage.setItem("battlezone_vbucks", String(savedVbucks));
-    vbucksBalance.textContent = savedVbucks.toLocaleString();
-    showToast("+100 V-Bucks");
+    showToast("V-Bucks are managed from your player account.");
   });
 
 </script>
