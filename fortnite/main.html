@@ -1,1 +1,2180 @@
+<!doctype html>
 
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07101e">
+<title>BattleZone</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&display=swap');
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:'Barlow Condensed',Arial,sans-serif;
+  color:#fff;
+  background:#07101e;
+}
+
+button,input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* =========================================================
+   BACKGROUND
+========================================================= */
+
+.app{
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+
+  background:
+    radial-gradient(
+      circle at 72% 32%,
+      rgba(255,220,170,.35),
+      transparent 22%
+    ),
+    linear-gradient(
+      135deg,
+      #172c52,
+      #416f9d 48%,
+      #c57c55
+    );
+}
+
+.app:before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,.48),
+      transparent 35%,
+      rgba(0,0,0,.55)
+    );
+
+  pointer-events:none;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+
+  height:76px;
+
+  display:flex;
+  align-items:center;
+
+  padding:0 24px;
+
+  z-index:10;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(4,10,20,.95),
+      rgba(4,10,20,.45),
+      transparent
+    );
+}
+
+.logo{
+  font-size:30px;
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:1px;
+  text-shadow:3px 4px #111;
+}
+
+.logo span{
+  color:#ffd02f;
+}
+
+.header-right{
+  margin-left:auto;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.header-button{
+  min-width:45px;
+  height:43px;
+
+  border:1px solid #ffffff28;
+  background:#07101dcc;
+  color:white;
+
+  display:grid;
+  place-items:center;
+
+  font-weight:900;
+
+  transition:.2s;
+}
+
+.header-button:hover{
+  background:#ffffff20;
+  transform:translateY(-1px);
+}
+
+.notification{
+  position:relative;
+}
+
+.notification-dot{
+  position:absolute;
+  right:5px;
+  top:5px;
+
+  width:8px;
+  height:8px;
+
+  border-radius:50%;
+  background:#ff4d5e;
+
+  box-shadow:0 0 10px #ff4d5e;
+}
+
+.vbucks{
+  padding:9px 14px;
+
+  border:1px solid #ffffff35;
+  background:#07101dcc;
+
+  font-weight:900;
+}
+
+.coin{
+  display:inline-grid;
+  place-items:center;
+
+  width:20px;
+  height:20px;
+
+  border-radius:50%;
+
+  background:#62d8ff;
+  color:#16466d;
+
+  margin-right:5px;
+}
+
+.avatar{
+  width:43px;
+  height:43px;
+
+  display:grid;
+  place-items:center;
+
+  border:2px solid white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #202b4a,
+      #d79769
+    );
+
+  font-weight:900;
+}
+
+/* =========================================================
+   CENTER
+========================================================= */
+
+.center{
+  position:absolute;
+
+  inset:76px 0 0;
+
+  display:grid;
+  place-items:center;
+
+  text-align:center;
+}
+
+.center-content{
+  margin-top:-20px;
+}
+
+.eyebrow{
+  font-size:21px;
+  font-weight:900;
+  letter-spacing:4px;
+}
+
+.title{
+  margin:12px 0;
+
+  font-size:clamp(70px,11vw,150px);
+  line-height:.78;
+
+  font-weight:900;
+  font-style:italic;
+
+  text-shadow:
+    6px 7px #202b43,
+    12px 15px 25px #0008;
+}
+
+.tagline{
+  font-size:23px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+.play{
+  margin-top:28px;
+
+  padding:15px 70px;
+
+  background:#f5c82e;
+  color:#172139;
+
+  border:3px solid white;
+
+  font-size:29px;
+  font-weight:900;
+  letter-spacing:2px;
+
+  clip-path:polygon(
+    3% 0,
+    100% 0,
+    97% 100%,
+    0 100%
+  );
+
+  transition:.2s;
+}
+
+.play:hover{
+  filter:brightness(1.1);
+  transform:translateY(-2px) scale(1.02);
+}
+
+/* =========================================================
+   PARTY PANEL
+========================================================= */
+
+.party{
+  position:absolute;
+
+  left:20px;
+  top:95px;
+
+  width:285px;
+
+  padding:15px;
+
+  background:rgba(5,13,27,.9);
+
+  border:
+    1px solid
+    rgba(255,255,255,.18);
+
+  box-shadow:
+    0 20px 50px #0005;
+
+  backdrop-filter:blur(12px);
+
+  z-index:9;
+}
+
+.party-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  margin-bottom:12px;
+}
+
+.party-title strong{
+  font-size:20px;
+  font-weight:900;
+}
+
+.party-count{
+  font-size:12px;
+  color:#8ea1be;
+}
+
+.party-player{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding:9px;
+
+  background:#ffffff0b;
+
+  border:1px solid #ffffff12;
+}
+
+.party-avatar{
+  width:38px;
+  height:38px;
+
+  display:grid;
+  place-items:center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #26375d,
+      #d79769
+    );
+
+  border:1px solid white;
+
+  font-weight:900;
+}
+
+.party-info{
+  min-width:0;
+}
+
+.party-name{
+  font-weight:900;
+  font-size:17px;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.party-status{
+  color:#7ee0a5;
+  font-size:12px;
+}
+
+.invite-button{
+  margin-left:auto;
+
+  padding:7px 10px;
+
+  border:1px solid #ffffff25;
+
+  background:#ffd02f;
+  color:#182039;
+
+  font-weight:900;
+}
+
+/* =========================================================
+   BOTTOM
+========================================================= */
+
+.bottom{
+  position:absolute;
+
+  left:20px;
+  right:20px;
+  bottom:18px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+
+  z-index:8;
+}
+
+.profile{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  padding:10px 15px;
+
+  background:#07101ddd;
+
+  border:1px solid #ffffff30;
+}
+
+.profile-avatar{
+  width:50px;
+  height:50px;
+
+  display:grid;
+  place-items:center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #273557,
+      #d99a71
+    );
+
+  font-size:21px;
+  font-weight:900;
+}
+
+.profile-name{
+  font-size:22px;
+  font-weight:900;
+}
+
+.profile-level{
+  color:#a5b4ca;
+  font-size:14px;
+}
+
+.news{
+  padding:11px 18px;
+
+  text-align:center;
+
+  background:#07101ddd;
+
+  border:1px solid #ffffff30;
+}
+
+.news b{
+  font-size:17px;
+}
+
+.news small{
+  display:block;
+  color:#aab6c8;
+}
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.overlay{
+  position:fixed;
+  inset:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(0,0,0,.62);
+
+  z-index:50;
+
+  backdrop-filter:blur(8px);
+}
+
+.modal{
+  width:min(470px,92vw);
+
+  padding:25px;
+
+  background:#07101ef5;
+
+  border:1px solid #ffffff25;
+
+  box-shadow:
+    0 30px 90px #0009;
+}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  margin-bottom:18px;
+}
+
+.modal-title{
+  margin:0;
+
+  font-size:30px;
+  font-weight:900;
+  font-style:italic;
+}
+
+.close{
+  width:38px;
+  height:38px;
+
+  border:1px solid #ffffff20;
+
+  background:#ffffff0b;
+  color:white;
+
+  font-size:20px;
+}
+
+.close:hover{
+  background:#ffffff20;
+}
+
+/* =========================================================
+   INVITATION
+========================================================= */
+
+.invite-card{
+  padding:16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #152b4d,
+      #0c1729
+    );
+
+  border:1px solid #ffffff18;
+}
+
+.invite-player{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.big-avatar{
+  width:55px;
+  height:55px;
+
+  display:grid;
+  place-items:center;
+
+  border:2px solid white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #354a79,
+      #d79a70
+    );
+
+  font-size:22px;
+  font-weight:900;
+}
+
+.invite-name{
+  font-size:22px;
+  font-weight:900;
+}
+
+.invite-text{
+  color:#98a8c0;
+  font-size:14px;
+}
+
+.invite-actions{
+  display:flex;
+  gap:10px;
+
+  margin-top:18px;
+}
+
+.accept,
+.decline{
+  flex:1;
+
+  height:48px;
+
+  border:2px solid white;
+
+  font-weight:900;
+  font-size:18px;
+}
+
+.accept{
+  background:#f5c82e;
+  color:#172139;
+}
+
+.decline{
+  background:#263246;
+  color:white;
+}
+
+/* =========================================================
+   FRIENDS
+========================================================= */
+
+.friend-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+
+  max-height:350px;
+  overflow:auto;
+}
+
+.friend{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding:10px;
+
+  background:#ffffff08;
+
+  border:1px solid #ffffff12;
+}
+
+.friend-avatar{
+  width:40px;
+  height:40px;
+
+  display:grid;
+  place-items:center;
+
+  border:1px solid white;
+
+  background:#26375d;
+
+  font-weight:900;
+}
+
+.friend-info{
+  flex:1;
+}
+
+.friend-name{
+  font-weight:900;
+}
+
+.friend-status{
+  color:#75d99a;
+  font-size:12px;
+}
+
+.friend-invite{
+  padding:7px 11px;
+
+  background:#ffd02f;
+  color:#172139;
+
+  border:0;
+
+  font-weight:900;
+}
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+.notification-item{
+  display:flex;
+  gap:12px;
+
+  padding:13px 0;
+
+  border-bottom:1px solid #ffffff12;
+}
+
+.notification-icon{
+  width:38px;
+  height:38px;
+
+  display:grid;
+  place-items:center;
+
+  background:#ffffff0c;
+}
+
+.notification-item strong{
+  display:block;
+  font-size:16px;
+}
+
+.notification-item small{
+  color:#8191a9;
+}
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+.setting{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:13px 0;
+
+  border-bottom:1px solid #ffffff12;
+}
+
+.setting-label{
+  font-weight:800;
+}
+
+.toggle{
+  width:48px;
+  height:25px;
+
+  border-radius:20px;
+
+  border:0;
+
+  background:#34435a;
+
+  position:relative;
+}
+
+.toggle:after{
+  content:"";
+
+  position:absolute;
+
+  top:4px;
+  left:4px;
+
+  width:17px;
+  height:17px;
+
+  border-radius:50%;
+
+  background:white;
+
+  transition:.2s;
+}
+
+.toggle.on{
+  background:#ffd02f;
+}
+
+.toggle.on:after{
+  left:27px;
+}
+
+/* =========================================================
+   SEARCH / ADD FRIEND
+========================================================= */
+
+.friend-search{
+  display:flex;
+  gap:8px;
+
+  margin-bottom:15px;
+}
+
+.friend-search input{
+  flex:1;
+
+  height:45px;
+
+  padding:0 12px;
+
+  color:white;
+
+  background:#111d31;
+
+  border:1px solid #ffffff20;
+
+  outline:none;
+}
+
+.friend-search button{
+  padding:0 15px;
+
+  border:0;
+
+  background:#ffd02f;
+
+  color:#172139;
+
+  font-weight:900;
+}
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.logout{
+  width:100%;
+  height:45px;
+
+  margin-top:18px;
+
+  background:#401f28;
+
+  color:#ff8998;
+
+  border:1px solid #ff526d44;
+
+  font-weight:900;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast{
+  position:fixed;
+
+  left:50%;
+  bottom:30px;
+
+  transform:
+    translate(-50%,20px);
+
+  padding:12px 20px;
+
+  background:#07101ef2;
+
+  border:1px solid #ffffff25;
+
+  box-shadow:0 15px 40px #0007;
+
+  opacity:0;
+  visibility:hidden;
+
+  transition:.3s;
+
+  z-index:100;
+
+  font-weight:800;
+}
+
+.toast.show{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0);
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:750px){
+
+  .header{
+    padding:0 12px;
+  }
+
+  .logo{
+    font-size:23px;
+  }
+
+  .vbucks{
+    font-size:13px;
+    padding:7px;
+  }
+
+  .header-button{
+    width:38px;
+    min-width:38px;
+  }
+
+  .avatar{
+    width:38px;
+    height:38px;
+  }
+
+  .party{
+    left:10px;
+    top:82px;
+    width:250px;
+  }
+
+  .center{
+    inset:65px 0 0;
+  }
+
+  .eyebrow{
+    font-size:15px;
+  }
+
+  .title{
+    font-size:65px;
+  }
+
+  .tagline{
+    font-size:16px;
+  }
+
+  .play{
+    font-size:23px;
+    padding:13px 45px;
+  }
+
+  .bottom{
+    left:10px;
+    right:10px;
+  }
+
+  .news{
+    display:none;
+  }
+
+  .profile{
+    padding:8px 10px;
+  }
+
+  .profile-avatar{
+    width:43px;
+    height:43px;
+  }
+
+  .profile-name{
+    font-size:18px;
+  }
+
+  .modal{
+    padding:20px;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- =======================================================
+     HEADER
+======================================================= -->
+
+<header class="header">
+
+  <div class="logo">
+    BATTLE<span>ZONE</span>
+  </div>
+
+  <div class="header-right">
+
+```
+<button
+  class="header-button"
+  id="friendsButton"
+  title="Friends"
+>
+  👥
+</button>
+
+<button
+  class="header-button notification"
+  id="notificationsButton"
+  title="Notifications"
+>
+  🔔
+  <span
+    class="notification-dot"
+    id="notificationDot"
+  ></span>
+</button>
+
+<button
+  class="header-button"
+  id="settingsButton"
+  title="Settings"
+>
+  ⚙
+</button>
+
+<div class="vbucks">
+  <span class="coin">V</span>
+  <span id="vbucks">2,850</span>
+</div>
+
+<div
+  class="avatar"
+  id="headerAvatar"
+>
+  K
+</div>
+```
+
+  </div>
+
+</header>
+
+<!-- =======================================================
+     PARTY
+======================================================= -->
+
+<section class="party">
+
+  <div class="party-title">
+
+```
+<strong>
+  YOUR PARTY
+</strong>
+
+<span
+  class="party-count"
+  id="partyCount"
+>
+  1 / 4
+</span>
+```
+
+  </div>
+
+  <div class="party-player">
+
+```
+<div
+  class="party-avatar"
+  id="partyAvatar"
+>
+  K
+</div>
+
+<div class="party-info">
+
+  <div
+    class="party-name"
+    id="partyName"
+  >
+    PLAYER
+  </div>
+
+  <div class="party-status">
+    ONLINE
+  </div>
+
+</div>
+
+<button
+  class="invite-button"
+  id="inviteButton"
+>
+  INVITE
+</button>
+```
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     CENTER
+======================================================= -->
+
+<main class="center">
+
+  <section class="center-content">
+
+```
+<div class="eyebrow">
+  CHAPTER 2 • SEASON 9
+</div>
+
+<h1 class="title">
+  BATTLE<br>
+  ROYALE
+</h1>
+
+<div class="tagline">
+  DROP IN. SURVIVE. CONQUER.
+</div>
+
+<button
+  class="play"
+  id="playButton"
+>
+  PLAY
+</button>
+```
+
+  </section>
+
+</main>
+
+<!-- =======================================================
+     BOTTOM
+======================================================= -->
+
+<footer class="bottom">
+
+  <div class="profile">
+
+```
+<div
+  class="profile-avatar"
+  id="profileAvatar"
+>
+  K
+</div>
+
+<div>
+
+  <div
+    class="profile-name"
+    id="profileName"
+  >
+    PLAYER
+  </div>
+
+  <div class="profile-level">
+    LEVEL 1
+  </div>
+
+</div>
+```
+
+  </div>
+
+  <div class="news">
+
+```
+<b>
+  SEASON UPDATE
+</b>
+
+<small>
+  New challenges are waiting.
+</small>
+```
+
+  </div>
+
+</footer>
+
+</div>
+
+<!-- =======================================================
+     INVITE MODAL
+======================================================= -->
+
+<div
+  class="overlay hidden"
+  id="inviteModal"
+>
+
+  <div class="modal">
+
+```
+<div class="modal-header">
+
+  <h2 class="modal-title">
+    INVITE PLAYER
+  </h2>
+
+  <button
+    class="close"
+    data-close="inviteModal"
+  >
+    ×
+  </button>
+
+</div>
+
+
+<div class="friend-search">
+
+  <input
+    id="friendSearch"
+    type="text"
+    placeholder="Enter username..."
+    autocomplete="off"
+  >
+
+  <button id="searchFriend">
+    SEARCH
+  </button>
+
+</div>
+
+
+<div
+  class="friend-list"
+  id="friendResults"
+>
+
+  <div class="friend">
+
+    <div class="friend-avatar">
+      A
+    </div>
+
+    <div class="friend-info">
+
+      <div class="friend-name">
+        Alex
+      </div>
+
+      <div class="friend-status">
+        ONLINE
+      </div>
+
+    </div>
+
+    <button
+      class="friend-invite"
+      data-friend="Alex"
+    >
+      INVITE
+    </button>
+
+  </div>
+
+
+  <div class="friend">
+
+    <div class="friend-avatar">
+      J
+    </div>
+
+    <div class="friend-info">
+
+      <div class="friend-name">
+        Jay
+      </div>
+
+      <div class="friend-status">
+        ONLINE
+      </div>
+
+    </div>
+
+    <button
+      class="friend-invite"
+      data-friend="Jay"
+    >
+      INVITE
+    </button>
+
+  </div>
+
+</div>
+```
+
+  </div>
+
+</div>
+
+<!-- =======================================================
+     FRIENDS MODAL
+======================================================= -->
+
+<div
+  class="overlay hidden"
+  id="friendsModal"
+>
+
+  <div class="modal">
+
+```
+<div class="modal-header">
+
+  <h2 class="modal-title">
+    FRIENDS
+  </h2>
+
+  <button
+    class="close"
+    data-close="friendsModal"
+  >
+    ×
+  </button>
+
+</div>
+
+
+<div class="friend-search">
+
+  <input
+    id="addFriendInput"
+    type="text"
+    placeholder="Username..."
+  >
+
+  <button id="addFriend">
+    ADD
+  </button>
+
+</div>
+
+
+<div class="friend-list">
+
+  <div class="friend">
+
+    <div class="friend-avatar">
+      A
+    </div>
+
+    <div class="friend-info">
+
+      <div class="friend-name">
+        Alex
+      </div>
+
+      <div class="friend-status">
+        ONLINE
+      </div>
+
+    </div>
+
+    <button
+      class="friend-invite"
+      data-friend="Alex"
+    >
+      INVITE
+    </button>
+
+  </div>
+
+
+  <div class="friend">
+
+    <div class="friend-avatar">
+      J
+    </div>
+
+    <div class="friend-info">
+
+      <div class="friend-name">
+        Jay
+      </div>
+
+      <div class="friend-status">
+        AWAY
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="friend">
+
+    <div class="friend-avatar">
+      M
+    </div>
+
+    <div class="friend-info">
+
+      <div class="friend-name">
+        Max
+      </div>
+
+      <div class="friend-status">
+        OFFLINE
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+```
+
+  </div>
+
+</div>
+
+<!-- =======================================================
+     NOTIFICATIONS
+======================================================= -->
+
+<div
+  class="overlay hidden"
+  id="notificationsModal"
+>
+
+  <div class="modal">
+
+```
+<div class="modal-header">
+
+  <h2 class="modal-title">
+    NOTIFICATIONS
+  </h2>
+
+  <button
+    class="close"
+    data-close="notificationsModal"
+  >
+    ×
+  </button>
+
+</div>
+
+
+<div class="notification-item">
+
+  <div class="notification-icon">
+    👥
+  </div>
+
+  <div>
+
+    <strong>
+      Party invitation
+    </strong>
+
+    <small>
+      Alex invited you to join their party.
+    </small>
+
+  </div>
+
+</div>
+
+
+<div class="notification-item">
+
+  <div class="notification-icon">
+    🎁
+  </div>
+
+  <div>
+
+    <strong>
+      Season reward
+    </strong>
+
+    <small>
+      You have a new reward waiting.
+    </small>
+
+  </div>
+
+</div>
+```
+
+  </div>
+
+</div>
+
+<!-- =======================================================
+     SETTINGS
+======================================================= -->
+
+<div
+  class="overlay hidden"
+  id="settingsModal"
+>
+
+  <div class="modal">
+
+```
+<div class="modal-header">
+
+  <h2 class="modal-title">
+    SETTINGS
+  </h2>
+
+  <button
+    class="close"
+    data-close="settingsModal"
+  >
+    ×
+  </button>
+
+</div>
+
+
+<div class="setting">
+
+  <span class="setting-label">
+    Music
+  </span>
+
+  <button
+    class="toggle on"
+    data-setting="music"
+  ></button>
+
+</div>
+
+
+<div class="setting">
+
+  <span class="setting-label">
+    Sound Effects
+  </span>
+
+  <button
+    class="toggle on"
+    data-setting="sound"
+  ></button>
+
+</div>
+
+
+<div class="setting">
+
+  <span class="setting-label">
+    Notifications
+  </span>
+
+  <button
+    class="toggle on"
+    data-setting="notifications"
+  ></button>
+
+</div>
+
+
+<button
+  class="logout"
+  id="logoutButton"
+>
+  LOG OUT
+</button>
+```
+
+  </div>
+
+</div>
+
+<!-- =======================================================
+     INCOMING INVITATION
+======================================================= -->
+
+<div
+  class="overlay hidden"
+  id="incomingInvite"
+>
+
+  <div class="modal">
+
+```
+<div class="modal-header">
+
+  <h2 class="modal-title">
+    PARTY INVITATION
+  </h2>
+
+</div>
+
+
+<div class="invite-card">
+
+  <div class="invite-player">
+
+    <div class="big-avatar">
+      A
+    </div>
+
+    <div>
+
+      <div class="invite-name">
+        Alex
+      </div>
+
+      <div class="invite-text">
+        wants you to join their party.
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="invite-actions">
+
+    <button
+      class="accept"
+      id="acceptInvite"
+    >
+      ACCEPT
+    </button>
+
+    <button
+      class="decline"
+      id="declineInvite"
+    >
+      DECLINE
+    </button>
+
+  </div>
+
+</div>
+```
+
+  </div>
+
+</div>
+
+<!-- =======================================================
+     TOAST
+======================================================= -->
+
+<div
+  class="toast"
+  id="toast"
+></div>
+
+<script>
+
+"use strict";
+
+
+/* =========================================================
+   USER
+========================================================= */
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+let username =
+  params.get("user");
+
+
+if(!username){
+
+  username =
+    localStorage.getItem(
+      "battlezone-user"
+    );
+}
+
+
+if(!username){
+
+  window.location.href =
+    "./index.html";
+
+}
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const profileName =
+  document.getElementById(
+    "profileName"
+  );
+
+const partyName =
+  document.getElementById(
+    "partyName"
+  );
+
+const profileAvatar =
+  document.getElementById(
+    "profileAvatar"
+  );
+
+const partyAvatar =
+  document.getElementById(
+    "partyAvatar"
+  );
+
+const headerAvatar =
+  document.getElementById(
+    "headerAvatar"
+  );
+
+const toast =
+  document.getElementById(
+    "toast"
+  );
+
+
+/* =========================================================
+   PLAYER UI
+========================================================= */
+
+const initial =
+  username.charAt(0)
+    .toUpperCase();
+
+
+profileName.textContent =
+  username;
+
+partyName.textContent =
+  username;
+
+profileAvatar.textContent =
+  initial;
+
+partyAvatar.textContent =
+  initial;
+
+headerAvatar.textContent =
+  initial;
+
+
+/* =========================================================
+   MODALS
+========================================================= */
+
+function openModal(id){
+
+  const modal =
+    document.getElementById(id);
+
+  if(modal){
+    modal.classList.remove("hidden");
+  }
+
+}
+
+
+function closeModal(id){
+
+  const modal =
+    document.getElementById(id);
+
+  if(modal){
+    modal.classList.add("hidden");
+  }
+
+}
+
+
+document
+  .querySelectorAll("[data-close]")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        closeModal(
+          button.dataset.close
+        );
+
+      }
+    );
+
+  });
+
+
+document
+  .querySelectorAll(".overlay")
+  .forEach(overlay => {
+
+    overlay.addEventListener(
+      "click",
+      event => {
+
+        if(
+          event.target === overlay
+        ){
+
+          overlay.classList.add(
+            "hidden"
+          );
+
+        }
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   FRIENDS
+========================================================= */
+
+document
+  .getElementById(
+    "friendsButton"
+  )
+  .addEventListener(
+    "click",
+    () => openModal(
+      "friendsModal"
+    )
+  );
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+document
+  .getElementById(
+    "notificationsButton"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      openModal(
+        "notificationsModal"
+      );
+
+      document
+        .getElementById(
+          "notificationDot"
+        )
+        .style.display =
+        "none";
+
+    }
+  );
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+document
+  .getElementById(
+    "settingsButton"
+  )
+  .addEventListener(
+    "click",
+    () => openModal(
+      "settingsModal"
+    )
+  );
+
+
+/* =========================================================
+   INVITE
+========================================================= */
+
+document
+  .getElementById(
+    "inviteButton"
+  )
+  .addEventListener(
+    "click",
+    () => openModal(
+      "inviteModal"
+    )
+  );
+
+
+document
+  .querySelectorAll(
+    ".friend-invite"
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const friend =
+          button.dataset.friend ||
+          "PLAYER";
+
+        showToast(
+          "Invitation sent to " +
+          friend
+        );
+
+        closeModal(
+          "inviteModal"
+        );
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   FRIEND SEARCH
+========================================================= */
+
+document
+  .getElementById(
+    "searchFriend"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const value =
+        document
+          .getElementById(
+            "friendSearch"
+          )
+          .value
+          .trim();
+
+      if(!value){
+
+        showToast(
+          "Enter a username."
+        );
+
+        return;
+      }
+
+      showToast(
+        "Searching for " +
+        value +
+        "..."
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   ADD FRIEND
+========================================================= */
+
+document
+  .getElementById(
+    "addFriend"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const value =
+        document
+          .getElementById(
+            "addFriendInput"
+          )
+          .value
+          .trim();
+
+      if(!value){
+
+        showToast(
+          "Enter a username."
+        );
+
+        return;
+      }
+
+      if(
+        value.toLowerCase() ===
+        username.toLowerCase()
+      ){
+
+        showToast(
+          "You cannot add yourself."
+        );
+
+        return;
+      }
+
+      showToast(
+        "Friend request sent to " +
+        value
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   SETTINGS TOGGLES
+========================================================= */
+
+document
+  .querySelectorAll(
+    ".toggle"
+  )
+  .forEach(toggle => {
+
+    toggle.addEventListener(
+      "click",
+      () => {
+
+        toggle.classList.toggle(
+          "on"
+        );
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+document
+  .getElementById(
+    "logoutButton"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      localStorage.removeItem(
+        "battlezone-user"
+      );
+
+      window.location.href =
+        "./index.html";
+
+    }
+  );
+
+
+/* =========================================================
+   PLAY
+========================================================= */
+
+document
+  .getElementById(
+    "playButton"
+  )
+  .addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.currentTarget;
+
+      button.textContent =
+        "MATCHMAKING...";
+
+      showToast(
+        "Finding a BattleZone match..."
+      );
+
+      setTimeout(
+        () => {
+
+          button.textContent =
+            "PLAY";
+
+          showToast(
+            "No match found yet."
+          );
+
+        },
+        1800
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   INCOMING INVITATION
+========================================================= */
+
+document
+  .getElementById(
+    "acceptInvite"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      closeModal(
+        "incomingInvite"
+      );
+
+      showToast(
+        "You joined Alex's party."
+      );
+
+      document
+        .getElementById(
+          "partyCount"
+        )
+        .textContent =
+        "2 / 4";
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "declineInvite"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      closeModal(
+        "incomingInvite"
+      );
+
+      showToast(
+        "Invitation declined."
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer;
+
+
+function showToast(message){
+
+  toast.textContent =
+    message;
+
+  toast.classList.add(
+    "show"
+  );
+
+  clearTimeout(
+    toastTimer
+  );
+
+  toastTimer =
+    setTimeout(
+      () => {
+
+        toast.classList.remove(
+          "show"
+        );
+
+      },
+      2600
+    );
+
+}
+
+
+/* =========================================================
+   DEMO INVITATION
+========================================================= */
+
+/*
+  This demonstrates the invitation UI.
+
+  Remove this timeout when you connect
+  the real Firebase invitation system.
+*/
+
+setTimeout(
+  () => {
+
+    /*
+      Only show the demo invitation if
+      the user is still on the main menu.
+    */
+
+    openModal(
+      "incomingInvite"
+    );
+
+  },
+  5000
+);
+
+</script>
+
+</body>
+</html>
