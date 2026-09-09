@@ -1,4 +1,4 @@
-name: VoidForge Checks
+name: VoidForge Checks 1.2
 
 on:
   push:
@@ -29,17 +29,19 @@ jobs:
         run: |
           set -e
 
-          if [ ! -f ".gitignore" ]; then
-            echo "No .gitignore found."
-            exit 1
-          fi
-
           git ls-files --cached --others --exclude-standard \
             | grep -Ei '\.js$' \
             > js-files.txt || true
 
+          echo "======================================"
           echo "JavaScript files:"
-          cat js-files.txt
+          echo "======================================"
+
+          if [ -s js-files.txt ]; then
+            cat js-files.txt
+          else
+            echo "No JavaScript files found."
+          fi
 
       - name: Validate JavaScript
         shell: bash
@@ -51,9 +53,30 @@ jobs:
             exit 0
           fi
 
+          FAILED=0
+
           while IFS= read -r file; do
+
+            [ -z "$file" ] && continue
+
+            echo ""
             echo "Checking $file"
-            node --check "$file"
+
+            if node --check "$file"; then
+              echo "PASS: $file"
+            else
+              echo "FAIL: $file"
+              FAILED=1
+            fi
+
           done < js-files.txt
+
+          echo ""
+          echo "======================================"
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "FAIL: JavaScript validation failed."
+            exit 1
+          fi
 
           echo "PASS: All JavaScript files."
