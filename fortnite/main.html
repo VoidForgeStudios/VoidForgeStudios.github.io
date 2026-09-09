@@ -66,11 +66,26 @@ button{cursor:pointer}
 .loading-logo{font-size:55px;font-weight:900;font-style:italic}
 .loading-logo span{color:#ffd02f}
 .loading-text{margin-top:15px;color:#8fa2be;letter-spacing:2px}
+
+.top-nav{display:flex;align-items:center;gap:6px;margin-left:35px}
+.top-nav-btn{height:40px;padding:0 14px;border:1px solid transparent;background:transparent;color:#aebed3;font-size:12px;font-weight:900;letter-spacing:.7px}
+.top-nav-btn:hover{color:white;background:#ffffff0b;border-color:#ffffff18}
+.top-nav-btn.active{color:#ffd02f;border-bottom:3px solid #ffd02f}
+.vbucks{display:flex;align-items:center;gap:7px;margin-right:18px;padding:6px 9px;background:#111d31;border:1px solid #ffffff20;font-weight:900}
+.vbucks-icon{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;border:2px solid #7bdcff;color:#7bdcff;font-size:12px;font-weight:900}
+#vbucksBalance{min-width:30px;text-align:right}
+.vbucks-add{width:22px;height:22px;border:1px solid #ffffff35;background:#ffd02f;color:#172139;font-weight:900;line-height:18px;padding:0}
+.vbucks-add:hover{filter:brightness(1.1)}
+.section-banner{position:absolute;top:96px;left:24px;padding:8px 13px;background:#07101ed9;border:1px solid #ffffff18;color:#9eafc8;font-size:11px;font-weight:900;letter-spacing:1.5px;z-index:2}
+
 @media(max-width:850px){
 html,body{overflow:auto}
 .app{min-height:100vh}
-.header{height:65px;padding:0 13px}
+.header{height:auto;min-height:65px;padding:8px 13px;flex-wrap:wrap;gap:6px}
 .logo{font-size:23px}
+.top-nav{order:3;width:100%;margin:2px 0 0;overflow-x:auto;justify-content:flex-start}
+.top-nav-btn{flex:0 0 auto}
+.vbucks{margin-right:4px}
 .user-info{display:none}
 .body{grid-template-columns:1fr;padding:10px}
 .hero{min-height:330px}
@@ -92,7 +107,20 @@ html,body{overflow:auto}
 <div class="app">
 <header class="header">
   <div class="logo">BATTLE<span>ZONE</span></div>
+
+  <nav class="top-nav" aria-label="Main navigation">
+    <button class="top-nav-btn active" data-section="PLAY">PLAY</button>
+    <button class="top-nav-btn" data-section="BATTLE PASS">BATTLE PASS</button>
+    <button class="top-nav-btn" data-section="ITEM SHOP">ITEM SHOP</button>
+    <button class="top-nav-btn" data-section="LOCKER">LOCKER</button>
+  </nav>
+
   <div class="header-user">
+    <div class="vbucks" title="V-Bucks balance">
+      <span class="vbucks-icon">V</span>
+      <span id="vbucksBalance">0</span>
+      <button id="addVbucks" class="vbucks-add" title="Add V-Bucks">+</button>
+    </div>
     <div class="user-info">
       <div id="headerUsername" class="username">Loading...</div>
       <div id="headerLevel" class="level">LEVEL 1</div>
@@ -101,6 +129,7 @@ html,body{overflow:auto}
   </div>
 </header>
 
+<div id="sectionBanner" class="section-banner">PLAY</div>
 <div class="body">
 <main class="hero">
   <div class="hero-content">
@@ -452,6 +481,40 @@ document
       this.textContent = "PLAY";
     }
   });
+  // Top sections and V-Bucks balance.
+  const topNavButtons = document.querySelectorAll(".top-nav-btn");
+  const sectionBanner = document.getElementById("sectionBanner");
+  const vbucksBalance = document.getElementById("vbucksBalance");
+  const addVbucks = document.getElementById("addVbucks");
+
+  let savedVbucks = Number(localStorage.getItem("battlezone_vbucks") || 0);
+  vbucksBalance.textContent = savedVbucks.toLocaleString();
+
+  topNavButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      topNavButtons.forEach(function (item) {
+        item.classList.remove("active");
+      });
+      button.classList.add("active");
+
+      const section = button.dataset.section;
+      sectionBanner.textContent = section;
+
+      if (section === "PLAY") {
+        showToast("Play section selected.");
+      } else {
+        showToast(section + " selected.");
+      }
+    });
+  });
+
+  addVbucks.addEventListener("click", function () {
+    savedVbucks += 100;
+    localStorage.setItem("battlezone_vbucks", String(savedVbucks));
+    vbucksBalance.textContent = savedVbucks.toLocaleString();
+    showToast("+100 V-Bucks");
+  });
+
 </script>
 
 </body>
