@@ -8,441 +8,74 @@
 
 <style>
 *{box-sizing:border-box}
-
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  font-family:Arial,sans-serif;
-  color:white;
-  background:
-    radial-gradient(circle at 70% 30%,#496f9b 0%,transparent 35%),
-    linear-gradient(135deg,#07101e,#1b3458 55%,#9a5c45);
-}
-
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;color:white;background:radial-gradient(circle at 70% 30%,#496f9b 0%,transparent 35%),linear-gradient(135deg,#07101e,#1b3458 55%,#9a5c45)}
 button,input{font:inherit}
-
 button{cursor:pointer}
-
-.app{
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  background:linear-gradient(180deg,#0007,transparent 35%,#0008);
-}
-
-/* HEADER */
-
-.header{
-  height:76px;
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
-  padding:0 24px;
-  background:#07101ee8;
-  border-bottom:1px solid #ffffff18;
-}
-
-.logo{
-  font-size:30px;
-  font-weight:900;
-  font-style:italic;
-  text-shadow:3px 4px #000;
-}
-
-.logo span{
-  color:#ffd02f;
-}
-
-.header-user{
-  margin-left:auto;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.avatar{
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  border:2px solid white;
-  background:linear-gradient(135deg,#263b62,#c47b58);
-  font-weight:900;
-}
-
-.user-info{
-  text-align:right;
-}
-
-.username{
-  font-size:18px;
-  font-weight:900;
-}
-
-.level{
-  color:#9eafc8;
-  font-size:12px;
-}
-
-/* LAYOUT */
-
-.body{
-  flex:1;
-  min-height:0;
-  display:grid;
-  grid-template-columns:1fr 390px;
-  gap:20px;
-  padding:20px;
-}
-
-.hero{
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-}
-
-.hero-content{
-  max-width:800px;
-}
-
-.season{
-  color:#dbe7f8;
-  letter-spacing:4px;
-  font-size:18px;
-  font-weight:800;
-}
-
-.hero h1{
-  margin:15px 0;
-  font-size:clamp(65px,9vw,130px);
-  line-height:.82;
-  font-style:italic;
-  font-weight:900;
-  text-shadow:7px 8px #17233a,0 20px 40px #0008;
-}
-
-.hero p{
-  font-size:20px;
-  letter-spacing:2px;
-  font-weight:700;
-}
-
-.play{
-  margin-top:25px;
-  padding:15px 60px;
-  border:3px solid white;
-  background:#f5c82e;
-  color:#172139;
-  font-size:27px;
-  font-weight:900;
-  transition:.2s;
-}
-
-.play:hover{
-  transform:translateY(-2px);
-  filter:brightness(1.1);
-}
-
-/* PANEL */
-
-.panel{
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  background:#07101ee8;
-  border:1px solid #ffffff20;
-  box-shadow:0 20px 60px #0005;
-  backdrop-filter:blur(15px);
-}
-
-.panel-header{
-  padding:18px;
-  border-bottom:1px solid #ffffff15;
-}
-
-.panel-title{
-  font-size:25px;
-  font-weight:900;
-}
-
-.panel-subtitle{
-  color:#8fa2be;
-  font-size:13px;
-  margin-top:4px;
-}
-
-.search{
-  margin-top:13px;
-  width:100%;
-  height:40px;
-  padding:0 12px;
-  color:white;
-  background:#111d31;
-  border:1px solid #ffffff20;
-  outline:none;
-}
-
-.search:focus{
-  border-color:#ffd02f;
-}
-
-/* PLAYER LIST */
-
-.player-list{
-  flex:1;
-  min-height:0;
-  overflow-y:auto;
-  padding:10px;
-}
-
-.player-list::-webkit-scrollbar{
-  width:7px;
-}
-
-.player-list::-webkit-scrollbar-thumb{
-  background:#ffffff25;
-}
-
-.player{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  padding:11px;
-  margin-bottom:7px;
-  background:#ffffff08;
-  border:1px solid transparent;
-  transition:.15s;
-}
-
-.player:hover{
-  background:#ffffff12;
-  border-color:#ffffff20;
-}
-
-.player-avatar{
-  width:43px;
-  height:43px;
-  flex-shrink:0;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(135deg,#273b61,#bb7657);
-  border:1px solid #ffffff55;
-  font-weight:900;
-}
-
-.player-info{
-  min-width:0;
-  flex:1;
-}
-
-.player-name{
-  font-weight:900;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.player-level{
-  color:#8395af;
-  font-size:12px;
-  margin-top:3px;
-}
-
-.invite{
-  border:1px solid #ffffff35;
-  background:#ffd02f;
-  color:#162039;
-  padding:8px 12px;
-  font-size:12px;
-  font-weight:900;
-}
-
-.invite:hover{
-  filter:brightness(1.1);
-}
-
-.invite:disabled{
-  opacity:.5;
-  cursor:wait;
-}
-
-.status{
-  padding:18px;
-  text-align:center;
-  color:#8fa2be;
-  font-size:14px;
-}
-
-.empty{
-  padding:35px 15px;
-  text-align:center;
-  color:#8496af;
-}
-
-/* INVITATIONS */
-
-.invites{
-  flex-shrink:0;
-  max-height:250px;
-  overflow-y:auto;
-  border-top:1px solid #ffffff15;
-}
-
-.invites-title{
-  padding:13px 15px 8px;
-  font-weight:900;
-}
-
-.invite-card{
-  margin:7px 10px;
-  padding:11px;
-  background:#ffffff0b;
-  border:1px solid #ffffff18;
-}
-
-.invite-card-name{
-  font-weight:900;
-}
-
-.invite-card-text{
-  color:#8fa2be;
-  font-size:12px;
-  margin-top:3px;
-}
-
-.invite-actions{
-  display:flex;
-  gap:7px;
-  margin-top:9px;
-}
-
-.accept,
-.decline{
-  border:0;
-  padding:7px 12px;
-  font-size:12px;
-  font-weight:900;
-}
-
-.accept{
-  background:#4ddd8a;
-  color:#071b12;
-}
-
-.decline{
-  background:#ff6262;
-  color:white;
-}
-
-/* TOAST */
-
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:25px;
-  transform:translateX(-50%) translateY(20px);
-  min-width:250px;
-  max-width:90vw;
-  padding:13px 18px;
-  text-align:center;
-  background:#07101ef5;
-  border:1px solid #ffffff30;
-  box-shadow:0 15px 40px #0007;
-  opacity:0;
-  pointer-events:none;
-  transition:.25s;
-  z-index:100;
-}
-
-.toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
-}
-
-/* LOADING */
-
-.loading{
-  position:fixed;
-  inset:0;
-  z-index:200;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#07101e;
-  transition:.4s;
-}
-
-.loading.hidden{
-  opacity:0;
-  pointer-events:none;
-}
-
-.loading-box{
-  text-align:center;
-}
-
-.loading-logo{
-  font-size:55px;
-  font-weight:900;
-  font-style:italic;
-}
-
-.loading-logo span{
-  color:#ffd02f;
-}
-
-.loading-text{
-  margin-top:15px;
-  color:#8fa2be;
-  letter-spacing:2px;
-}
-
-/* MOBILE */
-
+.app{width:100%;height:100%;display:flex;flex-direction:column;background:linear-gradient(180deg,#0007,transparent 35%,#0008)}
+.header{height:76px;flex-shrink:0;display:flex;align-items:center;padding:0 24px;background:#07101ee8;border-bottom:1px solid #ffffff18}
+.logo{font-size:30px;font-weight:900;font-style:italic;text-shadow:3px 4px #000}
+.logo span{color:#ffd02f}
+.header-user{margin-left:auto;display:flex;align-items:center;gap:12px}
+.avatar{width:42px;height:42px;display:grid;place-items:center;border:2px solid white;background:linear-gradient(135deg,#263b62,#c47b58);font-weight:900}
+.user-info{text-align:right}
+.username{font-size:18px;font-weight:900}
+.level{color:#9eafc8;font-size:12px}
+.body{flex:1;min-height:0;display:grid;grid-template-columns:1fr 390px;gap:20px;padding:20px}
+.hero{min-width:0;display:flex;align-items:center;justify-content:center;text-align:center}
+.hero-content{max-width:800px}
+.season{color:#dbe7f8;letter-spacing:4px;font-size:18px;font-weight:800}
+.hero h1{margin:15px 0;font-size:clamp(65px,9vw,130px);line-height:.82;font-style:italic;font-weight:900;text-shadow:7px 8px #17233a,0 20px 40px #0008}
+.hero p{font-size:20px;letter-spacing:2px;font-weight:700}
+.play{margin-top:25px;padding:15px 60px;border:3px solid white;background:#f5c82e;color:#172139;font-size:27px;font-weight:900;transition:.2s}
+.play:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.play:disabled{opacity:.65;cursor:wait}
+.panel{min-height:0;display:flex;flex-direction:column;background:#07101ee8;border:1px solid #ffffff20;box-shadow:0 20px 60px #0005;backdrop-filter:blur(15px)}
+.panel-header{padding:18px;border-bottom:1px solid #ffffff15}
+.panel-title{font-size:25px;font-weight:900}
+.panel-subtitle{color:#8fa2be;font-size:13px;margin-top:4px}
+.search{margin-top:13px;width:100%;height:40px;padding:0 12px;color:white;background:#111d31;border:1px solid #ffffff20;outline:none}
+.search:focus{border-color:#ffd02f}
+.player-list{flex:1;min-height:0;overflow-y:auto;padding:10px}
+.player-list::-webkit-scrollbar{width:7px}
+.player-list::-webkit-scrollbar-thumb{background:#ffffff25}
+.player{display:flex;align-items:center;gap:11px;padding:11px;margin-bottom:7px;background:#ffffff08;border:1px solid transparent;transition:.15s}
+.player:hover{background:#ffffff12;border-color:#ffffff20}
+.player-avatar{width:43px;height:43px;flex-shrink:0;display:grid;place-items:center;background:linear-gradient(135deg,#273b61,#bb7657);border:1px solid #ffffff55;font-weight:900}
+.player-info{min-width:0;flex:1}
+.player-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-level{color:#8395af;font-size:12px;margin-top:3px}
+.invite{border:1px solid #ffffff35;background:#ffd02f;color:#162039;padding:8px 12px;font-size:12px;font-weight:900}
+.invite:hover{filter:brightness(1.1)}
+.invite:disabled{opacity:.5;cursor:wait}
+.status{padding:18px;text-align:center;color:#8fa2be;font-size:14px}
+.empty{padding:35px 15px;text-align:center;color:#8496af}
+.invites{flex-shrink:0;max-height:250px;overflow-y:auto;border-top:1px solid #ffffff15}
+.invites-title{padding:13px 15px 8px;font-weight:900}
+.invite-card{margin:7px 10px;padding:11px;background:#ffffff0b;border:1px solid #ffffff18}
+.invite-card-name{font-weight:900}
+.invite-card-text{color:#8fa2be;font-size:12px;margin-top:3px}
+.invite-actions{display:flex;gap:7px;margin-top:9px}
+.accept,.decline{border:0;padding:7px 12px;font-size:12px;font-weight:900}
+.accept{background:#4ddd8a;color:#071b12}
+.decline{background:#ff6262;color:white}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%) translateY(20px);min-width:250px;max-width:90vw;padding:13px 18px;text-align:center;background:#07101ef5;border:1px solid #ffffff30;box-shadow:0 15px 40px #0007;opacity:0;pointer-events:none;transition:.25s;z-index:100}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loading{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:#07101e;transition:.4s}
+.loading.hidden{opacity:0;pointer-events:none}
+.loading-box{text-align:center}
+.loading-logo{font-size:55px;font-weight:900;font-style:italic}
+.loading-logo span{color:#ffd02f}
+.loading-text{margin-top:15px;color:#8fa2be;letter-spacing:2px}
 @media(max-width:850px){
-
-  html,body{
-    overflow:auto;
-  }
-
-  .app{
-    min-height:100vh;
-  }
-
-  .header{
-    height:65px;
-    padding:0 13px;
-  }
-
-  .logo{
-    font-size:23px;
-  }
-
-  .user-info{
-    display:none;
-  }
-
-  .body{
-    grid-template-columns:1fr;
-    padding:10px;
-  }
-
-  .hero{
-    min-height:330px;
-  }
-
-  .hero h1{
-    font-size:70px;
-  }
-
-  .panel{
-    min-height:500px;
-  }
+html,body{overflow:auto}
+.app{min-height:100vh}
+.header{height:65px;padding:0 13px}
+.logo{font-size:23px}
+.user-info{display:none}
+.body{grid-template-columns:1fr;padding:10px}
+.hero{min-height:330px}
+.hero h1{font-size:70px}
+.panel{min-height:500px}
 }
 </style>
 </head>
@@ -451,422 +84,227 @@ button{cursor:pointer}
 
 <div id="loading" class="loading">
   <div class="loading-box">
-    <div class="loading-logo">
-      BATTLE<span>ZONE</span>
-    </div>
-    <div id="loadingText" class="loading-text">
-      LOADING PLAYER...
-    </div>
+    <div class="loading-logo">BATTLE<span>ZONE</span></div>
+    <div id="loadingText" class="loading-text">LOADING PLAYER...</div>
   </div>
 </div>
 
 <div class="app">
-
 <header class="header">
-
-  <div class="logo">
-    BATTLE<span>ZONE</span>
-  </div>
-
+  <div class="logo">BATTLE<span>ZONE</span></div>
   <div class="header-user">
-
     <div class="user-info">
-      <div id="headerUsername" class="username">
-        Loading...
-      </div>
-      <div id="headerLevel" class="level">
-        LEVEL 1
-      </div>
+      <div id="headerUsername" class="username">Loading...</div>
+      <div id="headerLevel" class="level">LEVEL 1</div>
     </div>
-
-    <div id="headerAvatar" class="avatar">
-      ?
-    </div>
-
+    <div id="headerAvatar" class="avatar">?</div>
   </div>
-
 </header>
 
-
 <div class="body">
+<main class="hero">
+  <div class="hero-content">
+    <div class="season">CHAPTER 2 • SEASON 9</div>
+    <h1>BATTLE<br>ROYALE</h1>
+    <p>DROP IN. SURVIVE. CONQUER.</p>
+    <button id="playButton" class="play">PLAY</button>
+  </div>
+</main>
 
-  <main class="hero">
+<aside class="panel">
+  <div class="panel-header">
+    <div class="panel-title">PLAYERS</div>
+    <div class="panel-subtitle">Invite players registered in BattleZone</div>
+    <input id="playerSearch" class="search" type="text" placeholder="Search players..." autocomplete="off">
+  </div>
 
-    <div class="hero-content">
+  <div id="playerStatus" class="status">Loading players...</div>
+  <div id="playerList" class="player-list"></div>
 
-      <div class="season">
-        CHAPTER 2 • SEASON 9
-      </div>
-
-      <h1>
-        BATTLE<br>
-        ROYALE
-      </h1>
-
-      <p>
-        DROP IN. SURVIVE. CONQUER.
-      </p>
-
-      <button id="playButton" class="play">
-        PLAY
-      </button>
-
-    </div>
-
-  </main>
-
-
-  <aside class="panel">
-
-    <div class="panel-header">
-
-      <div class="panel-title">
-        PLAYERS
-      </div>
-
-      <div class="panel-subtitle">
-        Invite players registered in BattleZone
-      </div>
-
-      <input
-        id="playerSearch"
-        class="search"
-        type="text"
-        placeholder="Search players..."
-        autocomplete="off"
-      >
-
-    </div>
-
-
-    <div id="playerStatus" class="status">
-      Loading players...
-    </div>
-
-    <div id="playerList" class="player-list"></div>
-
-
-    <div class="invites">
-
-      <div class="invites-title">
-        INVITATIONS
-      </div>
-
-      <div id="inviteList"></div>
-
-    </div>
-
-  </aside>
-
+  <div class="invites">
+    <div class="invites-title">INVITATIONS</div>
+    <div id="inviteList"></div>
+  </div>
+</aside>
 </div>
-
 </div>
 
 <div id="toast" class="toast"></div>
 
-
-<!-- Firebase COMPAT SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
-<!-- YOUR PLAYER DATABASE -->
 <script src="./js/playerdb.js"></script>
-
-<!-- MATCHMAKING -->
 <script src="./js/matchmaking.js"></script>
-
 
 <script>
 "use strict";
 
-const loading =
-  document.getElementById("loading");
-
-const loadingText =
-  document.getElementById("loadingText");
-
-const headerUsername =
-  document.getElementById("headerUsername");
-
-const headerLevel =
-  document.getElementById("headerLevel");
-
-const headerAvatar =
-  document.getElementById("headerAvatar");
-
-const playerList =
-  document.getElementById("playerList");
-
-const playerStatus =
-  document.getElementById("playerStatus");
-
-const playerSearch =
-  document.getElementById("playerSearch");
-
-const inviteList =
-  document.getElementById("inviteList");
-
-const toast =
-  document.getElementById("toast");
+const loading = document.getElementById("loading");
+const loadingText = document.getElementById("loadingText");
+const headerUsername = document.getElementById("headerUsername");
+const headerLevel = document.getElementById("headerLevel");
+const headerAvatar = document.getElementById("headerAvatar");
+const playerList = document.getElementById("playerList");
+const playerStatus = document.getElementById("playerStatus");
+const playerSearch = document.getElementById("playerSearch");
+const inviteList = document.getElementById("inviteList");
+const toast = document.getElementById("toast");
 
 let currentPlayer = null;
 let allPlayers = [];
+let stopInvitationWatcher = null;
 
+console.log("[BattleZone] PlayerDB:", window.PlayerDB);
+console.log("[BattleZone] BattleMatchmaking:", window.BattleMatchmaking);
 
-/* =========================================================
-   TOAST
-========================================================= */
+if (!window.PlayerDB) {
+  loadingText.textContent = "PLAYERDB FAILED TO LOAD";
+  throw new Error("PlayerDB was not loaded.");
+}
 
-function showToast(message){
+if (!window.BattleMatchmaking) {
+  loadingText.textContent = "MATCHMAKING FAILED TO LOAD";
+  throw new Error("BattleMatchmaking was not loaded.");
+}
 
+function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
-
   clearTimeout(showToast.timer);
-
-  showToast.timer =
-    setTimeout(() => {
-      toast.classList.remove("show");
-    },3000);
+  showToast.timer = setTimeout(function () {
+    toast.classList.remove("show");
+  }, 3000);
 }
 
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHTML(value){
-
+function escapeHTML(value) {
   return String(value || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-
-/* =========================================================
-   DISPLAY PLAYER
-========================================================= */
-
-function playerInitial(name){
-
-  return (
-    String(name || "?")
-      .trim()
-      .charAt(0)
-      .toUpperCase() || "?"
-  );
+function playerInitial(name) {
+  return String(name || "?").trim().charAt(0).toUpperCase() || "?";
 }
 
+function renderPlayers() {
+  const search = playerSearch.value.trim().toLowerCase();
 
-function renderPlayers(){
+  const players = allPlayers.filter(function (player) {
+    const name = String(player.username || "").toLowerCase();
+    return name.includes(search);
+  });
 
-  const search =
-    playerSearch.value
-      .trim()
-      .toLowerCase();
-
-  const players =
-    allPlayers.filter(player => {
-
-      const name =
-        String(player.username || "")
-          .toLowerCase();
-
-      return name.includes(search);
-    });
-
-
-  if(!players.length){
-
+  if (!players.length) {
     playerStatus.style.display = "block";
-
-    playerStatus.textContent =
-      search
-        ? "No matching players."
-        : "No other registered players found.";
-
+    playerStatus.textContent = search
+      ? "No matching players."
+      : "No other registered players found.";
     playerList.innerHTML = "";
-
     return;
   }
 
-
   playerStatus.style.display = "none";
 
+  playerList.innerHTML = players.map(function (player) {
+    const username = player.username || "Unknown";
+    const level = Number(player.level || 1);
 
-  playerList.innerHTML =
-    players.map(player => {
-
-      const username =
-        player.username || "Unknown";
-
-      const level =
-        Number(player.level || 1);
-
-
-      return `
-        <div class="player">
-
-          <div class="player-avatar">
-            ${escapeHTML(playerInitial(username))}
-          </div>
-
-          <div class="player-info">
-
-            <div class="player-name">
-              ${escapeHTML(username)}
-            </div>
-
-            <div class="player-level">
-              LEVEL ${level}
-            </div>
-
-          </div>
-
-          <button
-            class="invite"
-            data-uid="${escapeHTML(player.uid)}"
-            data-username="${escapeHTML(username)}"
-          >
-            INVITE
-          </button>
-
+    return `
+      <div class="player">
+        <div class="player-avatar">
+          ${escapeHTML(playerInitial(username))}
         </div>
-      `;
 
-    }).join("");
+        <div class="player-info">
+          <div class="player-name">${escapeHTML(username)}</div>
+          <div class="player-level">LEVEL ${level}</div>
+        </div>
 
+        <button
+          class="invite"
+          data-uid="${escapeHTML(player.uid)}"
+          data-username="${escapeHTML(username)}"
+        >
+          INVITE
+        </button>
+      </div>
+    `;
+  }).join("");
 
-  document
-    .querySelectorAll(".invite")
-    .forEach(button => {
+  playerList.querySelectorAll(".invite").forEach(function (button) {
+    button.addEventListener("click", async function () {
+      const uid = button.dataset.uid;
+      const username = button.dataset.username;
 
-      button.addEventListener(
-        "click",
-        async () => {
+      button.disabled = true;
+      button.textContent = "...";
 
-          const uid =
-            button.dataset.uid;
+      try {
+        await BattleMatchmaking.sendInvitation(uid, username);
 
-          const username =
-            button.dataset.username;
+        showToast("Invitation sent to " + username);
+        button.textContent = "SENT";
+      } catch (error) {
+        console.error("[BattleZone] Invitation error:", error);
 
-          button.disabled = true;
-          button.textContent = "...";
+        showToast(
+          error.message ||
+          "Could not send invitation."
+        );
 
-
-          try{
-
-            await BattleMatchmaking
-              .sendInvitation(
-                uid,
-                username
-              );
-
-            showToast(
-              "Invitation sent to " +
-              username
-            );
-
-            button.textContent =
-              "SENT";
-
-          }catch(error){
-
-            console.error(error);
-
-            showToast(
-              error.message ||
-              "Could not send invitation."
-            );
-
-            button.disabled = false;
-            button.textContent = "INVITE";
-          }
-
-        }
-      );
-
+        button.disabled = false;
+        button.textContent = "INVITE";
+      }
     });
+  });
 }
 
+async function loadPlayers() {
+  playerStatus.textContent = "Reading PlayerDB...";
 
-/* =========================================================
-   LOAD PLAYERS
-========================================================= */
-
-async function loadPlayers(){
-
-  try{
-
-    playerStatus.textContent =
-      "Reading PlayerDB...";
-
-
+  try {
     allPlayers =
-      await BattleMatchmaking
-        .getRegisteredPlayers();
-
-
-    /*
-      The matchmaking system already removes
-      the current user.
-    */
+      await BattleMatchmaking.getRegisteredPlayers();
 
     renderPlayers();
+  } catch (error) {
+    console.error("[BattleZone] Player list error:", error);
 
-
-  }catch(error){
-
-    console.error(
-      "[BattleZone] Player list error:",
-      error
-    );
-
-    playerStatus.style.display =
-      "block";
-
+    playerStatus.style.display = "block";
     playerStatus.textContent =
       error.message ||
       "Could not load players.";
 
+    throw error;
   }
-
 }
 
+function renderInvitations(invitations) {
+  invitations = Array.isArray(invitations)
+    ? invitations
+    : [];
 
-/* =========================================================
-   INVITATIONS
-========================================================= */
-
-function renderInvitations(invitations){
-
-  if(!invitations.length){
-
+  if (!invitations.length) {
     inviteList.innerHTML =
       `<div class="empty">No invitations.</div>`;
-
     return;
   }
 
-
   inviteList.innerHTML =
-    invitations.map(invite => {
-
+    invitations.map(function (invite) {
       const username =
         invite.fromUsername || "Unknown";
-
 
       return `
         <div
           class="invite-card"
           data-invite="${escapeHTML(invite.id)}"
         >
-
           <div class="invite-card-name">
             ${escapeHTML(username)}
           </div>
@@ -876,7 +314,6 @@ function renderInvitations(invitations){
           </div>
 
           <div class="invite-actions">
-
             <button
               class="accept"
               data-action="accept"
@@ -892,229 +329,128 @@ function renderInvitations(invitations){
             >
               DECLINE
             </button>
-
           </div>
-
         </div>
       `;
-
     }).join("");
 
-
-  document
+  inviteList
     .querySelectorAll("[data-action]")
-    .forEach(button => {
+    .forEach(function (button) {
+      button.addEventListener("click", async function () {
+        const id = button.dataset.id;
+        const action = button.dataset.action;
 
-      button.addEventListener(
-        "click",
-        async () => {
+        button.disabled = true;
 
-          const id =
-            button.dataset.id;
-
-          const action =
-            button.dataset.action;
-
-
-          button.disabled = true;
-
-
-          try{
-
-            if(action === "accept"){
-
-              await BattleMatchmaking
-                .acceptInvitation(id);
-
-              showToast(
-                "Invitation accepted."
-              );
-
-            }else{
-
-              await BattleMatchmaking
-                .declineInvitation(id);
-
-              showToast(
-                "Invitation declined."
-              );
-
-            }
-
-          }catch(error){
-
-            console.error(error);
-
-            showToast(
-              error.message ||
-              "Action failed."
-            );
-
-            button.disabled = false;
+        try {
+          if (action === "accept") {
+            await BattleMatchmaking.acceptInvitation(id);
+            showToast("Invitation accepted.");
+          } else {
+            await BattleMatchmaking.declineInvitation(id);
+            showToast("Invitation declined.");
           }
+        } catch (error) {
+          console.error(
+            "[BattleZone] Invitation action error:",
+            error
+          );
 
+          showToast(
+            error.message ||
+            "Action failed."
+          );
+
+          button.disabled = false;
         }
-      );
-
+      });
     });
 }
 
+playerSearch.addEventListener("input", renderPlayers);
 
-/* =========================================================
-   SEARCH
-========================================================= */
+PlayerDB.watchPlayer(async function (player) {
+  if (!player) {
+    loadingText.textContent = "LOGIN REQUIRED";
 
-playerSearch.addEventListener(
-  "input",
-  renderPlayers
-);
+    setTimeout(function () {
+      window.location.href = "./index.html";
+    }, 800);
 
-
-/* =========================================================
-   AUTH
-========================================================= */
-
-if(!window.PlayerDB){
-
-  loadingText.textContent =
-    "PLAYERDB FAILED TO LOAD";
-
-  throw new Error(
-    "PlayerDB was not loaded."
-  );
-}
-
-
-PlayerDB.watchPlayer(
-  async player => {
-
-    if(!player){
-
-      loadingText.textContent =
-        "LOGIN REQUIRED";
-
-      setTimeout(() => {
-
-        window.location.href =
-          "./index.html";
-
-      },800);
-
-      return;
-    }
-
-
-    currentPlayer = player;
-
-
-    /*
-      IMPORTANT:
-      Username comes directly from
-      Firestore players/{uid}.
-    */
-
-    const username =
-      player.username ||
-      PlayerDB.getCurrentUser()?.displayName ||
-      "PLAYER";
-
-
-    headerUsername.textContent =
-      username;
-
-
-    headerLevel.textContent =
-      "LEVEL " +
-      Number(player.level || 1);
-
-
-    headerAvatar.textContent =
-      playerInitial(username);
-
-
-    loadingText.textContent =
-      "LOADING PLAYERS...";
-
-
-    try{
-
-      await loadPlayers();
-
-      BattleMatchmaking
-        .watchInvitations(
-          invitations => {
-
-            renderInvitations(
-              invitations
-            );
-
-          }
-        );
-
-
-      loading.classList.add("hidden");
-
-    }catch(error){
-
-      console.error(error);
-
-      loadingText.textContent =
-        "FAILED TO LOAD";
-
-    }
-
+    return;
   }
-);
 
+  currentPlayer = player;
 
-/* =========================================================
-   PLAY
-========================================================= */
+  const username =
+    player.username ||
+    PlayerDB.getCurrentUser()?.displayName ||
+    "PLAYER";
+
+  headerUsername.textContent = username;
+  headerLevel.textContent =
+    "LEVEL " + Number(player.level || 1);
+  headerAvatar.textContent = playerInitial(username);
+
+  loadingText.textContent = "LOADING PLAYERS...";
+
+  try {
+    await loadPlayers();
+
+    if (stopInvitationWatcher) {
+      stopInvitationWatcher();
+      stopInvitationWatcher = null;
+    }
+
+    stopInvitationWatcher =
+      BattleMatchmaking.watchInvitations(
+        function (invitations) {
+          renderInvitations(invitations);
+        }
+      );
+
+    loading.classList.add("hidden");
+  } catch (error) {
+    console.error("[BattleZone] Startup error:", error);
+
+    loadingText.textContent = "FAILED TO LOAD";
+    playerStatus.style.display = "block";
+    playerStatus.textContent =
+      error.message ||
+      "Failed to load BattleZone.";
+  }
+});
 
 document
   .getElementById("playButton")
-  .addEventListener("click",async function(){
-
+  .addEventListener("click", async function () {
     this.disabled = true;
     this.textContent = "MATCHMAKING...";
 
-    try{
-
+    try {
       const result =
-        await BattleMatchmaking
-          .findMatch();
+        await BattleMatchmaking.findMatch();
 
-
-      if(result){
-
-        showToast(
-          "Match found!"
-        );
-
-      }else{
-
-        showToast(
-          "Searching for players..."
-        );
-
+      if (result) {
+        showToast("Match found!");
+      } else {
+        showToast("Searching for players...");
       }
-
-    }catch(error){
-
-      console.error(error);
+    } catch (error) {
+      console.error(
+        "[BattleZone] Matchmaking error:",
+        error
+      );
 
       showToast(
         error.message ||
         "Matchmaking failed."
       );
-
-    }finally{
-
+    } finally {
       this.disabled = false;
       this.textContent = "PLAY";
-
     }
-
   });
 </script>
 
