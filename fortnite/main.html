@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -19,95 +18,100 @@ html,body{
   overflow:hidden;
   font-family:'Barlow Condensed',Arial,sans-serif;
   color:#fff;
-  background:#07101e;
+  background:
+    radial-gradient(circle at 70% 35%,#d99b7080,transparent 25%),
+    linear-gradient(135deg,#182d54,#416d9a 48%,#d68b58);
 }
 
-button,input{font:inherit}
-button{cursor:pointer}
+button,input{
+  font:inherit;
+}
 
-.hidden{display:none!important}
+button{
+  cursor:pointer;
+}
 
-.app{
-  position:relative;
+#app{
   width:100%;
   height:100%;
-  overflow:hidden;
-  background:
-    radial-gradient(circle at 72% 30%,rgba(255,220,170,.35),transparent 23%),
-    linear-gradient(135deg,#172c52,#416f9d 48%,#c57c55);
+  position:relative;
 }
 
-.app:before{
+#app:before{
   content:"";
   position:absolute;
   inset:0;
-  pointer-events:none;
   background:
-    linear-gradient(180deg,rgba(0,0,0,.52),transparent 38%,rgba(0,0,0,.62));
+    linear-gradient(
+      180deg,
+      #0008,
+      transparent 35%,
+      #0008
+    );
+  pointer-events:none;
 }
 
-.header{
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:78px;
-  z-index:20;
+/* HEADER */
+
+header{
+  position:relative;
+  z-index:5;
+  height:82px;
   display:flex;
   align-items:center;
-  padding:0 24px;
-  background:linear-gradient(#07101ef2,transparent);
+  padding:0 28px;
+  background:linear-gradient(#07101eee,transparent);
 }
 
 .logo{
   font-size:31px;
   font-weight:900;
   font-style:italic;
-  letter-spacing:1px;
   text-shadow:3px 4px #111;
 }
 
-.logo span{color:#ffd02f}
+.logo span{
+  color:#ffd02f;
+}
 
-.header-right{
+nav{
+  display:flex;
+  margin-left:45px;
+  gap:5px;
+}
+
+nav button{
+  height:48px;
+  padding:0 20px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  font-weight:900;
+  font-size:18px;
+}
+
+nav button:hover,
+nav button.active{
+  background:#ffffff1c;
+}
+
+nav button.active{
+  border-bottom:4px solid #ffd42e;
+}
+
+.account{
   margin-left:auto;
   display:flex;
   align-items:center;
-  gap:9px;
-}
-
-.icon-btn{
-  position:relative;
-  width:44px;
-  height:44px;
-  border:1px solid #ffffff28;
-  background:#07101dcc;
-  color:#fff;
-  font-size:18px;
-  transition:.2s;
-}
-
-.icon-btn:hover{
-  background:#ffffff20;
-  transform:translateY(-1px);
-}
-
-.dot{
-  position:absolute;
-  right:5px;
-  top:5px;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#ff4f62;
-  box-shadow:0 0 12px #ff4f62;
+  gap:12px;
 }
 
 .vbucks{
-  padding:9px 14px;
-  border:1px solid #ffffff35;
   background:#07101dcc;
-  font-weight:900;
+  border:1px solid #ffffff35;
+  padding:9px 14px;
+  border-radius:5px;
+  font-weight:800;
 }
 
 .coin{
@@ -126,153 +130,74 @@ button{cursor:pointer}
   height:43px;
   display:grid;
   place-items:center;
-  border:2px solid #fff;
-  background:linear-gradient(135deg,#202b4a,#d79769);
   font-weight:900;
+  background:linear-gradient(135deg,#202b4a,#d79769);
+  border:2px solid white;
 }
+
+/* MAIN */
 
 .center{
   position:absolute;
-  inset:78px 0 0;
+  inset:82px 0 0;
   display:grid;
   place-items:center;
   text-align:center;
+  z-index:2;
 }
 
-.center-content{
-  margin-top:-15px;
+.content{
+  margin-top:-20px;
 }
 
 .eyebrow{
-  font-size:21px;
-  font-weight:900;
+  font-size:22px;
   letter-spacing:4px;
+  font-weight:800;
 }
 
-.title{
+.hero-title{
+  font-size:clamp(70px,11vw,155px);
+  line-height:.8;
   margin:13px 0;
-  font-size:clamp(70px,11vw,150px);
-  line-height:.78;
   font-weight:900;
   font-style:italic;
-  text-shadow:6px 7px #202b43,12px 15px 25px #0008;
+  text-shadow:
+    6px 7px #202b43,
+    12px 15px 25px #0008;
 }
 
 .tagline{
   font-size:23px;
-  font-weight:900;
+  font-weight:800;
   letter-spacing:2px;
 }
 
 .play{
-  margin-top:28px;
-  padding:15px 70px;
-  border:3px solid white;
+  margin-top:30px;
+  padding:16px 65px;
   background:#f5c82e;
   color:#172139;
+  border:3px solid white;
   font-size:29px;
   font-weight:900;
   letter-spacing:2px;
   clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);
-  transition:.2s;
 }
 
 .play:hover{
-  transform:translateY(-2px);
   filter:brightness(1.1);
+  transform:translateY(-2px);
 }
 
-/* PARTY */
-
-.party{
-  position:absolute;
-  left:20px;
-  top:98px;
-  width:300px;
-  z-index:15;
-  padding:15px;
-  background:#050d1bea;
-  border:1px solid #ffffff20;
-  box-shadow:0 20px 60px #0006;
-  backdrop-filter:blur(14px);
-}
-
-.party-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:12px;
-}
-
-.party-header strong{
-  font-size:21px;
-}
-
-.party-count{
-  color:#8da0bb;
-  font-size:13px;
-}
-
-.party-slot{
-  min-height:61px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:7px;
-  padding:8px;
-  background:#ffffff08;
-  border:1px solid #ffffff12;
-}
-
-.party-avatar{
-  width:42px;
-  height:42px;
-  display:grid;
-  place-items:center;
-  border:1px solid white;
-  background:linear-gradient(135deg,#26375d,#d79769);
-  font-weight:900;
-}
-
-.party-info{
-  min-width:0;
-  flex:1;
-}
-
-.party-name{
-  font-size:17px;
-  font-weight:900;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.party-status{
-  font-size:12px;
-  color:#76dfa1;
-}
-
-.slot-empty{
-  color:#64748a;
-  font-size:14px;
-}
-
-.invite-small{
-  padding:7px 10px;
-  border:0;
-  background:#ffd02f;
-  color:#172139;
-  font-weight:900;
-}
-
-/* BOTTOM */
+/* PROFILE */
 
 .bottom{
   position:absolute;
-  left:20px;
-  right:20px;
-  bottom:18px;
-  z-index:10;
+  z-index:5;
+  left:24px;
+  right:24px;
+  bottom:20px;
   display:flex;
   justify-content:space-between;
   align-items:end;
@@ -280,315 +205,229 @@ button{cursor:pointer}
 
 .profile{
   display:flex;
-  align-items:center;
   gap:12px;
+  align-items:center;
+  background:#07101dcc;
   padding:10px 15px;
-  background:#07101ddd;
   border:1px solid #ffffff30;
 }
 
-.profile-avatar{
-  width:50px;
-  height:50px;
+.pfp{
+  width:48px;
+  height:48px;
   display:grid;
   place-items:center;
   background:linear-gradient(135deg,#273557,#d99a71);
-  border:1px solid #ffffff55;
+  font-size:20px;
+  font-weight:900;
+}
+
+.name{
   font-size:21px;
   font-weight:900;
 }
 
-.profile-name{
-  font-size:22px;
+.level{
+  font-size:15px;
+  opacity:.7;
+}
+
+/* FRIENDS */
+
+.friends-button{
+  position:absolute;
+  right:24px;
+  top:100px;
+  z-index:10;
+  padding:12px 20px;
+  border:1px solid #ffffff40;
+  background:#07101ddd;
+  color:white;
   font-weight:900;
 }
 
-.profile-level{
-  color:#a6b4c8;
-  font-size:14px;
-}
-
-.news{
-  padding:11px 18px;
-  background:#07101ddd;
-  border:1px solid #ffffff30;
-  text-align:center;
-}
-
-.news b{font-size:17px}
-.news small{
-  display:block;
-  color:#aab6c8;
-}
-
-/* MODAL */
-
-.overlay{
+.panel{
   position:fixed;
-  inset:0;
-  z-index:100;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#000a;
-  backdrop-filter:blur(9px);
+  z-index:30;
+  top:82px;
+  right:0;
+  width:min(430px,100%);
+  height:calc(100% - 82px);
+  padding:22px;
+  background:#07101ef5;
+  border-left:1px solid #ffffff25;
+  backdrop-filter:blur(18px);
+  transform:translateX(100%);
+  transition:.3s ease;
+  overflow:auto;
 }
 
-.modal{
-  width:min(520px,94vw);
-  max-height:85vh;
-  overflow:hidden;
-  padding:24px;
-  background:#07101ef7;
-  border:1px solid #ffffff25;
-  box-shadow:0 30px 100px #0009;
+.panel.open{
+  transform:translateX(0);
 }
 
-.modal-header{
+.panel-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  margin-bottom:18px;
+  margin-bottom:20px;
 }
 
-.modal-title{
+.panel-header h2{
   margin:0;
-  font-size:32px;
-  font-weight:900;
+  font-size:30px;
   font-style:italic;
 }
 
 .close{
   width:38px;
   height:38px;
-  border:1px solid #ffffff20;
-  background:#ffffff0b;
-  color:#fff;
-  font-size:22px;
+  border:1px solid #ffffff30;
+  background:#ffffff10;
+  color:white;
+  font-size:20px;
 }
 
-.close:hover{background:#ffffff20}
+/* INVITE */
 
-/* PLAYER SEARCH */
-
-.search{
-  display:flex;
-  gap:8px;
+.invite-box{
+  padding:16px;
+  background:#ffffff08;
+  border:1px solid #ffffff18;
   margin-bottom:15px;
 }
 
-.search input{
+.invite-box label{
+  display:block;
+  margin-bottom:8px;
+  font-weight:800;
+  color:#aebdd2;
+}
+
+.invite-row{
+  display:flex;
+  gap:8px;
+}
+
+.invite-row input{
   flex:1;
   min-width:0;
   height:48px;
-  padding:0 13px;
-  outline:none;
+  padding:0 12px;
   border:1px solid #ffffff20;
-  background:#111d31;
-  color:#fff;
+  background:#101c31;
+  color:white;
+  outline:none;
 }
 
-.search input:focus{
+.invite-row input:focus{
   border-color:#ffd02f;
 }
 
-.search button{
-  padding:0 16px;
+.invite-row button{
+  width:90px;
   border:0;
-  background:#ffd02f;
+  background:#f5c82e;
   color:#172139;
   font-weight:900;
 }
 
-.results{
-  max-height:390px;
-  overflow:auto;
+.invite-status{
+  min-height:22px;
+  margin-top:10px;
+  font-size:14px;
+  color:#9fb1cb;
+}
+
+.invite-status.error{
+  color:#ff7777;
+}
+
+.invite-status.success{
+  color:#72e3a1;
+}
+
+/* ONLINE */
+
+.section-title{
+  margin:22px 0 10px;
+  color:#91a5c2;
+  font-size:13px;
+  letter-spacing:2px;
+  font-weight:900;
 }
 
 .player{
   display:flex;
   align-items:center;
-  gap:11px;
-  padding:11px;
+  gap:12px;
+  padding:12px;
   margin-bottom:7px;
   background:#ffffff08;
   border:1px solid #ffffff12;
 }
 
 .player-avatar{
-  width:43px;
-  height:43px;
-  flex:none;
+  width:40px;
+  height:40px;
   display:grid;
   place-items:center;
-  border:1px solid #ffffff80;
-  background:linear-gradient(135deg,#26375d,#a96f5b);
+  background:#263653;
   font-weight:900;
 }
 
 .player-info{
-  min-width:0;
   flex:1;
+  min-width:0;
 }
 
 .player-name{
   font-size:18px;
   font-weight:900;
   overflow:hidden;
-  white-space:nowrap;
   text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 .player-status{
-  color:#7bdba0;
-  font-size:12px;
+  color:#6ee29d;
+  font-size:13px;
 }
 
-.player-action{
-  padding:8px 11px;
-  border:0;
-  background:#ffd02f;
+.invite-small{
+  padding:8px 12px;
+  background:#f5c82e;
   color:#172139;
+  border:0;
   font-weight:900;
-}
-
-.player-action:disabled{
-  opacity:.45;
-  cursor:not-allowed;
 }
 
 .empty{
-  padding:30px 10px;
+  padding:25px 10px;
   text-align:center;
-  color:#8190a7;
-}
-
-/* INVITATION */
-
-.invite-card{
-  padding:18px;
-  background:linear-gradient(135deg,#162e50,#0a1425);
-  border:1px solid #ffffff18;
-}
-
-.invite-player{
-  display:flex;
-  align-items:center;
-  gap:13px;
-}
-
-.big-avatar{
-  width:58px;
-  height:58px;
-  display:grid;
-  place-items:center;
-  border:2px solid white;
-  background:linear-gradient(135deg,#354a79,#d79a70);
-  font-size:23px;
-  font-weight:900;
-}
-
-.invite-name{
-  font-size:23px;
-  font-weight:900;
-}
-
-.invite-description{
-  color:#91a1b9;
-}
-
-.invite-actions{
-  display:flex;
-  gap:10px;
-  margin-top:20px;
-}
-
-.accept,
-.decline{
-  flex:1;
-  height:49px;
-  border:2px solid white;
-  font-weight:900;
-  font-size:18px;
-}
-
-.accept{
-  background:#ffd02f;
-  color:#172139;
-}
-
-.decline{
-  background:#263246;
-  color:#fff;
-}
-
-/* SETTINGS */
-
-.setting{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 0;
-  border-bottom:1px solid #ffffff12;
-}
-
-.setting-label{font-weight:800}
-
-.toggle{
-  width:48px;
-  height:25px;
-  position:relative;
-  border:0;
-  border-radius:20px;
-  background:#34435a;
-}
-
-.toggle:after{
-  content:"";
-  position:absolute;
-  left:4px;
-  top:4px;
-  width:17px;
-  height:17px;
-  border-radius:50%;
-  background:#fff;
-  transition:.2s;
-}
-
-.toggle.on{background:#ffd02f}
-.toggle.on:after{left:27px}
-
-.logout{
-  width:100%;
-  height:45px;
-  margin-top:20px;
-  border:1px solid #ff526d44;
-  background:#401f28;
-  color:#ff8998;
-  font-weight:900;
+  color:#71829c;
 }
 
 /* TOAST */
 
 .toast{
   position:fixed;
+  z-index:100;
   left:50%;
-  bottom:30px;
-  z-index:300;
-  padding:12px 20px;
-  background:#07101ef5;
-  border:1px solid #ffffff25;
-  box-shadow:0 15px 40px #0007;
-  opacity:0;
-  visibility:hidden;
+  bottom:35px;
   transform:translate(-50%,20px);
+  padding:13px 22px;
+  background:#07101eee;
+  border:1px solid #ffffff30;
+  box-shadow:0 10px 40px #0008;
+  opacity:0;
+  pointer-events:none;
   transition:.3s;
   font-weight:800;
 }
 
 .toast.show{
   opacity:1;
-  visibility:visible;
   transform:translate(-50%,0);
 }
 
@@ -596,146 +435,119 @@ button{cursor:pointer}
 
 @media(max-width:750px){
 
-  .header{
-    padding:0 10px;
+  header{
+    padding:0 14px;
   }
 
-  .logo{font-size:23px}
+  nav{
+    display:none;
+  }
 
-  .icon-btn{
-    width:38px;
-    height:38px;
+  .logo{
+    font-size:24px;
+  }
+
+  .eyebrow{
+    font-size:16px;
+  }
+
+  .tagline{
+    font-size:17px;
+  }
+
+  .hero-title{
+    font-size:65px;
+  }
+
+  .play{
+    font-size:23px;
+    padding:13px 45px;
+  }
+
+  .bottom{
+    left:12px;
+    right:12px;
+  }
+
+  .friends-button{
+    right:12px;
+    top:92px;
   }
 
   .vbucks{
+    font-size:14px;
     padding:7px;
-    font-size:13px;
   }
 
   .avatar{
-    width:38px;
-    height:38px;
+    width:37px;
+    height:37px;
   }
 
-  .party{
-    left:8px;
-    top:84px;
-    width:260px;
-  }
-
-  .title{font-size:64px}
-  .eyebrow{font-size:15px}
-  .tagline{font-size:16px}
-
-  .play{
-    padding:13px 45px;
-    font-size:23px;
-  }
-
-  .news{display:none}
-
-  .bottom{
-    left:8px;
-    right:8px;
-  }
-
-  .profile{
-    padding:8px 10px;
-  }
-
-  .profile-avatar{
-    width:43px;
-    height:43px;
-  }
-
-  .profile-name{
-    font-size:18px;
-  }
-
-  .modal{
-    padding:19px;
+  .panel{
+    top:70px;
+    height:calc(100% - 70px);
   }
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="app">
+<div id="app">
 
-<header class="header">
+<header>
 
   <div class="logo">
     BATTLE<span>ZONE</span>
   </div>
 
-  <div class="header-right">
+  <nav>
+    <button class="active">PLAY</button>
+    <button>LOCKER</button>
+    <button>SHOP</button>
+    <button>BATTLE PASS</button>
+    <button>QUESTS</button>
+  </nav>
 
-```
-<button class="icon-btn" id="friendsButton">
-  👥
-</button>
+  <div class="account">
 
-<button class="icon-btn" id="notificationsButton">
-  🔔
-  <span class="dot hidden" id="notificationDot"></span>
-</button>
+    <div class="vbucks">
+      <span class="coin">V</span>
+      2,850
+    </div>
 
-<button class="icon-btn" id="settingsButton">
-  ⚙
-</button>
-
-<div class="vbucks">
-  <span class="coin">V</span>
-  <span id="vbucks">2,850</span>
-</div>
-
-<div class="avatar" id="headerAvatar">?</div>
-```
+    <div id="headerAvatar" class="avatar">
+      ?
+    </div>
 
   </div>
 
 </header>
 
-<!-- PARTY -->
-
-<section class="party">
-
-  <div class="party-header">
-    <strong>YOUR PARTY</strong>
-    <span class="party-count" id="partyCount">
-      1 / 4
-    </span>
-  </div>
-
-  <div id="partySlots"></div>
-
-</section>
-
-<!-- CENTER -->
+<button id="friendsButton" class="friends-button">
+  FRIENDS
+</button>
 
 <main class="center">
 
-  <section class="center-content">
+  <section class="content">
 
-```
-<div class="eyebrow">
-  CHAPTER 2 • SEASON 9
-</div>
+    <div class="eyebrow">
+      CHAPTER 2 • SEASON 9
+    </div>
 
-<h1 class="title">
-  BATTLE<br>ROYALE
-</h1>
+    <div class="hero-title">
+      BATTLE<br>ROYAL
+    </div>
 
-<div class="tagline">
-  DROP IN. SURVIVE. CONQUER.
-</div>
+    <div class="tagline">
+      DROP IN. SURVIVE. CONQUER.
+    </div>
 
-<button class="play" id="playButton">
-  PLAY
-</button>
-```
+    <button id="playButton" class="play">
+      PLAY
+    </button>
 
   </section>
 
@@ -745,870 +557,540 @@ button{cursor:pointer}
 
   <div class="profile">
 
-```
-<div class="profile-avatar" id="profileAvatar">
-  ?
-</div>
+    <div id="profileAvatar" class="pfp">
+      ?
+    </div>
 
-<div>
+    <div>
 
-  <div class="profile-name" id="profileName">
-    PLAYER
-  </div>
+      <div id="profileName" class="name">
+        LOADING...
+      </div>
 
-  <div class="profile-level">
-    LEVEL 1
-  </div>
+      <div class="level">
+        LEVEL 1
+      </div>
 
-</div>
-```
+    </div>
 
-  </div>
-
-  <div class="news">
-    <b>SEASON UPDATE</b>
-    <small>New challenges are waiting.</small>
   </div>
 
 </footer>
 
 </div>
 
-<!-- =======================================================
-     FRIEND / INVITE MODAL
-======================================================= -->
 
-<div class="overlay hidden" id="friendsModal">
+<!-- FRIENDS / INVITATION PANEL -->
 
-  <div class="modal">
+<aside id="friendsPanel" class="panel">
 
-```
-<div class="modal-header">
+  <div class="panel-header">
 
-  <h2 class="modal-title">
-    PLAYERS
-  </h2>
+    <h2>FRIENDS</h2>
 
-  <button class="close" data-close="friendsModal">
-    ×
-  </button>
-
-</div>
-
-<div class="search">
-
-  <input
-    id="playerSearch"
-    type="text"
-    placeholder="Search username..."
-    autocomplete="off"
-  >
-
-  <button id="searchButton">
-    SEARCH
-  </button>
-
-</div>
-
-<div class="results" id="playerResults">
-
-  <div class="empty">
-    Search for a player in the database.
-  </div>
-
-</div>
-```
-
-  </div>
-
-</div>
-
-<!-- =======================================================
-     INCOMING INVITATION
-======================================================= -->
-
-<div class="overlay hidden" id="inviteModal">
-
-  <div class="modal">
-
-```
-<div class="modal-header">
-
-  <h2 class="modal-title">
-    PARTY INVITE
-  </h2>
-
-</div>
-
-<div class="invite-card">
-
-  <div class="invite-player">
-
-    <div class="big-avatar" id="inviteAvatar">
-      ?
-    </div>
-
-    <div>
-
-      <div class="invite-name" id="inviteFrom">
-        PLAYER
-      </div>
-
-      <div class="invite-description">
-        invited you to join their party.
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="invite-actions">
-
-    <button class="accept" id="acceptInvite">
-      ACCEPT
-    </button>
-
-    <button class="decline" id="declineInvite">
-      DECLINE
+    <button id="closeFriends" class="close">
+      ×
     </button>
 
   </div>
 
-</div>
-```
+
+  <div class="invite-box">
+
+    <label>
+      INVITE PLAYER
+    </label>
+
+    <div class="invite-row">
+
+      <input
+        id="inviteUsername"
+        type="text"
+        placeholder="Enter username"
+        autocomplete="off"
+      >
+
+      <button id="inviteButton">
+        INVITE
+      </button>
+
+    </div>
+
+    <div
+      id="inviteStatus"
+      class="invite-status"
+    ></div>
 
   </div>
 
-</div>
 
-<!-- =======================================================
-     NOTIFICATIONS
-======================================================= -->
-
-<div class="overlay hidden" id="notificationsModal">
-
-  <div class="modal">
-
-```
-<div class="modal-header">
-
-  <h2 class="modal-title">
-    NOTIFICATIONS
-  </h2>
-
-  <button class="close" data-close="notificationsModal">
-    ×
-  </button>
-
-</div>
-
-<div id="notificationList">
-
-  <div class="empty">
-    No new notifications.
+  <div class="section-title">
+    DATABASE PLAYERS
   </div>
 
-</div>
-```
+  <div id="playersList">
+
+    <div class="empty">
+      Loading players...
+    </div>
 
   </div>
 
-</div>
+</aside>
 
-<!-- =======================================================
-     SETTINGS
-======================================================= -->
 
-<div class="overlay hidden" id="settingsModal">
+<div id="toast" class="toast"></div>
 
-  <div class="modal">
-
-```
-<div class="modal-header">
-
-  <h2 class="modal-title">
-    SETTINGS
-  </h2>
-
-  <button class="close" data-close="settingsModal">
-    ×
-  </button>
-
-</div>
-
-<div class="setting">
-  <span class="setting-label">Music</span>
-  <button class="toggle on"></button>
-</div>
-
-<div class="setting">
-  <span class="setting-label">Sound Effects</span>
-  <button class="toggle on"></button>
-</div>
-
-<div class="setting">
-  <span class="setting-label">Notifications</span>
-  <button class="toggle on"></button>
-</div>
-
-<button class="logout" id="logoutButton">
-  LOG OUT
-</button>
-```
-
-  </div>
-
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- FIREBASE -->
 
 <script type="module">
 
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-
-import {
-  getAuth,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-  onSnapshot,
-  serverTimestamp,
-  orderBy,
-  limit
-} from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-
-
-/* =========================================================
-   FIREBASE CONFIG
+/*
+=========================================================
+  BATTLEZONE MAIN
 =========================================================
 
-   USE THE SAME CONFIG AS playerdb.js.
+  URL expected:
 
-========================================================= */
+  main.html?user=YourUsername
 
-const firebaseConfig = {
+  Example:
 
-  apiKey:"YOUR_FIREBASE_API_KEY",
+  main.html?user=Krv
 
-  authDomain:"YOUR_PROJECT.firebaseapp.com",
+  The username is decoded from the URL and displayed.
 
-  projectId:"YOUR_PROJECT_ID",
+  Authentication/database functions are loaded from:
 
-  storageBucket:"YOUR_PROJECT.firebasestorage.app",
+  ./js/playerdb.js
+=========================================================
+*/
 
-  messagingSenderId:"YOUR_SENDER_ID",
+import * as PlayerDBModule from "./js/playerdb.js";
 
-  appId:"YOUR_APP_ID"
-
-};
-
-
-const app =
-  initializeApp(firebaseConfig);
-
-const auth =
-  getAuth(app);
-
-const db =
-  getFirestore(app);
+const PlayerDB =
+  PlayerDBModule.default || PlayerDBModule;
 
 
-/* =========================================================
-   CURRENT PLAYER
-========================================================= */
-
-const params =
-  new URLSearchParams(
-    location.search
-  );
-
-let username =
-  params.get("user") ||
-  localStorage.getItem(
-    "battlezone-user"
-  );
-
-
-if(!username){
-
-  location.href="./index.html";
-
-}
-
-
-/* =========================================================
-   PLAYER STATE
-========================================================= */
-
-let currentPlayer = null;
-
-let partyMembers = [];
-
-let pendingInvite = null;
-
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
+/* =======================================================
+   DOM
+======================================================= */
 
 const profileName =
-  document.getElementById(
-    "profileName"
-  );
+  document.getElementById("profileName");
 
 const profileAvatar =
-  document.getElementById(
-    "profileAvatar"
-  );
+  document.getElementById("profileAvatar");
 
 const headerAvatar =
-  document.getElementById(
-    "headerAvatar"
-  );
+  document.getElementById("headerAvatar");
 
-const partySlots =
-  document.getElementById(
-    "partySlots"
-  );
+const friendsButton =
+  document.getElementById("friendsButton");
 
-const partyCount =
-  document.getElementById(
-    "partyCount"
-  );
+const friendsPanel =
+  document.getElementById("friendsPanel");
 
-const playerResults =
-  document.getElementById(
-    "playerResults"
-  );
+const closeFriends =
+  document.getElementById("closeFriends");
 
-const playerSearch =
-  document.getElementById(
-    "playerSearch"
-  );
+const inviteUsername =
+  document.getElementById("inviteUsername");
+
+const inviteButton =
+  document.getElementById("inviteButton");
+
+const inviteStatus =
+  document.getElementById("inviteStatus");
+
+const playersList =
+  document.getElementById("playersList");
 
 const toast =
-  document.getElementById(
-    "toast"
-  );
+  document.getElementById("toast");
 
 
-/* =========================================================
-   NORMALIZE USERNAME
-========================================================= */
+/* =======================================================
+   GET USERNAME FROM URL
+======================================================= */
 
-function normalizeName(name){
+function getUsernameFromURL(){
 
-  return String(name || "")
-    .trim()
-    .toLowerCase();
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const user =
+    params.get("user");
+
+  if(!user){
+    return null;
+  }
+
+  return user.trim();
+}
+
+
+/* =======================================================
+   CURRENT USER
+======================================================= */
+
+let currentUsername =
+  getUsernameFromURL();
+
+
+/*
+  IMPORTANT:
+
+  Do NOT immediately use "PLAYER".
+
+  If main.html was opened without ?user=,
+  redirect back to the login page.
+*/
+
+if(!currentUsername){
+
+  const saved =
+    localStorage.getItem("battlezone-user");
+
+  if(saved){
+
+    currentUsername =
+      saved.trim();
+
+  }else{
+
+    window.location.replace(
+      "./index.html"
+    );
+
+  }
 
 }
 
 
-/* =========================================================
-   PLAYER LOOKUP
-========================================================= */
+/* =======================================================
+   DISPLAY USERNAME
+======================================================= */
 
-async function findPlayerByUsername(name){
+function updateUserUI(username){
 
-  const normalized =
-    normalizeName(name);
-
-  if(!normalized){
-    return null;
-  }
-
-  /*
-    Primary lookup:
-
-    players.usernameLower
-
-    Your registration system should store this
-    field for every account.
-  */
-
-  const q =
-    query(
-      collection(db,"players"),
-      where(
-        "usernameLower",
-        "==",
-        normalized
-      ),
-      limit(1)
-    );
-
-  const snapshot =
-    await getDocs(q);
-
-  if(snapshot.empty){
-    return null;
-  }
-
-  const result =
-    snapshot.docs[0];
-
-  return {
-    id:result.id,
-    ...result.data()
-  };
-
-}
-
-
-/* =========================================================
-   LOAD CURRENT PLAYER
-========================================================= */
-
-async function loadCurrentPlayer(){
-
-  /*
-    First try username lookup.
-  */
-
-  currentPlayer =
-    await findPlayerByUsername(
-      username
-    );
-
-  if(!currentPlayer){
-
-    showToast(
-      "Player account was not found."
-    );
-
-    setTimeout(
-      () => {
-        location.href="./index.html";
-      },
-      1800
-    );
-
+  if(!username){
     return;
   }
 
-
-  username =
-    currentPlayer.username ||
+  const visibleName =
     username;
-
-
-  localStorage.setItem(
-    "battlezone-user",
-    username
-  );
-
-
-  updatePlayerUI();
-
-  subscribeToInvitations();
-
-}
-
-
-/* =========================================================
-   PLAYER UI
-========================================================= */
-
-function updatePlayerUI(){
-
-  const name =
-    currentPlayer.username ||
-    username;
-
-  const initial =
-    name.charAt(0).toUpperCase();
-
 
   profileName.textContent =
-    name;
+    visibleName;
+
+  const firstLetter =
+    visibleName
+      .charAt(0)
+      .toUpperCase();
 
   profileAvatar.textContent =
-    initial;
+    firstLetter;
 
   headerAvatar.textContent =
-    initial;
+    firstLetter;
 
-
-  partyMembers = [
-    {
-      username:name,
-      uid:
-        currentPlayer.uid ||
-        currentPlayer.id,
-      owner:true
-    }
-  ];
-
-
-  renderParty();
-
+  document.title =
+    "BattleZone • " + visibleName;
 }
 
 
-/* =========================================================
-   PARTY
-========================================================= */
+/* =======================================================
+   PLAYER DATABASE HELPERS
+======================================================= */
 
-function renderParty(){
+/*
+  Different versions of playerdb.js may export
+  different function names.
 
-  partySlots.innerHTML = "";
-
-  partyMembers
-    .slice(0,4)
-    .forEach(member => {
-
-      const name =
-        member.username ||
-        "PLAYER";
-
-      const initial =
-        name.charAt(0).toUpperCase();
-
-      const slot =
-        document.createElement(
-          "div"
-        );
-
-      slot.className =
-        "party-slot";
-
-      slot.innerHTML = `
-
-        <div class="party-avatar">
-          ${escapeHTML(initial)}
-        </div>
-
-        <div class="party-info">
-
-          <div class="party-name">
-            ${escapeHTML(name)}
-          </div>
-
-          <div class="party-status">
-            ${member.owner ? "PARTY LEADER" : "IN PARTY"}
-          </div>
-
-        </div>
-
-      `;
-
-      partySlots.appendChild(slot);
-
-    });
+  These helpers support common names.
+*/
 
 
-  while(
-    partySlots.children.length < 4
-  ){
+async function findPlayer(username){
 
-    const empty =
-      document.createElement(
-        "div"
-      );
-
-    empty.className =
-      "party-slot";
-
-    empty.innerHTML = `
-      <div class="party-avatar">+</div>
-      <div class="slot-empty">
-        Empty party slot
-      </div>
-    `;
-
-    partySlots.appendChild(empty);
-
+  if(typeof PlayerDB.getPlayer === "function"){
+    return await PlayerDB.getPlayer(username);
   }
 
+  if(typeof PlayerDB.findPlayer === "function"){
+    return await PlayerDB.findPlayer(username);
+  }
 
-  partyCount.textContent =
-    partyMembers.length +
-    " / 4";
+  if(typeof PlayerDB.getPlayerByUsername === "function"){
+    return await PlayerDB.getPlayerByUsername(username);
+  }
 
+  if(typeof PlayerDB.findUser === "function"){
+    return await PlayerDB.findUser(username);
+  }
+
+  return null;
 }
 
 
-/* =========================================================
-   SEARCH ONLY REAL DATABASE PLAYERS
-========================================================= */
+async function getPlayers(){
 
-async function searchPlayers(){
-
-  const search =
-    normalizeName(
-      playerSearch.value
-    );
-
-  if(!search){
-
-    playerResults.innerHTML = `
-      <div class="empty">
-        Enter a username.
-      </div>
-    `;
-
-    return;
+  if(typeof PlayerDB.getPlayers === "function"){
+    return await PlayerDB.getPlayers();
   }
 
+  if(typeof PlayerDB.getAllPlayers === "function"){
+    return await PlayerDB.getAllPlayers();
+  }
 
-  playerResults.innerHTML = `
-    <div class="empty">
-      SEARCHING DATABASE...
-    </div>
-  `;
+  if(typeof PlayerDB.listPlayers === "function"){
+    return await PlayerDB.listPlayers();
+  }
 
+  return [];
+}
+
+
+/* =======================================================
+   VERIFY CURRENT PLAYER
+======================================================= */
+
+async function verifyCurrentPlayer(){
 
   try{
 
+    const player =
+      await findPlayer(currentUsername);
+
     /*
-      Firestore does not support normal
-      "contains" queries.
-
-      We therefore query a usernameLower
-      prefix range.
-
-      Example:
-      alex -> alex...
+      If playerdb.js provides a lookup function,
+      make sure the account actually exists.
     */
 
-    const end =
-      search +
-      "\uf8ff";
+    if(player === null ||
+       player === undefined){
 
+      /*
+        Do not destroy the URL username just because
+        this particular playerdb implementation doesn't
+        expose lookup.
+      */
 
-    const q =
-      query(
-        collection(db,"players"),
-        where(
-          "usernameLower",
-          ">=",
-          search
-        ),
-        where(
-          "usernameLower",
-          "<=",
-          end
-        ),
-        limit(20)
+      if(
+        typeof PlayerDB.getPlayer === "function" ||
+        typeof PlayerDB.findPlayer === "function" ||
+        typeof PlayerDB.getPlayerByUsername === "function" ||
+        typeof PlayerDB.findUser === "function"
+      ){
+
+        throw new Error(
+          "PLAYER_NOT_FOUND"
+        );
+      }
+
+    }
+
+    updateUserUI(currentUsername);
+
+    return true;
+
+  }catch(error){
+
+    console.error(
+      "Player verification failed:",
+      error
+    );
+
+    profileName.textContent =
+      "LOGIN REQUIRED";
+
+    setTimeout(() => {
+
+      window.location.replace(
+        "./index.html"
       );
 
+    },1200);
 
-    const snapshot =
-      await getDocs(q);
+    return false;
+  }
+}
 
+
+/* =======================================================
+   LOAD DATABASE PLAYERS
+======================================================= */
+
+async function loadPlayers(){
+
+  playersList.innerHTML =
+    '<div class="empty">Loading players...</div>';
+
+  try{
 
     const players =
-      snapshot.docs.map(
-        d => ({
-          id:d.id,
-          ...d.data()
-        })
-      );
+      await getPlayers();
 
+    if(!Array.isArray(players) ||
+       players.length === 0){
 
-    /*
-      NEVER display users that are not
-      returned from Firebase.
-    */
-
-    const filtered =
-      players.filter(
-        player =>
-          normalizeName(
-            player.username
-          ) !==
-          normalizeName(username)
-      );
-
-
-    if(!filtered.length){
-
-      playerResults.innerHTML = `
-        <div class="empty">
-          No registered players found.
-        </div>
-      `;
+      playersList.innerHTML =
+        '<div class="empty">No players available.</div>';
 
       return;
     }
 
 
-    playerResults.innerHTML = "";
+    /*
+      Only database players are rendered.
+    */
 
+    const validPlayers =
+      players
+        .map(player => {
 
-    filtered.forEach(
-      player => {
+          if(typeof player === "string"){
+            return {
+              username:player
+            };
+          }
 
-        renderPlayer(
-          player
+          return player;
+
+        })
+        .filter(player =>
+          player &&
+          typeof player.username === "string" &&
+          player.username.trim()
+        )
+        .filter(player =>
+          player.username.toLowerCase() !==
+          currentUsername.toLowerCase()
         );
 
-      }
-    );
 
+    if(validPlayers.length === 0){
+
+      playersList.innerHTML =
+        '<div class="empty">No other database players.</div>';
+
+      return;
+    }
+
+
+    playersList.innerHTML = "";
+
+
+    validPlayers.forEach(player => {
+
+      const username =
+        player.username.trim();
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "player";
+
+
+      const avatar =
+        document.createElement("div");
+
+      avatar.className =
+        "player-avatar";
+
+      avatar.textContent =
+        username.charAt(0).toUpperCase();
+
+
+      const info =
+        document.createElement("div");
+
+      info.className =
+        "player-info";
+
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "player-name";
+
+      name.textContent =
+        username;
+
+
+      const status =
+        document.createElement("div");
+
+      status.className =
+        "player-status";
+
+      status.textContent =
+        "DATABASE PLAYER";
+
+
+      const invite =
+        document.createElement("button");
+
+      invite.className =
+        "invite-small";
+
+      invite.textContent =
+        "INVITE";
+
+
+      invite.onclick = () => {
+
+        invitePlayer(username);
+
+      };
+
+
+      info.appendChild(name);
+      info.appendChild(status);
+
+      row.appendChild(avatar);
+      row.appendChild(info);
+      row.appendChild(invite);
+
+      playersList.appendChild(row);
+
+    });
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "Could not load players:",
+      error
+    );
 
-    playerResults.innerHTML = `
-      <div class="empty">
-        Could not search the player database.
-      </div>
-    `;
-
+    playersList.innerHTML =
+      '<div class="empty">Unable to load player database.</div>';
   }
-
 }
 
 
-/* =========================================================
-   RENDER PLAYER
-========================================================= */
+/* =======================================================
+   INVITE PLAYER
+======================================================= */
 
-function renderPlayer(player){
+async function invitePlayer(username){
 
-  const name =
-    player.username ||
-    "PLAYER";
+  inviteStatus.textContent = "";
+  inviteStatus.className =
+    "invite-status";
 
-  const initial =
-    name.charAt(0).toUpperCase();
-
-
-  const element =
-    document.createElement(
-      "div"
-    );
-
-  element.className =
-    "player";
+  username =
+    String(username || "").trim();
 
 
-  const alreadyParty =
-    partyMembers.some(
-      member =>
-        normalizeName(
-          member.username
-        ) ===
-        normalizeName(name)
-    );
+  if(!username){
 
-
-  const button =
-    document.createElement(
-      "button"
-    );
-
-  button.className =
-    "player-action";
-
-  button.textContent =
-    alreadyParty
-      ? "IN PARTY"
-      : "INVITE";
-
-
-  button.disabled =
-    alreadyParty ||
-    partyMembers.length >= 4;
-
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      invitePlayer(
-        player
-      );
-
-    }
-  );
-
-
-  element.innerHTML = `
-
-    <div class="player-avatar">
-      ${escapeHTML(initial)}
-    </div>
-
-    <div class="player-info">
-
-      <div class="player-name">
-        ${escapeHTML(name)}
-      </div>
-
-      <div class="player-status">
-        REGISTERED PLAYER
-      </div>
-
-    </div>
-
-  `;
-
-
-  element.appendChild(
-    button
-  );
-
-
-  playerResults.appendChild(
-    element
-  );
-
-}
-
-
-/* =========================================================
-   SEND INVITATION
-========================================================= */
-
-async function invitePlayer(player){
-
-  /*
-    Final database verification.
-
-    Even if the search result was valid,
-    verify that the player still exists before
-    creating an invitation.
-  */
-
-  if(partyMembers.length >= 4){
-
-    showToast(
-      "Your party is full."
-    );
-
-    return;
-  }
-
-
-  const target =
-    await findPlayerByUsername(
-      player.username
-    );
-
-
-  if(!target){
-
-    showToast(
-      "That player no longer exists."
+    showInviteError(
+      "Enter a username."
     );
 
     return;
@@ -1616,13 +1098,11 @@ async function invitePlayer(player){
 
 
   if(
-    normalizeName(
-      target.username
-    ) ===
-    normalizeName(username)
+    username.toLowerCase() ===
+    currentUsername.toLowerCase()
   ){
 
-    showToast(
+    showInviteError(
       "You cannot invite yourself."
     );
 
@@ -1630,813 +1110,212 @@ async function invitePlayer(player){
   }
 
 
-  /*
-    A deterministic invitation ID prevents
-    duplicate invitations.
-  */
-
-  const senderId =
-    currentPlayer.uid ||
-    currentPlayer.id;
-
-  const receiverId =
-    target.uid ||
-    target.id;
-
-
-  const inviteId =
-    senderId +
-    "_" +
-    receiverId;
-
-
-  const inviteRef =
-    doc(
-      db,
-      "invitations",
-      inviteId
-    );
-
-
-  const existing =
-    await getDoc(
-      inviteRef
-    );
-
-
-  if(existing.exists()){
-
-    const old =
-      existing.data();
-
-
-    if(
-      old.status ===
-      "pending"
-    ){
-
-      showToast(
-        "Invitation already sent."
-      );
-
-      return;
-    }
-
-  }
-
-
-  await setDoc(
-    inviteRef,
-    {
-
-      id:inviteId,
-
-      fromUid:senderId,
-
-      fromUsername:
-        username,
-
-      toUid:receiverId,
-
-      toUsername:
-        target.username,
-
-      status:"pending",
-
-      createdAt:
-        serverTimestamp()
-
-    }
-  );
-
-
-  showToast(
-    "Invitation sent to " +
-    target.username
-  );
-
-}
-
-
-/* =========================================================
-   REAL-TIME INVITATIONS
-========================================================= */
-
-function subscribeToInvitations(){
-
-  const receiverId =
-    currentPlayer.uid ||
-    currentPlayer.id;
-
-
-  const q =
-    query(
-      collection(
-        db,
-        "invitations"
-      ),
-      where(
-        "toUid",
-        "==",
-        receiverId
-      ),
-      where(
-        "status",
-        "==",
-        "pending"
-      ),
-      orderBy(
-        "createdAt",
-        "desc"
-      ),
-      limit(10)
-    );
-
-
-  onSnapshot(
-    q,
-    snapshot => {
-
-      if(snapshot.empty){
-
-        return;
-      }
-
-
-      const invitation =
-        snapshot.docs[0];
-
-
-      const data =
-        invitation.data();
-
-
-      pendingInvite = {
-        id:invitation.id,
-        ...data
-      };
-
-
-      showIncomingInvite(
-        pendingInvite
-      );
-
-      loadNotifications(
-        snapshot
-      );
-
-    },
-    error => {
-
-      console.error(
-        "Invitation listener:",
-        error
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   SHOW INVITATION
-========================================================= */
-
-function showIncomingInvite(invite){
-
-  const from =
-    invite.fromUsername ||
-    "PLAYER";
-
-  document.getElementById(
-    "inviteFrom"
-  ).textContent =
-    from;
-
-  document.getElementById(
-    "inviteAvatar"
-  ).textContent =
-    from.charAt(0).toUpperCase();
-
-
-  document
-    .getElementById(
-      "inviteModal"
-    )
-    .classList.remove(
-      "hidden"
-    );
-
-
-  document
-    .getElementById(
-      "notificationDot"
-    )
-    .classList.remove(
-      "hidden"
-    );
-
-}
-
-
-/* =========================================================
-   ACCEPT INVITE
-========================================================= */
-
-async function acceptInvitation(){
-
-  if(!pendingInvite){
-    return;
-  }
+  inviteButton.disabled = true;
+  inviteButton.textContent = "...";
 
 
   try{
 
-    const invite =
-      pendingInvite;
-
-
     /*
-      Verify sender still exists.
+      FIRST:
+      Verify the target player exists in Firebase.
     */
 
-    const sender =
-      await findPlayerByUsername(
-        invite.fromUsername
-      );
-
-
-    if(!sender){
-
-      showToast(
-        "The player no longer exists."
-      );
-
-      await removeInvitation(
-        invite.id
-      );
-
-      return;
-    }
+    const target =
+      await findPlayer(username);
 
 
     /*
-      Verify receiver is still the
-      currently registered player.
+      If playerdb.js supports lookup and returns
+      nothing, the target is NOT allowed.
     */
 
     if(
-      normalizeName(
-        invite.toUsername
-      ) !==
-      normalizeName(username)
+      target === null ||
+      target === undefined
     ){
-
-      showToast(
-        "Invalid invitation."
-      );
-
-      await removeInvitation(
-        invite.id
-      );
-
-      return;
-    }
-
-
-    await updateDoc(
-      doc(
-        db,
-        "invitations",
-        invite.id
-      ),
-      {
-
-        status:"accepted",
-
-        acceptedAt:
-          serverTimestamp()
-
-      }
-    );
-
-
-    /*
-      Add sender to the local party UI.
-      A production party backend should store
-      the actual party ID here.
-    */
-
-    if(
-      partyMembers.length < 4
-    ){
-
-      partyMembers.push({
-
-        username:
-          sender.username,
-
-        uid:
-          sender.uid ||
-          sender.id,
-
-        owner:false
-
-      });
-
-    }
-
-
-    renderParty();
-
-
-    closeModal(
-      "inviteModal"
-    );
-
-
-    showToast(
-      "Joined " +
-      sender.username +
-      "'s party."
-    );
-
-
-    pendingInvite = null;
-
-
-  }catch(error){
-
-    console.error(error);
-
-    showToast(
-      "Could not accept invitation."
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   DECLINE
-========================================================= */
-
-async function declineInvitation(){
-
-  if(!pendingInvite){
-    return;
-  }
-
-
-  try{
-
-    await updateDoc(
-      doc(
-        db,
-        "invitations",
-        pendingInvite.id
-      ),
-      {
-
-        status:"declined",
-
-        declinedAt:
-          serverTimestamp()
-
-      }
-    );
-
-
-    closeModal(
-      "inviteModal"
-    );
-
-
-    showToast(
-      "Invitation declined."
-    );
-
-
-    pendingInvite = null;
-
-
-  }catch(error){
-
-    console.error(error);
-
-    showToast(
-      "Could not decline invitation."
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   REMOVE INVITATION
-========================================================= */
-
-async function removeInvitation(id){
-
-  await updateDoc(
-    doc(
-      db,
-      "invitations",
-      id
-    ),
-    {
-      status:"expired"
-    }
-  );
-
-}
-
-
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
-
-function loadNotifications(snapshot){
-
-  const list =
-    document.getElementById(
-      "notificationList"
-    );
-
-  list.innerHTML = "";
-
-
-  snapshot.docs.forEach(
-    item => {
-
-      const data =
-        item.data();
-
-
-      const row =
-        document.createElement(
-          "div"
-        );
-
-      row.className =
-        "player";
-
-
-      row.innerHTML = `
-
-        <div class="player-avatar">
-          👥
-        </div>
-
-        <div class="player-info">
-
-          <div class="player-name">
-            Party invitation
-          </div>
-
-          <div class="player-status">
-            ${escapeHTML(
-              data.fromUsername ||
-              "PLAYER"
-            )} invited you
-          </div>
-
-        </div>
-
-      `;
-
-
-      list.appendChild(
-        row
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   MODALS
-========================================================= */
-
-function openModal(id){
-
-  document
-    .getElementById(id)
-    .classList.remove(
-      "hidden"
-    );
-
-}
-
-
-function closeModal(id){
-
-  document
-    .getElementById(id)
-    .classList.add(
-      "hidden"
-    );
-
-}
-
-
-document
-  .querySelectorAll(
-    "[data-close]"
-  )
-  .forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          closeModal(
-            button.dataset.close
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-document
-  .querySelectorAll(
-    ".overlay"
-  )
-  .forEach(
-    overlay => {
-
-      overlay.addEventListener(
-        "click",
-        event => {
-
-          if(
-            event.target ===
-            overlay
-          ){
-
-            overlay.classList.add(
-              "hidden"
-            );
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   FRIENDS
-========================================================= */
-
-document
-  .getElementById(
-    "friendsButton"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      openModal(
-        "friendsModal"
-      );
-
-      playerSearch.focus();
-
-    }
-  );
-
-
-document
-  .getElementById(
-    "searchButton"
-  )
-  .addEventListener(
-    "click",
-    searchPlayers
-  );
-
-
-playerSearch
-  .addEventListener(
-    "keydown",
-    event => {
 
       if(
-        event.key ===
-        "Enter"
+        typeof PlayerDB.getPlayer === "function" ||
+        typeof PlayerDB.findPlayer === "function" ||
+        typeof PlayerDB.getPlayerByUsername === "function" ||
+        typeof PlayerDB.findUser === "function"
       ){
 
-        searchPlayers();
-
-      }
-
-    }
-  );
-
-
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
-
-document
-  .getElementById(
-    "notificationsButton"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      openModal(
-        "notificationsModal"
-      );
-
-      document
-        .getElementById(
-          "notificationDot"
-        )
-        .classList.add(
-          "hidden"
+        throw new Error(
+          "PLAYER_NOT_FOUND"
         );
-
-    }
-  );
-
-
-/* =========================================================
-   ACCEPT / DECLINE
-========================================================= */
-
-document
-  .getElementById(
-    "acceptInvite"
-  )
-  .addEventListener(
-    "click",
-    acceptInvitation
-  );
-
-
-document
-  .getElementById(
-    "declineInvite"
-  )
-  .addEventListener(
-    "click",
-    declineInvitation
-  );
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-document
-  .getElementById(
-    "settingsButton"
-  )
-  .addEventListener(
-    "click",
-    () => openModal(
-      "settingsModal"
-    )
-  );
-
-
-document
-  .querySelectorAll(
-    ".toggle"
-  )
-  .forEach(
-    toggle => {
-
-      toggle.addEventListener(
-        "click",
-        () => {
-
-          toggle.classList.toggle(
-            "on"
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-document
-  .getElementById(
-    "logoutButton"
-  )
-  .addEventListener(
-    "click",
-    async () => {
-
-      try{
-
-        await signOut(auth);
-
-      }catch(error){
-
-        console.warn(
-          "Firebase logout:",
-          error
-        );
-
       }
+    }
 
 
-      localStorage.removeItem(
-        "battlezone-user"
+    /*
+      SECOND:
+      Send invitation through playerdb.js.
+    */
+
+    if(typeof PlayerDB.sendInvitation === "function"){
+
+      await PlayerDB.sendInvitation(
+        currentUsername,
+        username
       );
 
+    }else if(typeof PlayerDB.sendInvite === "function"){
 
-      location.href =
-        "./index.html";
+      await PlayerDB.sendInvite(
+        currentUsername,
+        username
+      );
+
+    }else if(typeof PlayerDB.invitePlayer === "function"){
+
+      await PlayerDB.invitePlayer(
+        currentUsername,
+        username
+      );
+
+    }else{
+
+      /*
+        If there is no invitation function, don't pretend
+        that a Firebase invitation was created.
+      */
+
+      throw new Error(
+        "INVITE_FUNCTION_MISSING"
+      );
+    }
+
+
+    inviteStatus.className =
+      "invite-status success";
+
+    inviteStatus.textContent =
+      "Invitation sent to " + username;
+
+    showToast(
+      "Invitation sent to " + username
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "Invitation failed:",
+      error
+    );
+
+    if(error.message === "PLAYER_NOT_FOUND"){
+
+      showInviteError(
+        "That player is not in the database."
+      );
+
+    }else if(
+      error.message ===
+      "INVITE_FUNCTION_MISSING"
+    ){
+
+      showInviteError(
+        "playerdb.js has no invitation function."
+      );
+
+    }else{
+
+      showInviteError(
+        error.message ||
+        "Could not send invitation."
+      );
 
     }
-  );
 
+  }finally{
 
-/* =========================================================
-   PLAY
-========================================================= */
+    inviteButton.disabled = false;
+    inviteButton.textContent = "INVITE";
 
-document
-  .getElementById(
-    "playButton"
-  )
-  .addEventListener(
-    "click",
-    event => {
-
-      const button =
-        event.currentTarget;
-
-
-      button.textContent =
-        "MATCHMAKING...";
-
-
-      showToast(
-        "Finding a BattleZone match..."
-      );
-
-
-      setTimeout(
-        () => {
-
-          button.textContent =
-            "PLAY";
-
-          showToast(
-            "Matchmaking is ready."
-
-          );
-
-        },
-        1800
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   SAFE HTML
-========================================================= */
-
-function escapeHTML(value){
-
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-
+  }
 }
 
 
-/* =========================================================
+/* =======================================================
+   INVITE FORM
+======================================================= */
+
+inviteButton.addEventListener(
+  "click",
+  () => {
+
+    invitePlayer(
+      inviteUsername.value
+    );
+
+  }
+);
+
+
+inviteUsername.addEventListener(
+  "keydown",
+  event => {
+
+    if(event.key === "Enter"){
+
+      event.preventDefault();
+
+      invitePlayer(
+        inviteUsername.value
+      );
+
+    }
+
+  }
+);
+
+
+/* =======================================================
+   INVITE STATUS
+======================================================= */
+
+function showInviteError(message){
+
+  inviteStatus.className =
+    "invite-status error";
+
+  inviteStatus.textContent =
+    message;
+}
+
+
+/* =======================================================
+   FRIENDS PANEL
+======================================================= */
+
+friendsButton.addEventListener(
+  "click",
+  async () => {
+
+    friendsPanel.classList.add("open");
+
+    await loadPlayers();
+
+  }
+);
+
+
+closeFriends.addEventListener(
+  "click",
+  () => {
+
+    friendsPanel.classList.remove("open");
+
+  }
+);
+
+
+/* =======================================================
    TOAST
-========================================================= */
+======================================================= */
 
 let toastTimer;
 
@@ -2445,34 +1324,100 @@ function showToast(message){
   toast.textContent =
     message;
 
-  toast.classList.add(
-    "show"
-  );
+  toast.classList.add("show");
 
-  clearTimeout(
-    toastTimer
-  );
+  clearTimeout(toastTimer);
 
   toastTimer =
-    setTimeout(
-      () => {
+    setTimeout(() => {
 
-        toast.classList.remove(
-          "show"
-        );
+      toast.classList.remove("show");
 
-      },
-      2800
-    );
-
+    },3000);
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+/* =======================================================
+   PLAY
+======================================================= */
 
-loadCurrentPlayer();
+document
+  .getElementById("playButton")
+  .addEventListener(
+    "click",
+    event => {
+
+      const button =
+        event.currentTarget;
+
+      button.textContent =
+        "MATCHMAKING...";
+
+      setTimeout(() => {
+
+        button.textContent =
+          "PLAY";
+
+      },1600);
+
+    }
+  );
+
+
+/* =======================================================
+   NAV
+======================================================= */
+
+document
+  .querySelectorAll("nav button")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll("nav button")
+          .forEach(item =>
+            item.classList.remove("active")
+          );
+
+        button.classList.add("active");
+
+      }
+    );
+
+  });
+
+
+/* =======================================================
+   START
+======================================================= */
+
+(async function(){
+
+  if(!currentUsername){
+    return;
+  }
+
+  /*
+    Immediately show the URL username.
+    This prevents the old "PLAYER" fallback.
+  */
+
+  updateUserUI(
+    currentUsername
+  );
+
+
+  const valid =
+    await verifyCurrentPlayer();
+
+  if(!valid){
+    return;
+  }
+
+})();
 
 </script>
 
