@@ -1,5 +1,5 @@
-
 <!doctype html>
+
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -10,12 +10,9 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&display=swap');
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
-html,
-body{
+html,body{
   margin:0;
   width:100%;
   height:100%;
@@ -25,18 +22,9 @@ body{
   color:#fff;
 }
 
-body{
-  user-select:none;
-}
+body{user-select:none}
 
-button,
-input{
-  font:inherit;
-}
-
-/* =========================================================
-   GLOBAL SCREEN
-========================================================= */
+button,input{font:inherit}
 
 .screen{
   position:fixed;
@@ -58,24 +46,15 @@ input{
 }
 
 /* =========================================================
-   BOOT SCREEN
+   BOOT
 ========================================================= */
 
 #bootScreen{
   z-index:100;
   flex-direction:column;
   background:
-    radial-gradient(
-      circle at 50% 42%,
-      rgba(55,115,210,.35),
-      transparent 30%
-    ),
-    linear-gradient(
-      135deg,
-      #050914,
-      #0c1930 55%,
-      #101c31
-    );
+    radial-gradient(circle at 50% 42%,rgba(55,115,210,.35),transparent 30%),
+    linear-gradient(135deg,#050914,#0c1930 55%,#101c31);
 }
 
 .boot-logo{
@@ -83,13 +62,13 @@ input{
   font-weight:900;
   font-style:italic;
   letter-spacing:3px;
-  text-shadow:
-    5px 6px #000,
-    0 0 40px rgba(76,150,255,.35);
+  text-shadow:5px 6px #000,0 0 40px rgba(76,150,255,.35);
   animation:logoIn 1s ease both;
 }
 
-.boot-logo span{
+.boot-logo span,
+.login-brand h1 span,
+.logo span{
   color:#ffd02f;
 }
 
@@ -138,45 +117,24 @@ input{
 }
 
 @keyframes logoIn{
-  from{
-    opacity:0;
-    transform:scale(.8);
-  }
-  to{
-    opacity:1;
-    transform:scale(1);
-  }
+  from{opacity:0;transform:scale(.8)}
+  to{opacity:1;transform:scale(1)}
 }
 
 @keyframes fadeUp{
-  from{
-    opacity:0;
-    transform:translateY(15px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{opacity:0;transform:translateY(15px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 /* =========================================================
-   LOGIN SCREEN
+   LOGIN / REGISTER
 ========================================================= */
 
 #loginScreen{
   z-index:90;
   background:
-    radial-gradient(
-      circle at 50% 45%,
-      rgba(71,120,190,.35),
-      transparent 28%
-    ),
-    linear-gradient(
-      135deg,
-      #111f3b,
-      #375f8c 50%,
-      #b66e4d
-    );
+    radial-gradient(circle at 50% 45%,rgba(71,120,190,.35),transparent 28%),
+    linear-gradient(135deg,#111f3b,#375f8c 50%,#b66e4d);
 }
 
 #loginScreen:before{
@@ -184,35 +142,26 @@ input{
   position:absolute;
   inset:0;
   background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.55),
-      transparent 40%,
-      rgba(0,0,0,.65)
-    );
+    linear-gradient(180deg,rgba(0,0,0,.55),transparent 40%,rgba(0,0,0,.65));
   pointer-events:none;
 }
 
 .login-wrap{
   position:relative;
   width:min(450px,92vw);
+  max-height:96vh;
+  overflow:auto;
   animation:loginIn .7s ease both;
 }
 
 @keyframes loginIn{
-  from{
-    opacity:0;
-    transform:translateY(30px) scale(.96);
-  }
-  to{
-    opacity:1;
-    transform:none;
-  }
+  from{opacity:0;transform:translateY(30px) scale(.96)}
+  to{opacity:1;transform:none}
 }
 
 .login-brand{
   text-align:center;
-  margin-bottom:25px;
+  margin-bottom:20px;
 }
 
 .login-brand h1{
@@ -223,10 +172,6 @@ input{
   text-shadow:4px 5px #111;
 }
 
-.login-brand h1 span{
-  color:#ffd02f;
-}
-
 .login-brand p{
   margin:5px 0 0;
   color:#d5dfef;
@@ -235,8 +180,8 @@ input{
 }
 
 .login-card{
-  padding:32px;
-  background:rgba(5,13,27,.88);
+  padding:30px;
+  background:rgba(5,13,27,.9);
   border:1px solid rgba(255,255,255,.2);
   box-shadow:
     0 25px 80px rgba(0,0,0,.45),
@@ -252,13 +197,13 @@ input{
 }
 
 .login-description{
-  margin:4px 0 25px;
+  margin:4px 0 20px;
   color:#94a6c2;
   font-size:16px;
 }
 
 .field{
-  margin-bottom:16px;
+  margin-bottom:15px;
 }
 
 .field label{
@@ -279,9 +224,7 @@ input{
   border:1px solid #ffffff20;
   outline:none;
   border-radius:3px;
-  transition:
-    border-color .2s,
-    box-shadow .2s;
+  transition:border-color .2s,box-shadow .2s;
   user-select:text;
 }
 
@@ -293,7 +236,7 @@ input{
 .login-button{
   width:100%;
   height:58px;
-  margin-top:7px;
+  margin-top:5px;
   border:2px solid white;
   background:#f5c82e;
   color:#162039;
@@ -301,15 +244,8 @@ input{
   font-weight:900;
   letter-spacing:2px;
   cursor:pointer;
-  clip-path:polygon(
-    3% 0,
-    100% 0,
-    97% 100%,
-    0 100%
-  );
-  transition:
-    filter .2s,
-    transform .2s;
+  clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);
+  transition:filter .2s,transform .2s;
 }
 
 .login-button:hover{
@@ -325,15 +261,31 @@ input{
 
 .login-error{
   min-height:22px;
-  margin:13px 0 0;
+  margin:12px 0 0;
   color:#ff7070;
   font-size:14px;
   font-weight:700;
   text-align:center;
 }
 
+.mode-switch{
+  margin-top:18px;
+  text-align:center;
+  color:#8292ac;
+  font-size:15px;
+}
+
+.mode-switch button{
+  border:0;
+  background:none;
+  color:#ffd02f;
+  font-weight:900;
+  cursor:pointer;
+  margin-left:5px;
+}
+
 .login-hint{
-  margin-top:20px;
+  margin-top:15px;
   text-align:center;
   color:#72829d;
   font-size:13px;
@@ -344,36 +296,26 @@ input{
 }
 
 /* =========================================================
-   MAIN MENU PREVIEW
+   MENU
 ========================================================= */
 
 #menuScreen{
   z-index:50;
   background:
-    radial-gradient(
-      circle at 68% 35%,
-      rgba(255,225,170,.35),
-      transparent 22%
-    ),
-    linear-gradient(
-      135deg,
-      #182d54,
-      #416d9a 48%,
-      #d68b58
-    );
+    radial-gradient(circle at 68% 35%,rgba(255,225,170,.35),transparent 22%),
+    linear-gradient(135deg,#182d54,#416d9a 48%,#d68b58);
 }
 
 #menuScreen:before{
   content:"";
   position:absolute;
   inset:0;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(0,0,0,.35),
-      transparent 35%,
-      rgba(0,0,0,.35)
-    );
+  background:linear-gradient(
+    180deg,
+    rgba(0,0,0,.35),
+    transparent 35%,
+    rgba(0,0,0,.35)
+  );
 }
 
 .menu{
@@ -398,10 +340,6 @@ input{
   font-style:italic;
   text-shadow:3px 4px #111;
   letter-spacing:1px;
-}
-
-.logo span{
-  color:#ffd02f;
 }
 
 nav{
@@ -491,9 +429,7 @@ h2{
   margin:13px 0;
   font-weight:900;
   font-style:italic;
-  text-shadow:
-    6px 7px #202b43,
-    12px 15px 25px #0008;
+  text-shadow:6px 7px #202b43,12px 15px 25px #0008;
 }
 
 .tagline{
@@ -512,17 +448,7 @@ h2{
   font-weight:900;
   letter-spacing:2px;
   cursor:pointer;
-  clip-path:polygon(
-    3% 0,
-    100% 0,
-    97% 100%,
-    0 100%
-  );
-}
-
-.play:hover{
-  filter:brightness(1.1);
-  transform:translateY(-2px);
+  clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);
 }
 
 .bottom{
@@ -571,14 +497,8 @@ h2{
   text-align:center;
 }
 
-.news b{
-  font-size:17px;
-}
-
-.news small{
-  display:block;
-  opacity:.7;
-}
+.news b{font-size:17px}
+.news small{display:block;opacity:.7}
 
 /* =========================================================
    MOBILE
@@ -586,38 +506,24 @@ h2{
 
 @media(max-width:750px){
 
-  nav{
-    display:none;
-  }
+  nav{display:none}
 
-  .top{
-    padding:0 14px;
-  }
+  .top{padding:0 14px}
 
-  .logo{
-    font-size:24px;
-  }
+  .logo{font-size:24px}
 
-  .eyebrow{
-    font-size:16px;
-  }
+  .eyebrow{font-size:16px}
 
-  .tagline{
-    font-size:17px;
-  }
+  .tagline{font-size:17px}
 
-  h2{
-    font-size:65px;
-  }
+  h2{font-size:65px}
 
   .play{
     font-size:23px;
     padding:13px 45px;
   }
 
-  .news{
-    display:none;
-  }
+  .news{display:none}
 
   .bottom{
     left:12px;
@@ -635,7 +541,7 @@ h2{
   }
 
   .login-card{
-    padding:25px 20px;
+    padding:24px 20px;
   }
 
   .login-brand h1{
@@ -643,13 +549,15 @@ h2{
   }
 }
 </style>
+
 </head>
 
 <body>
 
 <!-- =======================================================
-     BOOT SCREEN
-======================================================== -->
+     BOOT
+======================================================= -->
+
 <section id="bootScreen" class="screen">
 
   <div class="boot-logo">
@@ -661,13 +569,17 @@ h2{
   </div>
 
   <div class="boot-loader">
-    <div class="boot-track">
-      <div id="bootProgress" class="boot-progress"></div>
-    </div>
 
-    <div id="bootStatus" class="boot-status">
-      INITIALIZING...
-    </div>
+```
+<div class="boot-track">
+  <div id="bootProgress" class="boot-progress"></div>
+</div>
+
+<div id="bootStatus" class="boot-status">
+  INITIALIZING...
+</div>
+```
+
   </div>
 
   <div class="boot-version">
@@ -676,214 +588,281 @@ h2{
 
 </section>
 
-
 <!-- =======================================================
-     LOGIN SCREEN
-======================================================== -->
+     LOGIN / REGISTER
+======================================================= -->
+
 <section id="loginScreen" class="screen hidden">
 
   <div class="login-wrap">
 
-    <div class="login-brand">
-      <h1>BATTLE<span>ZONE</span></h1>
-      <p>ONLINE SERVICES</p>
-    </div>
+```
+<div class="login-brand">
+  <h1>BATTLE<span>ZONE</span></h1>
+  <p>ONLINE SERVICES</p>
+</div>
 
-    <div class="login-card">
+<div class="login-card">
 
-      <h2 class="login-title">
-        SIGN IN
-      </h2>
+  <h2 id="authTitle" class="login-title">
+    SIGN IN
+  </h2>
 
-      <p class="login-description">
-        Log in to continue to BattleZone.
-      </p>
+  <p id="authDescription" class="login-description">
+    Log in to continue to BattleZone.
+  </p>
 
-      <form id="loginForm">
 
-        <div class="field">
-          <label for="username">
-            USERNAME
-          </label>
+  <form id="authForm">
 
-          <input
-            id="username"
-            name="username"
-            type="text"
-            autocomplete="username"
-            placeholder="Enter username"
-            required
-          >
-        </div>
+    <!-- USERNAME -->
 
-        <div class="field">
-          <label for="password">
-            PASSWORD
-          </label>
+    <div class="field" id="usernameField">
 
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Enter password"
-            required
-          >
-        </div>
+      <label for="username">
+        USERNAME
+      </label>
 
-        <button
-          id="loginButton"
-          class="login-button"
-          type="submit"
-        >
-          LOGIN
-        </button>
-
-        <div
-          id="loginError"
-          class="login-error"
-          aria-live="polite"
-        ></div>
-
-      </form>
-
-      <div class="login-hint">
-        SECURE PLAYER DATABASE
-        <span>•</span>
-        ONLINE
-      </div>
+      <input
+        id="username"
+        type="text"
+        autocomplete="username"
+        placeholder="Enter username"
+      >
 
     </div>
+
+
+    <!-- EMAIL -->
+
+    <div class="field">
+
+      <label for="email">
+        EMAIL
+      </label>
+
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        placeholder="Enter email"
+        required
+      >
+
+    </div>
+
+
+    <!-- PASSWORD -->
+
+    <div class="field">
+
+      <label for="password">
+        PASSWORD
+      </label>
+
+      <input
+        id="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Enter password"
+        minlength="6"
+        required
+      >
+
+    </div>
+
+
+    <!-- SUBMIT -->
+
+    <button
+      id="authButton"
+      class="login-button"
+      type="submit"
+    >
+      LOGIN
+    </button>
+
+
+    <div
+      id="loginError"
+      class="login-error"
+      aria-live="polite"
+    ></div>
+
+  </form>
+
+
+  <!-- SWITCH -->
+
+  <div class="mode-switch">
+
+    <span id="switchText">
+      Don't have an account?
+    </span>
+
+    <button
+      id="switchMode"
+      type="button"
+    >
+      CREATE ACCOUNT
+    </button>
+
+  </div>
+
+
+  <div class="login-hint">
+    SECURE PLAYER DATABASE
+    <span>•</span>
+    ONLINE
+  </div>
+
+</div>
+```
 
   </div>
 
 </section>
 
-
 <!-- =======================================================
-     MAIN MENU FALLBACK / PREVIEW
-======================================================== -->
+     MENU FALLBACK
+======================================================= -->
+
 <section id="menuScreen" class="screen hidden">
 
   <div class="menu">
 
-    <header class="top">
+```
+<header class="top">
 
-      <div class="logo">
-        BATTLE<span>ZONE</span>
+  <div class="logo">
+    BATTLE<span>ZONE</span>
+  </div>
+
+  <nav>
+
+    <button class="active">
+      PLAY
+    </button>
+
+    <button>
+      LOCKER
+    </button>
+
+    <button>
+      SHOP
+    </button>
+
+    <button>
+      BATTLE PASS
+    </button>
+
+    <button>
+      QUESTS
+    </button>
+
+  </nav>
+
+  <div class="account">
+
+    <div class="vbucks">
+      <span class="coin">V</span>
+      2,850
+    </div>
+
+    <div id="menuAvatar" class="avatar">
+      K
+    </div>
+
+  </div>
+
+</header>
+
+
+<main class="center">
+
+  <section class="content">
+
+    <div class="eyebrow">
+      CHAPTER 2 • SEASON 9
+    </div>
+
+    <h2>
+      BATTLE<br>
+      ROYAL
+    </h2>
+
+    <div class="tagline">
+      DROP IN. SURVIVE. CONQUER.
+    </div>
+
+    <button class="play" id="play">
+      PLAY
+    </button>
+
+  </section>
+
+</main>
+
+
+<footer class="bottom">
+
+  <div class="profile">
+
+    <div id="menuPfp" class="pfp">
+      K
+    </div>
+
+    <div>
+
+      <div id="menuName" class="name">
+        PLAYER
       </div>
 
-      <nav>
-        <button class="active">PLAY</button>
-        <button>LOCKER</button>
-        <button>SHOP</button>
-        <button>BATTLE PASS</button>
-        <button>QUESTS</button>
-      </nav>
-
-      <div class="account">
-
-        <div class="vbucks">
-          <span class="coin">V</span>
-          2,850
-        </div>
-
-        <div id="menuAvatar" class="avatar">
-          K
-        </div>
-
+      <div class="level">
+        LEVEL 1
       </div>
 
-    </header>
+    </div>
 
-    <main class="center">
+  </div>
 
-      <section class="content">
 
-        <div class="eyebrow">
-          CHAPTER 2 • SEASON 9
-        </div>
+  <div class="news">
+    <b>SEASON UPDATE</b>
+    <small>New challenges are waiting.</small>
+  </div>
 
-        <h2>
-          BATTLE<br>
-          ROYAL
-        </h2>
-
-        <div class="tagline">
-          DROP IN. SURVIVE. CONQUER.
-        </div>
-
-        <button class="play" id="play">
-          PLAY
-        </button>
-
-      </section>
-
-    </main>
-
-    <footer class="bottom">
-
-      <div class="profile">
-
-        <div id="menuPfp" class="pfp">
-          K
-        </div>
-
-        <div>
-          <div id="menuName" class="name">
-            PLAYER
-          </div>
-
-          <div class="level">
-            LEVEL 1
-          </div>
-        </div>
-
-      </div>
-
-      <div class="news">
-        <b>SEASON UPDATE</b>
-        <small>New challenges are waiting.</small>
-      </div>
-
-    </footer>
+</footer>
+```
 
   </div>
 
 </section>
 
+<!-- =======================================================
+     FIREBASE
+======================================================= -->
 
-<script type="module">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 
-/*
-=========================================================
-   PLAYER DATABASE
-=========================================================
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 
-   Your existing database remains responsible for
-   authentication.
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-   This file supports common playerdb.js exports:
+<script src="./js/playerdb.js"></script>
 
-   - loginPlayer(username,password)
-   - login(username,password)
-   - authenticate(username,password)
-   - signIn(username,password)
+<!-- =======================================================
+     APPLICATION
+======================================================= -->
 
-   If playerdb.js exports a default object, that is
-   supported as well.
-=========================================================
-*/
+<script>
 
-import * as PlayerDBModule from "./js/playerdb.js";
-
-const PlayerDB =
-  PlayerDBModule.default || PlayerDBModule;
+"use strict";
 
 
-/* =======================================================
+/* =========================================================
    ELEMENTS
-======================================================= */
+========================================================= */
 
 const bootScreen =
   document.getElementById("bootScreen");
@@ -900,25 +879,55 @@ const bootProgress =
 const bootStatus =
   document.getElementById("bootStatus");
 
-const loginForm =
-  document.getElementById("loginForm");
+const authForm =
+  document.getElementById("authForm");
 
-const loginButton =
-  document.getElementById("loginButton");
+const authTitle =
+  document.getElementById("authTitle");
+
+const authDescription =
+  document.getElementById("authDescription");
+
+const authButton =
+  document.getElementById("authButton");
 
 const loginError =
   document.getElementById("loginError");
 
+const usernameField =
+  document.getElementById("usernameField");
+
 const usernameInput =
   document.getElementById("username");
+
+const emailInput =
+  document.getElementById("email");
 
 const passwordInput =
   document.getElementById("password");
 
+const switchMode =
+  document.getElementById("switchMode");
 
-/* =======================================================
-   SCREEN HELPERS
-======================================================= */
+const switchText =
+  document.getElementById("switchText");
+
+const menuName =
+  document.getElementById("menuName");
+
+const menuPfp =
+  document.getElementById("menuPfp");
+
+const menuAvatar =
+  document.getElementById("menuAvatar");
+
+
+let registerMode = false;
+
+
+/* =========================================================
+   SCREEN
+========================================================= */
 
 function showScreen(screen){
 
@@ -926,12 +935,12 @@ function showScreen(screen){
     bootScreen,
     loginScreen,
     menuScreen
-  ].forEach(s => {
+  ].forEach(item => {
 
-    if(s === screen){
-      s.classList.remove("hidden");
+    if(item === screen){
+      item.classList.remove("hidden");
     }else{
-      s.classList.add("hidden");
+      item.classList.add("hidden");
     }
 
   });
@@ -939,329 +948,441 @@ function showScreen(screen){
 }
 
 
-/* =======================================================
-   BOOT
-======================================================= */
+/* =========================================================
+   WAIT
+========================================================= */
 
-function bootStep(progress,status){
+function wait(ms){
 
-  bootProgress.style.width =
-    progress + "%";
+  return new Promise(resolve =>
+    setTimeout(resolve,ms)
+  );
 
-  bootStatus.textContent =
-    status;
 }
 
 
+/* =========================================================
+   BOOT
+========================================================= */
+
 async function boot(){
 
-  bootStep(10,"INITIALIZING CLIENT...");
+  bootProgress.style.width = "10%";
+  bootStatus.textContent =
+    "INITIALIZING CLIENT...";
+
   await wait(350);
 
-  bootStep(30,"LOADING PLAYER DATABASE...");
+  bootProgress.style.width = "30%";
+  bootStatus.textContent =
+    "LOADING PLAYER DATABASE...";
+
   await wait(350);
 
-  bootStep(50,"CHECKING ONLINE SERVICES...");
+  bootProgress.style.width = "50%";
+  bootStatus.textContent =
+    "CONNECTING TO ONLINE SERVICES...";
+
   await wait(350);
 
-  bootStep(70,"LOADING BATTLEZONE...");
+  bootProgress.style.width = "70%";
+  bootStatus.textContent =
+    "LOADING BATTLEZONE...";
+
   await wait(350);
 
-  bootStep(90,"PREPARING LOGIN...");
+  bootProgress.style.width = "90%";
+  bootStatus.textContent =
+    "PREPARING LOGIN...";
+
   await wait(350);
 
-  bootStep(100,"READY");
+  bootProgress.style.width = "100%";
+  bootStatus.textContent =
+    "READY";
+
   await wait(450);
 
   showScreen(loginScreen);
 
-  setTimeout(() => {
-    usernameInput.focus();
-  },500);
+  usernameInput.focus();
 }
 
 
-/* =======================================================
-   LOGIN
+/* =========================================================
+   AUTH MODE
 ========================================================= */
 
-loginForm.addEventListener("submit",async event => {
-
-  event.preventDefault();
+function updateAuthMode(){
 
   loginError.textContent = "";
 
-  const username =
-    usernameInput.value.trim();
+  if(registerMode){
 
-  const password =
-    passwordInput.value;
+    authTitle.textContent =
+      "CREATE ACCOUNT";
 
-  if(!username || !password){
+    authDescription.textContent =
+      "Create your BattleZone player account.";
 
-    loginError.textContent =
-      "Enter your username and password.";
+    usernameField.style.display =
+      "block";
 
-    return;
+    usernameInput.required =
+      true;
+
+    authButton.textContent =
+      "CREATE ACCOUNT";
+
+    switchText.textContent =
+      "Already have an account?";
+
+    switchMode.textContent =
+      "LOGIN";
+
+    passwordInput.autocomplete =
+      "new-password";
+
+  }else{
+
+    authTitle.textContent =
+      "SIGN IN";
+
+    authDescription.textContent =
+      "Log in to continue to BattleZone.";
+
+    usernameField.style.display =
+      "none";
+
+    usernameInput.required =
+      false;
+
+    authButton.textContent =
+      "LOGIN";
+
+    switchText.textContent =
+      "Don't have an account?";
+
+    switchMode.textContent =
+      "CREATE ACCOUNT";
+
+    passwordInput.autocomplete =
+      "current-password";
   }
-
-  loginButton.disabled = true;
-  loginButton.textContent = "LOGGING IN...";
-
-  try{
-
-    /*
-      Try the real playerdb.js functions.
-    */
-
-    let result;
-
-    if(typeof PlayerDB.loginPlayer === "function"){
-
-      result =
-        await PlayerDB.loginPlayer(
-          username,
-          password
-        );
-
-    }else if(typeof PlayerDB.login === "function"){
-
-      result =
-        await PlayerDB.login(
-          username,
-          password
-        );
-
-    }else if(typeof PlayerDB.authenticate === "function"){
-
-      result =
-        await PlayerDB.authenticate(
-          username,
-          password
-        );
-
-    }else if(typeof PlayerDB.signIn === "function"){
-
-      result =
-        await PlayerDB.signIn(
-          username,
-          password
-        );
-
-    }else{
-
-      throw new Error(
-        "No login function was exported by ./js/playerdb.js"
-      );
-    }
-
-
-    /*
-      playerdb.js can return:
-
-      {
-        username: "PlayerName"
-      }
-
-      or
-
-      {
-        user: {
-          username: "PlayerName"
-        }
-      }
-
-      or simply true.
-    */
-
-    let finalUsername =
-      username;
-
-    if(result){
-
-      if(typeof result.username === "string"){
-        finalUsername =
-          result.username;
-      }
-
-      else if(
-        result.user &&
-        typeof result.user.username === "string"
-      ){
-        finalUsername =
-          result.user.username;
-      }
-
-      else if(
-        result.player &&
-        typeof result.player.username === "string"
-      ){
-        finalUsername =
-          result.player.username;
-      }
-
-      else if(
-        typeof result.name === "string"
-      ){
-        finalUsername =
-          result.name;
-      }
-    }
-
-
-    if(!finalUsername){
-
-      throw new Error(
-        "Login succeeded but no username was returned."
-      );
-    }
-
-
-    /*
-      Save the player locally as a convenience.
-      Authentication itself remains handled by
-      playerdb.js.
-    */
-
-    localStorage.setItem(
-      "battlezone-user",
-      finalUsername
-    );
-
-
-    /*
-      IMPORTANT:
-      Redirect exactly to:
-
-      main.html?user=username
-
-      encodeURIComponent prevents usernames containing
-      spaces or special characters from breaking the URL.
-    */
-
-    loginButton.textContent =
-      "LOADING...";
-
-    await wait(450);
-
-    window.location.href =
-      "./main.html?user=" +
-      encodeURIComponent(finalUsername);
-
-  }catch(error){
-
-    console.error(
-      "BattleZone login failed:",
-      error
-    );
-
-    loginError.textContent =
-      getLoginError(error);
-
-    loginButton.disabled = false;
-    loginButton.textContent = "LOGIN";
-  }
-
-});
-
-
-/* =======================================================
-   ERROR HANDLING
-========================================================= */
-
-function getLoginError(error){
-
-  const code =
-    error?.code || "";
-
-  const message =
-    error?.message || "";
-
-  if(
-    code === "auth/invalid-credential" ||
-    code === "auth/wrong-password"
-  ){
-    return "Incorrect username or password.";
-  }
-
-  if(code === "auth/user-not-found"){
-    return "Player account not found.";
-  }
-
-  if(code === "auth/network-request-failed"){
-    return "Network error. Check your connection.";
-  }
-
-  if(message){
-    return message;
-  }
-
-  return "Login failed. Please try again.";
 }
 
 
-/* =======================================================
-   MAIN MENU NAVIGATION
+/* =========================================================
+   SWITCH LOGIN / REGISTER
+========================================================= */
+
+switchMode.addEventListener(
+  "click",
+  () => {
+
+    registerMode =
+      !registerMode;
+
+    updateAuthMode();
+
+    if(registerMode){
+      usernameInput.focus();
+    }else{
+      emailInput.focus();
+    }
+
+  }
+);
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+authForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+    loginError.textContent = "";
+
+    const username =
+      usernameInput.value.trim();
+
+    const email =
+      emailInput.value.trim();
+
+    const password =
+      passwordInput.value;
+
+
+    if(registerMode){
+
+      if(!username){
+
+        loginError.textContent =
+          "Enter a username.";
+
+        usernameInput.focus();
+
+        return;
+      }
+
+      if(username.length < 3){
+
+        loginError.textContent =
+          "Username must contain at least 3 characters.";
+
+        return;
+      }
+
+    }
+
+
+    if(!email){
+
+      loginError.textContent =
+        "Enter your email.";
+
+      return;
+    }
+
+
+    if(!password){
+
+      loginError.textContent =
+        "Enter your password.";
+
+      return;
+    }
+
+
+    authButton.disabled = true;
+
+    authButton.textContent =
+      registerMode
+        ? "CREATING ACCOUNT..."
+        : "LOGGING IN...";
+
+
+    try{
+
+      let player;
+
+
+      /* ===================================================
+         REGISTER
+      =================================================== */
+
+      if(registerMode){
+
+        player =
+          await PlayerDB.registerPlayer(
+            username,
+            email,
+            password
+          );
+
+      }
+
+
+      /* ===================================================
+         LOGIN
+      =================================================== */
+
+      else{
+
+        /*
+         * playerdb.js expects email + password.
+         */
+
+        player =
+          await PlayerDB.loginPlayer(
+            email,
+            password
+          );
+
+      }
+
+
+      if(!player){
+
+        throw new Error(
+          "No player data was returned."
+        );
+      }
+
+
+      let finalUsername =
+        player.username ||
+        player.displayName ||
+        username ||
+        "PLAYER";
+
+
+      localStorage.setItem(
+        "battlezone-user",
+        finalUsername
+      );
+
+
+      /*
+       * Redirect to main.html
+       *
+       * Example:
+       * main.html?user=KrV
+       */
+
+      authButton.textContent =
+        "LOADING...";
+
+
+      await wait(400);
+
+
+      window.location.href =
+        "./main.html?user=" +
+        encodeURIComponent(
+          finalUsername
+        );
+
+
+    }catch(error){
+
+      console.error(
+        "[BattleZone Auth]",
+        error
+      );
+
+
+      loginError.textContent =
+        getAuthError(error);
+
+
+      authButton.disabled =
+        false;
+
+      authButton.textContent =
+        registerMode
+          ? "CREATE ACCOUNT"
+          : "LOGIN";
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   FIREBASE ERROR MESSAGES
+========================================================= */
+
+function getAuthError(error){
+
+  const code =
+    error &&
+    error.code
+      ? error.code
+      : "";
+
+  switch(code){
+
+    case "auth/email-already-in-use":
+      return "This email is already registered.";
+
+    case "auth/invalid-email":
+      return "Enter a valid email address.";
+
+    case "auth/weak-password":
+      return "Password must contain at least 6 characters.";
+
+    case "auth/user-not-found":
+      return "Player account not found.";
+
+    case "auth/wrong-password":
+      return "Incorrect password.";
+
+    case "auth/invalid-credential":
+      return "Incorrect email or password.";
+
+    case "auth/network-request-failed":
+      return "Network error. Check your connection.";
+
+    case "auth/too-many-requests":
+      return "Too many attempts. Try again later.";
+
+    case "permission-denied":
+      return "Database permission denied.";
+
+    default:
+
+      return error &&
+        error.message
+          ? error.message
+          : "Authentication failed.";
+  }
+}
+
+
+/* =========================================================
+   MENU NAVIGATION
 ========================================================= */
 
 document
   .querySelectorAll("nav button")
   .forEach(button => {
 
-    button.addEventListener("click",() => {
+    button.addEventListener(
+      "click",
+      () => {
 
-      document
-        .querySelectorAll("nav button")
-        .forEach(item =>
-          item.classList.remove("active")
-        );
+        document
+          .querySelectorAll("nav button")
+          .forEach(item =>
+            item.classList.remove("active")
+          );
 
-      button.classList.add("active");
-    });
+        button.classList.add("active");
+      }
+    );
 
   });
 
 
-/* =======================================================
-   PLAY BUTTON
+/* =========================================================
+   PLAY
 ========================================================= */
 
 document
   .getElementById("play")
-  .addEventListener("click",event => {
+  .addEventListener(
+    "click",
+    event => {
 
-    const button =
-      event.currentTarget;
-
-    button.textContent =
-      "MATCHMAKING...";
-
-    setTimeout(() => {
+      const button =
+        event.currentTarget;
 
       button.textContent =
-        "PLAY";
+        "MATCHMAKING...";
 
-    },1600);
+      setTimeout(
+        () => {
+          button.textContent =
+            "PLAY";
+        },
+        1600
+      );
 
-  });
-
-
-/* =======================================================
-   UTILITY
-========================================================= */
-
-function wait(ms){
-
-  return new Promise(
-    resolve => setTimeout(resolve,ms)
+    }
   );
 
-}
 
-
-/* =======================================================
+/* =========================================================
    START
 ========================================================= */
+
+updateAuthMode();
 
 boot();
 
