@@ -171,6 +171,86 @@ input:focus{
   font-size:12px;
 }
 
+#menu{
+  transition:all .25s ease;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+
+#menu .btn{
+  cursor:pointer;
+  color:#fff;
+  transition:transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+
+#menu .btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.12);
+  box-shadow:0 8px 24px rgba(0,0,0,.22);
+}
+
+#menu .btn:active{
+  transform:translateY(1px) scale(.99);
+}
+
+#menu.playing{
+  left:18px;
+  top:18px;
+  transform:none;
+  width:min(350px,calc(100vw - 36px));
+  padding:16px;
+  border-radius:18px;
+  z-index:40;
+}
+
+#menu.playing .logo{font-size:24px;letter-spacing:-1px}
+#menu.playing .sub,
+#menu.playing > label,
+#menu.playing > #name,
+#menu.playing > #create,
+#menu.playing > #showJoin,
+#menu.playing > #joinBox{display:none!important}
+#menu.playing #roomBox{display:block!important;margin-top:0}
+#menu.playing #status{margin-top:9px}
+
+.roomActions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:9px;
+}
+
+.roomActions button{
+  height:40px;
+  border:0;
+  border-radius:10px;
+  color:#fff;
+  background:rgba(255,255,255,.09);
+  font-weight:900;
+  cursor:pointer;
+}
+
+.roomActions button:hover{background:rgba(255,255,255,.15)}
+
+#closeRoomPanel{
+  width:100%;
+  margin-top:8px;
+  height:36px;
+  border:0;
+  border-radius:10px;
+  color:#9fb0c7;
+  background:rgba(255,255,255,.05);
+  font-weight:800;
+}
+
+@media(max-width:700px){
+  #menu.playing{
+    left:10px;top:10px;
+    width:min(310px,calc(100vw - 20px));
+    padding:13px;
+  }
+}
+
 #game{
   display:none;
   position:fixed;
@@ -448,6 +528,12 @@ input:focus{
     <button id="copyLink" class="btn secondary">
       COPY INVITE LINK
     </button>
+
+    <div class="roomActions">
+      <button id="shareRoom">SHARE ROOM</button>
+      <button id="newRoom">NEW ROOM</button>
+    </div>
+    <button id="closeRoomPanel">HIDE ROOM PANEL</button>
 
   </div>
 
@@ -1397,7 +1483,6 @@ function createRoom(){
     host:"0.peerjs.com",
     port:443,
     secure:true,
-    path:"/",
     debug:1
   });
 
@@ -1608,7 +1693,6 @@ function joinRoom(){
     host:"0.peerjs.com",
     port:443,
     secure:true,
-    path:"/",
     debug:1
   });
 
@@ -1661,6 +1745,43 @@ function joinRoom(){
 
 }
 
+
+
+const shareRoom = document.getElementById("shareRoom");
+const newRoom = document.getElementById("newRoom");
+const closeRoomPanel = document.getElementById("closeRoomPanel");
+
+async function copyInvite(){
+  const url = inviteLink.textContent.trim();
+  if(!url) return;
+  try{
+    await navigator.clipboard.writeText(url);
+    status.textContent = "Invite link copied!";
+  }catch{
+    window.prompt("Copy this invite link:", url);
+  }
+}
+
+shareRoom.onclick = async()=>{
+  const url = inviteLink.textContent.trim();
+  if(!url) return;
+  if(navigator.share){
+    try{ await navigator.share({title:"SkyForge Room", text:"Join my SkyForge room", url}); }catch{}
+  }else{
+    await copyInvite();
+  }
+};
+
+newRoom.onclick = ()=>{
+  if(peer){ try{peer.destroy();}catch{} }
+  location.hash = "";
+  location.reload();
+};
+
+closeRoomPanel.onclick = ()=>{
+  menu.classList.remove("playing");
+  menu.style.display = "none";
+};
 
 /* =========================================================
    CONNECTION SETUP
@@ -2036,21 +2157,15 @@ function handlePacket(
 
 function startGame(){
 
-  if(started)
-    return;
+  if(started) return;
 
+  started = true;
 
-  started =
-  true;
+  game.style.display = "block";
 
-
-  menu.style.display =
-  "none";
-
-
-  game.style.display =
-  "block";
-
+  // Keep the room controls visible so the host can copy/share the room
+  // after creating it. The panel becomes a compact in-game lobby card.
+  menu.classList.add("playing");
 
   updateLocalName();
 
@@ -2578,7 +2693,7 @@ function rendererReady(){
 
   document.addEventListener(
     "click",
-    ()=>{
+    e=>{
       if(
         started &&
         matchMedia("(pointer:fine)").matches &&
@@ -3136,7 +3251,33 @@ try{
 <div id="mobileControls"><div id="moveStick"><div class="stick-knob"></div></div><div class="mobile-actions"><button id="jumpBtn">▲</button><button id="copyLinkBtn">🔗 Copy Link</button></div></div>
 <style>@media (max-width:900px),(pointer:coarse){#mobileControls{display:block;position:fixed;inset:0;z-index:999;pointer-events:none;touch-action:none}#moveStick{position:absolute;left:20px;bottom:25px;width:120px;height:120px;border:2px solid #ffffff66;border-radius:50%;background:#0004;pointer-events:auto}.stick-knob{position:absolute;left:50%;top:50%;width:55px;height:55px;transform:translate(-50%,-50%);border-radius:50%;background:#fff9}.mobile-actions{position:absolute;right:18px;bottom:22px;display:flex;gap:10px;pointer-events:auto}.mobile-actions button{min-width:62px;min-height:62px;border:0;border-radius:16px;background:#111c;color:white;font-weight:800;font-size:22px}.mobile-actions #copyLinkBtn{min-width:125px;font-size:14px}}@media(min-width:901px) and (pointer:fine){#mobileControls{display:none}}</style>
 <script>
-(()=>{const st=document.getElementById('moveStick'),kn=st?.querySelector('.stick-knob'),jb=document.getElementById('jumpBtn'),cb=document.getElementById('copyLinkBtn');let pid=null,mx=0,my=0;function mv(x,y){const r=st.getBoundingClientRect(),dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2),max=r.width*.32,l=Math.hypot(dx,dy)||1,a=Math.min(1,max/l);mx=dx/max*a;my=dy/max*a;kn.style.transform=`translate(calc(-50% + ${dx*a}px),calc(-50% + ${dy*a}px))`}function reset(){mx=my=0;kn.style.transform='translate(-50%,-50%)'}st?.addEventListener('pointerdown',e=>{e.preventDefault();pid=e.pointerId;st.setPointerCapture(pid);mv(e.clientX,e.clientY)});st?.addEventListener('pointermove',e=>{if(e.pointerId===pid){e.preventDefault();mv(e.clientX,e.clientY)}});['pointerup','pointercancel','lostpointercapture'].forEach(t=>st?.addEventListener(t,reset));window.getMobileMove=()=>({x:mx,y:my});jb?.addEventListener('pointerdown',e=>{e.preventDefault();window.dispatchEvent(new KeyboardEvent('keydown',{key:' ',code:'Space',bubbles:true}));setTimeout(()=>window.dispatchEvent(new KeyboardEvent('keyup',{key:' ',code:'Space',bubbles:true})),70)});cb?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);cb.textContent='✓ Copied!'}catch(e){const t=document.createElement('textarea');t.value=location.href;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();cb.textContent='✓ Copied!'}setTimeout(()=>cb.textContent='🔗 Copy Link',1400)})})();
+(()=>{
+  const st=document.getElementById('moveStick');
+  const kn=st?.querySelector('.stick-knob');
+  const jb=document.getElementById('jumpBtn');
+  const cb=document.getElementById('copyLinkBtn');
+  let pid=null;
+  function mv(x,y){
+    if(!st)return;
+    const r=st.getBoundingClientRect();
+    let dx=x-(r.left+r.width/2),dy=y-(r.top+r.height/2);
+    const max=r.width*.32,len=Math.hypot(dx,dy)||1;
+    if(len>max){dx=dx/len*max;dy=dy/len*max;}
+    window.joyX=dx/max; window.joyY=dy/max;
+    if(kn)kn.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+  }
+  function reset(){window.joyX=0;window.joyY=0;if(kn)kn.style.transform='translate(-50%,-50%)';pid=null;}
+  st?.addEventListener('pointerdown',e=>{e.preventDefault();pid=e.pointerId;st.setPointerCapture(pid);mv(e.clientX,e.clientY)});
+  st?.addEventListener('pointermove',e=>{if(e.pointerId===pid){e.preventDefault();mv(e.clientX,e.clientY)}});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(t=>st?.addEventListener(t,reset));
+  jb?.addEventListener('pointerdown',e=>{e.preventDefault();if(typeof jump==='function')jump();});
+  cb?.addEventListener('click',async()=>{
+    const url=location.href;
+    try{await navigator.clipboard.writeText(url);cb.textContent='✓ Copied!';}
+    catch(e){const t=document.createElement('textarea');t.value=url;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();cb.textContent='✓ Copied!';}
+    setTimeout(()=>cb.textContent='🔗 Copy Link',1400);
+  });
+})();
 </script>
 </body>
 </html>
