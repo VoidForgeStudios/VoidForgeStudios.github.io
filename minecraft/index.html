@@ -706,11 +706,36 @@ function handleMPMessage(d,fromId){
   if(d.t==="hello"){
     createRemote(id,d);
     if(mp.isHost){
+      // The host is authoritative for the procedural world. Send the exact
+      // terrain recipe so every client generates the same terrain from the
+      // same seed instead of using its own locally generated world.
+      peerSend(mp.connections.get(fromId),{t:"worldSync",seed:worldSeed,terrain:currentTerrain,height:worldHeight,options:{...generationOptions}});
       peerSend(mp.connections.get(fromId),localState());
       hostBroadcast({t:"playerJoined",id,name:d.name||"Player"},fromId);
       for(const [otherId,p] of mp.remotePlayers){
         if(otherId!==id)peerSend(mp.connections.get(fromId),{t:"state",id:otherId,name:p.name,x:p.group.position.x,y:p.group.position.y,z:p.group.position.z,yaw:p.yaw});
       }
+    }
+    return;
+  }
+  if(d.t==="worldSync"){
+    // Guests rebuild their local procedural world with the host's exact
+    // terrain type, seed, height and generation options.
+    if(!mp.isHost){
+      const syncSeed=Number.isFinite(+d.seed)?Math.trunc(+d.seed):1;
+      const syncTerrain=String(d.terrain||"normal");
+      const syncOptions={...generationOptions,...(d.options||{})};
+      syncOptions.terrainHeight=Math.max(16,+syncOptions.terrainHeight||32);
+      setMPStatus("🟡 Syncing host world...");
+      generateWorld(syncTerrain,syncSeed,syncOptions).then(()=>{
+        if(mp.connected){
+          setMPStatus(`🟢 Connected to room ${mp.roomCode} · world synced`);
+          sendPlayerHello();
+        }
+      }).catch(e=>{
+        console.error("World sync failed",e);
+        setMPStatus("🔴 World sync failed: "+(e&&e.message||String(e)));
+      });
     }
     return;
   }
