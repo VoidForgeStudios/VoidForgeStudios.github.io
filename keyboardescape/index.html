@@ -475,6 +475,58 @@ input:focus{
     display:none!important;
   }
 }
+/* DEVICE CAPABILITY DETECTION */
+#deviceInfo{margin-top:10px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);color:#91a2ba;font-size:10px;line-height:1.45}
+#deviceInfo b{color:#d9e8ff}
+.deviceBadges{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.deviceBadge{padding:4px 7px;border-radius:7px;background:rgba(67,185,255,.09);border:1px solid rgba(67,185,255,.14)}
+.deviceBadge.off{opacity:.45;background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.06)}
+html[data-input-mode="touch"] #mobile,html[data-input-mode="hybrid"] #mobile{display:block!important}
+html[data-input-mode="mouse"] #mobile{display:none!important}
+
+/* FIT ALL UI TO VIEWPORT */
+html,body{width:100%;height:100%;overflow:hidden;}
+*{box-sizing:border-box;}
+#panel{width:min(92vw,360px);max-height:calc(100dvh - 24px);overflow-y:auto;overflow-x:hidden;}
+#panel input,#panel button{max-width:100%;}
+#hud{max-width:calc(100vw - 24px);}
+#crosshair{pointer-events:none;}
+#chatbox{max-width:calc(100vw - 24px);}
+#deviceInfo{max-height:22dvh;overflow:auto;}
+@media(max-width:700px){
+ #panel{width:min(94vw,330px);max-height:calc(100dvh - 16px);padding:12px;}
+ #panel h1{font-size:20px;}
+ #panel .row{gap:6px;}
+ #panel button{font-size:12px;padding:8px 10px;}
+ #hud{font-size:11px;max-width:calc(100vw - 16px);}
+ #chatbox{width:min(92vw,420px);max-width:calc(100vw - 16px);}
+ #mobile{transform:scale(.82);transform-origin:bottom center;}
+}
+@media(max-width:400px){
+ #panel{width:96vw;padding:10px;}
+ #panel h1{font-size:18px;}
+ #mobile{transform:scale(.7);}
+}
+@media(max-height:600px){
+ #panel{max-height:calc(100dvh - 8px);}
+ #deviceInfo{max-height:15dvh;}
+ #mobile{transform:scale(.68);}
+}
+
+/* Compact room code widget */
+#roomBox{position:fixed!important;top:14px;left:50%;transform:translateX(-50%);width:min(320px,calc(100vw - 28px));padding:10px!important;border-radius:14px;z-index:50;box-shadow:0 14px 40px rgba(0,0,0,.35);}
+#roomBox.compact{width:auto;min-width:150px;padding:7px 9px!important;border-radius:999px;cursor:pointer;}
+#roomBox.compact .roomDetails{display:none;}
+#roomBox.compact .roomTitle{margin:0!important;font-size:9px;display:inline-flex;align-items:center;gap:5px;}
+#roomBox.compact .roomTitle:after{content:"⌄";font-size:12px;}
+#roomBox.compact .smallRow{display:flex;margin:0;}
+#roomBox.compact #roomId{width:92px;border:0;background:transparent;font-weight:800;text-align:center;padding:2px;color:#fff;}
+#roomBox.compact #copyId{display:none;}
+#roomBox:not(.compact) .roomTitle:first-child{margin-top:0;}
+#roomToggle{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:51;border:1px solid rgba(255,255,255,.14);background:rgba(8,15,28,.88);backdrop-filter:blur(12px);color:#dcecff;border-radius:999px;padding:7px 11px;font-size:10px;font-weight:800;letter-spacing:.05em;box-shadow:0 8px 30px rgba(0,0,0,.3);display:none;}
+#roomToggle.has-room{display:block;}
+@media(max-width:700px){#roomBox{top:8px;width:min(290px,calc(100vw - 16px));}#roomToggle{top:8px;max-width:calc(100vw - 16px);}}
+@media(max-height:600px){#roomBox{top:6px;transform:translateX(-50%) scale(.92);transform-origin:top center;}#roomToggle{top:6px;transform:translateX(-50%) scale(.92);}}
 </style>
 </head>
 
@@ -507,6 +559,7 @@ input:focus{
     </div>
     <button id="closeRoomPanel">HIDE ROOM PANEL</button>
   </div>
+  <button id="roomToggle" type="button">ROOM · <span id="roomToggleCode">----</span></button>
 
   <div id="joinBox">
     <label>ROOM ID OR INVITE LINK</label>
@@ -515,6 +568,11 @@ input:focus{
   </div>
 
   <div id="status">Ready.</div>
+  <div id="deviceInfo" aria-live="polite">
+    <b>DEVICE SUPPORT</b>
+    <div id="deviceSummary">Detecting...</div>
+    <div class="deviceBadges" id="deviceBadges"></div>
+  </div>
 </div>
 
 <div id="game">
@@ -600,6 +658,49 @@ const messages = document.getElementById("messages");
 const chatForm = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
 const leave = document.getElementById("leave");
+
+/* =========================================================
+   DEVICE / INPUT CAPABILITY DETECTION
+========================================================= */
+const deviceSummary = document.getElementById("deviceSummary");
+const deviceBadges = document.getElementById("deviceBadges");
+const mobileControls = document.getElementById("mobile");
+const DEVICE = {touch:false,keyboard:false,mouse:false,pen:false,gamepad:false,orientation:false,fullscreen:false,clipboard:false,webrtc:false,webgl:false,hover:false};
+
+function detectDeviceCapabilities(){
+  const nav=navigator;
+  DEVICE.touch=("ontouchstart" in window)||(nav.maxTouchPoints||0)>0;
+  DEVICE.mouse=matchMedia("(any-pointer:fine)").matches||matchMedia("(pointer:fine)").matches;
+  DEVICE.keyboard=DEVICE.mouse || !!nav.keyboard;
+  DEVICE.pen=DEVICE.touch && matchMedia("(any-pointer:fine)").matches;
+  DEVICE.gamepad=!!(nav.getGamepads && [...nav.getGamepads()].some(Boolean));
+  DEVICE.orientation="orientation" in screen || "onorientationchange" in window;
+  DEVICE.fullscreen=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+  DEVICE.clipboard=!!(nav.clipboard && window.isSecureContext);
+  DEVICE.webrtc=!!(window.RTCPeerConnection||window.webkitRTCPeerConnection);
+  DEVICE.webgl=!!window.WebGLRenderingContext;
+  DEVICE.hover=matchMedia("(any-hover:hover)").matches;
+
+  const type=DEVICE.touch&&DEVICE.mouse?"Hybrid / Touch + Keyboard + Pointer":DEVICE.touch?"Touch device":DEVICE.mouse?"Keyboard + Mouse / Pointer":"Basic pointer device";
+  deviceSummary.textContent=type;
+  document.documentElement.dataset.inputMode=DEVICE.touch&&DEVICE.mouse?"hybrid":DEVICE.touch?"touch":"mouse";
+
+  const items=[["⌨ Keyboard",DEVICE.keyboard],["🖱 Mouse",DEVICE.mouse],["👆 Touch",DEVICE.touch],["✎ Pen",DEVICE.pen],["🎮 Gamepad",DEVICE.gamepad],["↔ Orientation",DEVICE.orientation],["⛶ Fullscreen",DEVICE.fullscreen],["📋 Clipboard",DEVICE.clipboard],["🌐 WebRTC",DEVICE.webrtc],["⚡ WebGL",DEVICE.webgl]];
+  deviceBadges.innerHTML="";
+  for(const [label,supported] of items){
+    const el=document.createElement("span");
+    el.className="deviceBadge"+(supported?"":" off");
+    el.textContent=label+(supported?" ✓":" —");
+    deviceBadges.appendChild(el);
+  }
+  if(mobileControls) mobileControls.style.display=DEVICE.touch?"block":"";
+}
+
+addEventListener("gamepadconnected",detectDeviceCapabilities);
+addEventListener("gamepaddisconnected",detectDeviceCapabilities);
+addEventListener("resize",detectDeviceCapabilities);
+detectDeviceCapabilities();
+setTimeout(detectDeviceCapabilities,500);
 
 /* =========================================================
    NETWORK STATE
@@ -922,6 +1023,9 @@ function createRoom(){
 
 function showRoom(id){
   roomBox.style.display = "block";
+  roomBox.classList.add("compact");
+  roomToggle.classList.add("has-room");
+  roomToggleCode.textContent = id;
   roomIdInput.value = id;
   const link = location.origin + location.pathname + "#room=" + encodeURIComponent(id);
   inviteLink.textContent = link;
@@ -977,6 +1081,8 @@ function joinRoom(){
 const shareRoom = document.getElementById("shareRoom");
 const newRoom = document.getElementById("newRoom");
 const closeRoomPanel = document.getElementById("closeRoomPanel");
+const roomToggle = document.getElementById("roomToggle");
+const roomToggleCode = document.getElementById("roomToggleCode");
 
 async function copyInvite(){
   const url = inviteLink.textContent.trim();
@@ -988,6 +1094,17 @@ async function copyInvite(){
     window.prompt("Copy this invite link:", url);
   }
 }
+
+roomToggle.onclick = () => {
+  roomBox.style.display = "block";
+  roomBox.classList.toggle("compact");
+};
+
+roomBox.addEventListener("click", e => {
+  if(roomBox.classList.contains("compact") && !e.target.closest("input,button")){
+    roomBox.classList.remove("compact");
+  }
+});
 
 shareRoom.onclick = async () => {
   const url = inviteLink.textContent.trim();
@@ -1008,6 +1125,7 @@ newRoom.onclick = () => {
 closeRoomPanel.onclick = () => {
   menu.classList.remove("playing");
   menu.style.display = "none";
+  roomBox.classList.add("compact");
 };
 
 function setupConnection(conn){
@@ -1112,8 +1230,18 @@ function updateLocalName(){
 function updateMovement(dt){
   if(!started) return;
 
-  let forward = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) - joyY;
-  let side = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joyX;
+  let padX=0,padY=0,padRun=false;
+  if(navigator.getGamepads){
+    const pad=[...navigator.getGamepads()].find(Boolean);
+    if(pad){
+      const dz=v=>Math.abs(v)<.14?0:(Math.abs(v)-.14)/.86*Math.sign(v);
+      padX=dz(pad.axes?.[0]||0);
+      padY=dz(pad.axes?.[1]||0);
+      padRun=!!pad.buttons?.[10]?.pressed||!!pad.buttons?.[5]?.pressed;
+    }
+  }
+  let forward = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) - joyY - padY;
+  let side = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joyX + padX;
 
   const length = Math.hypot(forward, side);
   if(length > 1){
@@ -1121,7 +1249,7 @@ function updateMovement(dt){
     side /= length;
   }
 
-  const speed = (me.running || keys.ShiftLeft || keys.ShiftRight) ? RUN : WALK;
+  const speed = (me.running || keys.ShiftLeft || keys.ShiftRight || padRun) ? RUN : WALK;
   const sin = Math.sin(me.yaw);
   const cos = Math.cos(me.yaw);
 
@@ -1263,7 +1391,7 @@ addEventListener("keydown", e => {
 addEventListener("keyup", e => { keys[e.code] = false; });
 
 document.addEventListener("click", e => {
-  if(started && matchMedia("(pointer:fine)").matches && renderer &&
+  if(started && DEVICE.mouse && renderer &&
      document.pointerLockElement !== renderer.domElement &&
      !e.target.closest("input,button,form")){
     renderer.domElement.requestPointerLock();
@@ -1327,6 +1455,7 @@ function resetJoystick(){
 const lookArea = document.getElementById("lookArea");
 
 lookArea.addEventListener("pointerdown", e => {
+  if(!DEVICE.touch) return;
   lookActive = true;
   lookX = e.clientX;
   lookY = e.clientY;
@@ -1407,9 +1536,20 @@ function resize(){
   renderer.setSize(innerWidth, innerHeight);
 }
 
+let lastPadJump=false;
+function pollGamepad(){
+  if(!navigator.getGamepads||!started) return;
+  const pad=[...navigator.getGamepads()].find(Boolean);
+  if(!pad) return;
+  const pressed=!!pad.buttons?.[0]?.pressed;
+  if(pressed&&!lastPadJump) jump();
+  lastPadJump=pressed;
+}
+
 function animate(){
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), .05);
+  pollGamepad();
 
   updateMovement(dt);
   updateRemotePlayers();
