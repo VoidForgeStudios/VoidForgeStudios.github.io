@@ -564,6 +564,23 @@ const JUMP = 8;
 const NET_RATE = 30;
 
 /* =========================================================
+   PEERJS CONFIG (FAST STUN NETWORK DISCOVERY)
+========================================================= */
+const PEER_CONFIG = {
+  host: "peerjs.com",
+  port: 443,
+  secure: true,
+  debug: 1,
+  config: {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" }
+    ]
+  }
+};
+
+/* =========================================================
    UI ELEMENTS
 ========================================================= */
 const menu = document.getElementById("menu");
@@ -850,7 +867,7 @@ function playerColor(id){
 }
 
 /* =========================================================
-   NETWORK COMMUNICATIONS (PEERJS)
+   NETWORK COMMUNICATIONS (PEERJS HIGH-SPEED OPTIMIZED)
 ========================================================= */
 function packet(type, data = {}){
   return { type, ...data };
@@ -881,22 +898,22 @@ function createRoom(){
 
   me.name = name;
   isHost = true;
-  status.textContent = "Connecting to public signaling...";
+  status.textContent = "Connecting to high-speed signaling...";
   createBtn.disabled = true;
 
-  peer = new Peer({ host: "0.peerjs.com", port: 443, secure: true, debug: 1 });
+  peer = new Peer(PEER_CONFIG);
 
   peer.on("open", id => {
     myId = id;
     hostId = id;
     showRoom(id);
-    status.textContent = "ROOM READY — share the Room ID or invite link.";
+    status.textContent = "ROOM READY — share Room ID or invite link.";
     startGame();
   });
 
   peer.on("connection", conn => { setupConnection(conn); });
   peer.on("disconnected", () => {
-    status.textContent = "Signaling disconnected. Trying again...";
+    status.textContent = "Signaling re-connecting...";
     try { peer.reconnect(); } catch{}
   });
   peer.on("error", error => {
@@ -945,11 +962,11 @@ function joinRoom(){
   status.textContent = "Connecting to Room " + room + "...";
   joinBtn.disabled = true;
 
-  peer = new Peer({ host: "0.peerjs.com", port: 443, secure: true, debug: 1 });
+  peer = new Peer(PEER_CONFIG);
 
   peer.on("open", id => {
     myId = id;
-    const conn = peer.connect(hostId, { reliable: true, serialization: "json" });
+    const conn = peer.connect(hostId, { reliable: false, serialization: "json" });
     setupConnection(conn);
   });
 
