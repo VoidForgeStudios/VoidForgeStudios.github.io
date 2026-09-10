@@ -646,7 +646,7 @@ function isMobile(){return window.matchMedia("(pointer:coarse)").matches||innerW
 let settingsReturn="main";
 function setNonGameUI(){gameActive=false;document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";document.getElementById("mobileExtraButtons").style.display="none";resetInputs();try{if(document.pointerLockElement)document.exitPointerLock()}catch(_){}closePanels()}
 function showLoading(text="Loading..."){setNonGameUI();hideAllMenus();loadingScreen.classList.remove("hidden");setLoading(0,text)}
-function hideAllMenus(){mainMenu.classList.add("hidden");worldMenu.classList.add("hidden");settingsMenu.classList.add("hidden");realmsMenu.classList.add("hidden");marketplaceMenu.classList.add("hidden");profileMenu.classList.add("hidden");dressingRoomMenu.classList.add("hidden");terrainGenerator.classList.remove("active")}
+function hideAllMenus(){mainMenu.classList.add("hidden");worldMenu.classList.add("hidden");settingsMenu.classList.add("hidden");realmsMenu.classList.add("hidden");marketplaceMenu.classList.add("hidden");profileMenu.classList.add("hidden");dressingRoomMenu.classList.add("hidden");registerMenu.classList.add("hidden");loginMenu.classList.add("hidden");terrainGenerator.classList.remove("active")}
 function showLoginMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();$("#loginMenu").classList.remove("hidden");setAuthError("");setTimeout(()=>$("#loginIdentity")?.focus(),0)}
 function showRegisterMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();$("#registerMenu").classList.remove("hidden");setAuthError("");setTimeout(()=>$("#regUsername")?.focus(),0)}
 function showAuthMenu(){showLoginMenu()}
