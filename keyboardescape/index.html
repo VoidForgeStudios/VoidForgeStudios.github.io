@@ -513,20 +513,255 @@ html,body{width:100%;height:100%;overflow:hidden;}
  #mobile{transform:scale(.68);}
 }
 
-/* Compact room code widget */
-#roomBox{position:fixed!important;top:14px;left:50%;transform:translateX(-50%);width:min(320px,calc(100vw - 28px));padding:10px!important;border-radius:14px;z-index:50;box-shadow:0 14px 40px rgba(0,0,0,.35);}
-#roomBox.compact{width:auto;min-width:150px;padding:7px 9px!important;border-radius:999px;cursor:pointer;}
-#roomBox.compact .roomDetails{display:none;}
-#roomBox.compact .roomTitle{margin:0!important;font-size:9px;display:inline-flex;align-items:center;gap:5px;}
-#roomBox.compact .roomTitle:after{content:"⌄";font-size:12px;}
-#roomBox.compact .smallRow{display:flex;margin:0;}
-#roomBox.compact #roomId{width:92px;border:0;background:transparent;font-weight:800;text-align:center;padding:2px;color:#fff;}
-#roomBox.compact #copyId{display:none;}
-#roomBox:not(.compact) .roomTitle:first-child{margin-top:0;}
-#roomToggle{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:51;border:1px solid rgba(255,255,255,.14);background:rgba(8,15,28,.88);backdrop-filter:blur(12px);color:#dcecff;border-radius:999px;padding:7px 11px;font-size:10px;font-weight:800;letter-spacing:.05em;box-shadow:0 8px 30px rgba(0,0,0,.3);display:none;}
-#roomToggle.has-room{display:block;}
-@media(max-width:700px){#roomBox{top:8px;width:min(290px,calc(100vw - 16px));}#roomToggle{top:8px;max-width:calc(100vw - 16px);}}
-@media(max-height:600px){#roomBox{top:6px;transform:translateX(-50%) scale(.92);transform-origin:top center;}#roomToggle{top:6px;transform:translateX(-50%) scale(.92);}}
+/* =========================================================
+   CLEAN ROOM HUD
+========================================================= */
+#roomBox{
+  position:fixed!important;
+  top:12px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:min(340px,calc(100vw - 24px));
+  margin:0!important;
+  padding:14px!important;
+  border-radius:18px!important;
+  background:rgba(7,13,24,.92)!important;
+  border:1px solid rgba(105,200,255,.20)!important;
+  box-shadow:0 18px 55px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.05)!important;
+  backdrop-filter:blur(18px) saturate(130%);
+  z-index:100;
+}
+#roomBox.compact{
+  display:none!important;
+}
+#roomBox .roomTitle:first-child{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:0 0 8px!important;
+  color:#a9ddff;
+  font-size:9px;
+  letter-spacing:.12em;
+}
+#roomBox .roomTitle:first-child:after{
+  content:'ROOM';
+  color:#6e8099;
+  font-size:8px;
+}
+#roomId{
+  min-width:0;
+  height:38px!important;
+  padding:0 12px!important;
+  border:1px solid rgba(105,200,255,.16)!important;
+  border-radius:11px!important;
+  background:rgba(255,255,255,.055)!important;
+  color:#fff!important;
+  font-size:14px!important;
+  letter-spacing:1px!important;
+  text-align:center;
+}
+#copyId{
+  width:72px!important;
+  height:38px!important;
+  border-radius:11px!important;
+  background:rgba(67,185,255,.13)!important;
+  border:1px solid rgba(67,185,255,.18)!important;
+  color:#cfeeff!important;
+}
+#inviteLink{
+  margin-top:8px!important;
+  padding:8px 10px;
+  border-radius:9px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+  max-height:40px;
+  overflow:hidden;
+}
+#roomBox .btn.secondary{
+  height:34px!important;
+  margin-top:7px!important;
+  font-size:10px!important;
+}
+.roomActions{gap:7px;margin-top:7px!important}
+.roomActions button{height:34px!important;font-size:10px!important}
+#closeRoomPanel{
+  height:30px!important;
+  margin-top:7px!important;
+  font-size:9px;
+  background:transparent!important;
+}
+#roomToggle{
+  position:fixed;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:110;
+  display:none;
+  align-items:center;
+  gap:7px;
+  max-width:calc(100vw - 24px);
+  height:34px;
+  padding:0 12px;
+  border:1px solid rgba(105,200,255,.20);
+  background:rgba(7,13,24,.88);
+  backdrop-filter:blur(16px);
+  color:#dcecff;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.06em;
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
+  cursor:pointer;
+}
+#roomToggle.has-room{display:flex}
+#roomToggleCode{color:#65c8ff;letter-spacing:.12em}
+#roomToggle:before{
+  content:'';
+  width:6px;height:6px;border-radius:50%;
+  background:#55d88b;
+  box-shadow:0 0 10px rgba(85,216,139,.8);
+}
+@media(max-width:700px){
+  #roomToggle{top:8px;height:32px;font-size:9px}
+  #roomBox{top:8px!important;width:min(320px,calc(100vw - 16px));padding:12px!important}
+}
+@media(max-height:600px){
+  #roomBox{top:6px!important;padding:10px!important}
+  #roomBox #inviteLink{display:none}
+  #roomBox .roomTitle[style]{display:none}
+}
+
+/* =========================================================
+   POLISHED IN-GAME ROOM UI
+========================================================= */
+#menu.playing{
+  position:fixed!important;
+  left:50%!important;
+  top:0!important;
+  transform:translateX(-50%)!important;
+  width:100%!important;
+  height:0!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:visible!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  pointer-events:none!important;
+}
+#menu.playing > *{pointer-events:none!important}
+#menu.playing #roomBox{pointer-events:auto!important}
+#menu.playing #roomToggle{pointer-events:auto!important}
+#menu.playing #status,
+#menu.playing #deviceInfo{display:none!important}
+
+#menu.playing #roomBox{
+  display:none!important;
+  position:fixed!important;
+  top:58px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  width:min(350px,calc(100vw - 28px))!important;
+  box-sizing:border-box!important;
+  padding:16px!important;
+  margin:0!important;
+  border-radius:20px!important;
+  background:rgba(8,15,28,.94)!important;
+  border:1px solid rgba(105,200,255,.22)!important;
+  box-shadow:0 20px 60px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.06)!important;
+  backdrop-filter:blur(22px) saturate(135%)!important;
+}
+#menu.playing #roomBox:not(.compact){display:block!important}
+
+#menu.playing #roomBox .roomTitle:first-child{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  margin:0 0 9px!important;
+  color:#8fd6ff!important;
+  font-size:10px!important;
+  letter-spacing:.14em!important;
+}
+#menu.playing #roomBox .roomTitle:first-child:after{content:'ONLINE';color:#59dc96;font-size:8px}
+#menu.playing #roomId{
+  width:100%!important;
+  min-width:0!important;
+  height:44px!important;
+  box-sizing:border-box!important;
+  padding:0 12px!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  letter-spacing:.7px!important;
+  text-align:center!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#menu.playing #copyId{
+  flex:0 0 68px!important;
+  width:68px!important;
+  height:44px!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+#menu.playing #inviteLink{
+  margin-top:10px!important;
+  padding:9px 10px!important;
+  max-height:38px!important;
+  border-radius:10px!important;
+  font-size:9px!important;
+  text-align:center!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#menu.playing #roomBox .roomTitle[style]{
+  margin-top:11px!important;
+  margin-bottom:6px!important;
+  font-size:8px!important;
+}
+#menu.playing #copyLink{height:36px!important;margin-top:7px!important;font-size:9px!important}
+#menu.playing .roomActions{grid-template-columns:1fr 1fr!important;gap:7px!important}
+#menu.playing .roomActions button{height:36px!important;font-size:9px!important}
+#menu.playing #closeRoomPanel{height:30px!important;font-size:9px!important}
+
+#roomToggle{
+  top:14px!important;
+  height:38px!important;
+  max-width:min(300px,calc(100vw - 30px))!important;
+  padding:0 14px!important;
+  gap:8px!important;
+  font-size:10px!important;
+  letter-spacing:.05em!important;
+  white-space:nowrap!important;
+}
+#roomToggleCode{
+  display:block!important;
+  max-width:190px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#roomToggle:after{
+  content:'⌄';
+  color:#71849d;
+  font-size:13px;
+  line-height:1;
+  margin-left:1px;
+}
+#roomToggle.has-room:hover{border-color:rgba(105,200,255,.38);background:rgba(10,20,36,.94)}
+#roomToggle.has-room:active{transform:translateX(-50%) scale(.98)}
+
+@media(max-width:700px){
+  #roomToggle{top:9px!important;height:34px!important;padding:0 11px!important;font-size:9px!important}
+  #roomToggleCode{max-width:145px!important}
+  #menu.playing #roomBox{top:50px!important;width:min(330px,calc(100vw - 20px))!important;padding:13px!important;border-radius:17px!important}
+}
+@media(max-height:600px){
+  #menu.playing #roomBox{top:46px!important;padding:11px!important}
+  #menu.playing #inviteLink,#menu.playing #copyLink{display:none!important}
+}
+
 </style>
 </head>
 
@@ -1022,10 +1257,11 @@ function createRoom(){
 }
 
 function showRoom(id){
-  roomBox.style.display = "block";
+  roomBox.style.display = "none";
   roomBox.classList.add("compact");
   roomToggle.classList.add("has-room");
   roomToggleCode.textContent = id;
+  roomToggle.title = "Room code: " + id;
   roomIdInput.value = id;
   const link = location.origin + location.pathname + "#room=" + encodeURIComponent(id);
   inviteLink.textContent = link;
@@ -1096,8 +1332,8 @@ async function copyInvite(){
 }
 
 roomToggle.onclick = () => {
-  roomBox.style.display = "block";
   roomBox.classList.toggle("compact");
+  roomBox.style.display = roomBox.classList.contains("compact") ? "none" : "block";
 };
 
 roomBox.addEventListener("click", e => {
@@ -1123,9 +1359,8 @@ newRoom.onclick = () => {
 };
 
 closeRoomPanel.onclick = () => {
-  menu.classList.remove("playing");
-  menu.style.display = "none";
   roomBox.classList.add("compact");
+  roomToggle.classList.add("has-room");
 };
 
 function setupConnection(conn){
