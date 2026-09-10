@@ -375,8 +375,6 @@ input:focus{
   font-weight:900;
 }
 
-/* MOBILE CONTROLS */
-
 #mobile{
   display:none;
   position:absolute;
@@ -553,9 +551,6 @@ input:focus{
 <script type="module">
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 
-/* =========================================================
-   SETTINGS
-========================================================= */
 const WORLD = 220;
 const WALK = 6;
 const RUN = 10;
@@ -563,13 +558,8 @@ const GRAVITY = 22;
 const JUMP = 8;
 const NET_RATE = 30;
 
-/* =========================================================
-   PEERJS CONFIG (FAST STUN NETWORK DISCOVERY)
-========================================================= */
+/* FIXED PEER CONFIG STRUCTURE */
 const PEER_CONFIG = {
-  host: "peerjs.com",
-  port: 443,
-  secure: true,
   debug: 1,
   config: {
     iceServers: [
@@ -580,9 +570,6 @@ const PEER_CONFIG = {
   }
 };
 
-/* =========================================================
-   UI ELEMENTS
-========================================================= */
 const menu = document.getElementById("menu");
 const game = document.getElementById("game");
 const nameInput = document.getElementById("name");
@@ -604,9 +591,6 @@ const chatForm = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
 const leave = document.getElementById("leave");
 
-/* =========================================================
-   NETWORK STATE
-========================================================= */
 let peer = null;
 let myId = "";
 let hostId = "";
@@ -617,14 +601,8 @@ const remotePlayers = new Map();
 let lastSend = 0;
 let lastPing = 0;
 
-/* =========================================================
-   THREE JS SCENE SETUP
-========================================================= */
 let scene, camera, renderer, clock, localMesh, world;
 
-/* =========================================================
-   PLAYER STATE
-========================================================= */
 const me = {
   name: "",
   pos: new THREE.Vector3(0, 0.02, 0),
@@ -635,9 +613,6 @@ const me = {
   running: false
 };
 
-/* =========================================================
-   INPUT STATE
-========================================================= */
 const keys = {};
 let joyX = 0;
 let joyY = 0;
@@ -646,9 +621,6 @@ let lookActive = false;
 let lookX = 0;
 let lookY = 0;
 
-/* =========================================================
-   INITIALIZATION
-========================================================= */
 function initThree(){
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x071426);
@@ -686,9 +658,6 @@ function initThree(){
   animate();
 }
 
-/* =========================================================
-   WORLD CREATION
-========================================================= */
 function createWorld(){
   const ground = new THREE.Mesh(
     new THREE.BoxGeometry(WORLD, 2, WORLD),
@@ -750,9 +719,6 @@ function createPlatform(x, y, z, w, h, d){
   world.add(mesh);
 }
 
-/* =========================================================
-   CHARACTER CREATION
-========================================================= */
 function createCharacter(color, name){
   const group = new THREE.Group();
 
@@ -809,9 +775,6 @@ function createNameTag(name){
   return sprite;
 }
 
-/* =========================================================
-   REMOTE PLAYERS MANAGEMENT
-========================================================= */
 function addRemote(data){
   if(data.id === myId || remotePlayers.has(data.id)) return;
 
@@ -866,9 +829,6 @@ function playerColor(id){
   return colors[Math.abs(n) % colors.length];
 }
 
-/* =========================================================
-   NETWORK COMMUNICATIONS (PEERJS HIGH-SPEED OPTIMIZED)
-========================================================= */
 function packet(type, data = {}){
   return { type, ...data };
 }
@@ -898,7 +858,7 @@ function createRoom(){
 
   me.name = name;
   isHost = true;
-  status.textContent = "Connecting to high-speed signaling...";
+  status.textContent = "Connecting to signaling server...";
   createBtn.disabled = true;
 
   peer = new Peer(PEER_CONFIG);
@@ -966,7 +926,7 @@ function joinRoom(){
 
   peer.on("open", id => {
     myId = id;
-    const conn = peer.connect(hostId, { reliable: false, serialization: "json" });
+    const conn = peer.connect(hostId, { reliable: false });
     setupConnection(conn);
   });
 
@@ -1109,9 +1069,6 @@ function updateLocalName(){
   if(tag) tag.quaternion.copy(camera.quaternion);
 }
 
-/* =========================================================
-   MOVEMENT LOGIC (CROSS-PLATFORM)
-========================================================= */
 function updateMovement(dt){
   if(!started) return;
 
@@ -1199,9 +1156,6 @@ function updateRemotePlayers(){
   }
 }
 
-/* =========================================================
-   CHAT SYSTEM
-========================================================= */
 chatForm.onsubmit = e => {
   e.preventDefault();
   const message = chatInput.value.trim();
@@ -1252,9 +1206,6 @@ setInterval(() => {
   send(conn, packet("ping", { time: performance.now() }));
 }, 3000);
 
-/* =========================================================
-   DESKTOP INPUT LISTENERS
-========================================================= */
 addEventListener("keydown", e => {
   keys[e.code] = true;
   if(e.code === "Space" && !e.repeat){
@@ -1280,9 +1231,6 @@ addEventListener("mousemove", e => {
   me.pitch = THREE.MathUtils.clamp(me.pitch, -1.35, 1.35);
 });
 
-/* =========================================================
-   MOBILE INPUT LISTENERS
-========================================================= */
 const joystick = document.getElementById("joystick");
 const stick = document.getElementById("stick");
 
@@ -1361,9 +1309,6 @@ run.addEventListener("pointerdown", () => { me.running = true; });
 run.addEventListener("pointerup", () => { me.running = false; });
 run.addEventListener("pointercancel", () => { me.running = false; });
 
-/* =========================================================
-   ROOM COPYING & AUTO-JOIN
-========================================================= */
 copyId.onclick = async () => {
   try {
     await navigator.clipboard.writeText(roomIdInput.value);
@@ -1400,12 +1345,9 @@ leave.onclick = () => {
   location.href = location.pathname;
 };
 
-/* =========================================================
-   RESIZE & RENDER LOOP
-========================================================= */
 function resize(){
   camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
+  camera.updatePointerMatrix ? camera.updatePointerMatrix() : camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 }
 
@@ -1426,9 +1368,6 @@ function animate(){
   renderer.render(scene, camera);
 }
 
-/* =========================================================
-   HELPERS & STARTUP
-========================================================= */
 function cleanName(value){
   return value.replace(/[<>]/g, "").trim().substring(0, 18);
 }
