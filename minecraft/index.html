@@ -140,7 +140,7 @@ input[type=range]{accent-color:var(--ui-accent);height:6px}
 body.in-game-ui #survivalHud,body.in-game-ui #worldTime,body.in-game-ui #crosshair,body.in-game-ui #status,body.in-game-ui #hotbar,body.in-game-ui #help{display:block !important}
 body.in-game-ui #mobileExtraButtons{display:flex !important}
 
-<style id="ultra-ui">
+</style><style id="ultra-ui">
 :root{--accent:#5ee7ff;--accent2:#7c5cff;--panel:rgba(8,13,25,.78);--line:rgba(255,255,255,.12)}
 body{background:#030611;letter-spacing:.2px}
 #menu,.menu,.panel,.modal,.settings,.mp-panel{backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px);border:1px solid var(--line);box-shadow:0 25px 80px rgba(0,0,0,.45),inset 0 1px rgba(255,255,255,.06);border-radius:24px}
@@ -358,6 +358,46 @@ kbd{
 #mpRoomCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;letter-spacing:.08em}
 #mpPlayers{text-align:center}
 @media(max-width:520px){#multiplayerPanel .mp-actions{grid-template-columns:1fr}}
+/* ================================================================
+   EASY CUSTOMIZATION
+   Change these values first when tuning the client appearance.
+   ================================================================ */
+:root {
+  --custom-accent: #5ee7ff;
+  --custom-accent-strong: #7c5cff;
+  --custom-panel: rgba(6, 11, 20, 0.92);
+  --custom-panel-border: rgba(255, 255, 255, 0.11);
+  --custom-button-height: 46px;
+  --custom-radius: 12px;
+}
+
+/* Shared controls */
+.button,
+.mp-button,
+.small-button {
+  min-height: var(--custom-button-height) !important;
+  border-radius: var(--custom-radius) !important;
+}
+
+/* Shared panels */
+.game-panel,
+.panel,
+.terrain-generator-card {
+  background: var(--custom-panel) !important;
+  border-color: var(--custom-panel-border) !important;
+}
+
+/* Main menu controls */
+.mc-button,
+.mc-side-button {
+  min-height: var(--custom-button-height);
+}
+
+.mc-logo-sub {
+  color: var(--custom-accent) !important;
+}
+
+/* Keep this block near the end so overrides are predictable. */
 </style></head>
 <body><div id="ultra-bg"><div class="orb o1"></div><div class="orb o2"></div><div class="gridfx"></div></div>
 <div id="game"></div>
@@ -378,6 +418,7 @@ kbd{
         <button id="realmsButton" class="mc-button" type="button">Realms</button>
       </div>
       <button id="marketplaceButton" class="mc-button mc-button-wide" type="button">Marketplace</button>
+      <button id="accountButton" class="mc-button mc-button-wide" type="button">Sign in for Online Services</button>
     </div>
     <div class="mc-side-left">
       <button id="profileButton" class="mc-side-button" type="button">Profile</button>
@@ -391,6 +432,7 @@ kbd{
     </div>
   </div>
 </div>
+<div id="authMenu" class="screen hidden"><div class="panel auth-panel"><h2 id="authTitle">BlockWorld Account</h2><p id="authNote" class="menu-note">Register or sign in to use Realms, chat, invites, and other online services.</p><div class="option"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></div><div class="option"><label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="At least 6 characters"></div><div id="authError" class="auth-error"></div><button id="authSubmit" class="button primary" type="button">REGISTER</button><button id="authToggle" class="button" type="button">Already have an account? SIGN IN</button><button id="authSignOut" class="button danger hidden" type="button">SIGN OUT</button><button id="authBack" class="button" type="button">BACK</button></div></div>
 <div id="worldMenu" class="screen hidden"><div class="panel"><h2>Create New World</h2><div class="option"><label for="worldName">World Name</label><input id="worldName" type="text" value="My World" maxlength="32"></div><div class="option"><label for="terrainType">Terrain</label><select id="terrainType"><option value="normal">Normal</option><option value="mountains">Mountains</option><option value="flat">Flat</option><option value="islands">Islands</option><option value="desert">Desert</option><option value="snow">Snowy</option></select></div><div class="option"><label for="seed">World Seed</label><div class="seed-row"><input id="seed" type="number" placeholder="Random"><button id="randomSeed" class="small-button" type="button">🎲</button></div></div><button id="generateButton" class="button primary" type="button">CREATE WORLD</button><button id="backWorldButton" class="button" type="button">BACK</button></div></div>
 <div id="settingsMenu" class="screen hidden"><div class="panel"><h2>Settings</h2><div class="option"><label for="fov">Field of View <span id="fovValue" class="range-value">75</span></label><input id="fov" type="range" min="55" max="100" value="75" style="width:100%"></div><div class="option"><label for="sensitivity">Look Sensitivity <span id="sensitivityValue" class="range-value">4</span></label><input id="sensitivity" type="range" min="1" max="10" value="4" style="width:100%"></div><div class="option"><label for="renderDistance">Render Distance</label><select id="renderDistance"><option value="35">Low</option><option value="55" selected>Medium</option><option value="75">High</option></select></div><button id="backSettingsButton" class="button" type="button">BACK</button></div></div>
 <div id="realmsMenu" class="screen hidden"><div class="panel"><h2>Realms</h2><div class="menu-note">Play with friends using BlockWorld's peer-to-peer multiplayer. Multiplayer opens only when you enter a world.</div><button id="openRealmsButton" class="button" type="button">OPEN MULTIPLAYER</button><button id="backRealmsButton" class="button" type="button">BACK</button></div></div>
@@ -446,7 +488,9 @@ kbd{
 </div>
 <div id="mobileControls"><div id="lookArea"></div><div id="joystick"><div id="joystickKnob"></div></div><button id="jumpButton" class="mobile-button" type="button">↑</button><button id="sprintButton" class="mobile-button" type="button">⚡</button><button id="breakButton" class="mobile-button" type="button">⛏</button><button id="placeButton" class="mobile-button" type="button">＋</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js';"></script>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
 "use strict";
 const THREE=window.THREE;
@@ -459,6 +503,23 @@ const fovInput=$("#fov"),fovValue=$("#fovValue"),sensitivityInput=$("#sensitivit
 const healthFill=$("#healthFill"),hungerFill=$("#hungerFill"),healthText=$("#healthText"),hungerText=$("#hungerText"),deathOverlay=$("#deathOverlay");
 const tgSeed=$("#tgSeed"),tgHeight=$("#tgHeight"),tgMountain=$("#tgMountain"),tgRoughness=$("#tgRoughness"),tgWaterLevel=$("#tgWater"),tgTrees=$("#tgTrees"),tgWaterEnabled=$("#tgWaterEnabled"),tgCaves=$("#tgCaves"),tgIslands=$("#tgIslands"),tgWorldType=$("#tgWorldType"),terrainPreviewCanvas=$("#terrainPreviewCanvas");
 const terrainInput=$("#terrainType"),seedInput=$("#seed");
+/* Replace these values with the Web app configuration from Firebase Console. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDLez6wPbTrWSDP-LkSuXzTs7n2XuLQM9o",
+  authDomain: "minecraft-ed75b.firebaseapp.com",
+  projectId: "minecraft-ed75b",
+  storageBucket: "minecraft-ed75b.firebasestorage.app",
+  messagingSenderId: "740824808534",
+  appId: "1:740824808534:web:a10a22592b5a147c578ff7",
+  measurementId: "G-5K3DRQP0K5"
+};
+let firebaseAuth=null,currentUser=null,authMode="register";
+function onlineSignedIn(){return !!currentUser}
+function setAuthError(message){$("#authError").textContent=message||""}
+function refreshAuthUI(){const signedIn=onlineSignedIn();$("#accountButton").textContent=signedIn?`Online: ${currentUser.email}`:"Sign in for Online Services";$("#authSubmit").classList.toggle("hidden",signedIn);$("#authToggle").classList.toggle("hidden",signedIn);$("#authSignOut").classList.toggle("hidden",!signedIn);$("#authEmail").disabled=signedIn;$("#authPassword").disabled=signedIn;$("#authTitle").textContent=signedIn?"Account Connected":"BlockWorld Account";$("#authNote").textContent=signedIn?`Signed in as ${currentUser.email}. Online services are unlocked.` :"Register or sign in to use Realms, chat, invites, and other online services."}
+function requireOnline(callback){if(onlineSignedIn()){callback();return}setAuthError("Sign in or register to use online services.");showAuthMenu()}
+function showAuthMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();$("#authMenu").classList.remove("hidden");refreshAuthUI()}
+try{if(window.firebase&&FIREBASE_CONFIG.apiKey!=="YOUR_API_KEY"){firebase.initializeApp(FIREBASE_CONFIG);firebaseAuth=firebase.auth();firebaseAuth.onAuthStateChanged(user=>{currentUser=user;refreshAuthUI()})}}catch(e){console.warn("Firebase authentication unavailable",e)}
 let gameActive=false,generationInProgress=false,generationId=0,world=new Map();
 const CHUNK_SIZE=16,INITIAL_CHUNK_RADIUS=1,LOW_DEVICE=(window.matchMedia("(pointer:coarse)").matches||innerWidth<=800||(navigator.hardwareConcurrency||4)<=4||(navigator.deviceMemory||4)<=4),STREAM_CHUNK_RADIUS=LOW_DEVICE?3:4,UNLOAD_CHUNK_RADIUS=LOW_DEVICE?4:6,CHUNK_STREAM_BUDGET_MS=LOW_DEVICE?2:4,MAX_CHUNKS_PER_TICK=LOW_DEVICE?1:2,MAX_UNLOADS_PER_TICK=1;
 let worldHeight=32,worldSeed=1,currentTerrain="normal",chunkGenQueue=[],generatedChunks=new Set(),chunkMeshGroups=new Map(),blockMeshSet=new Set(),lastPlayerChunk={cx:null,cz:null},streamingAccumulator=0;
@@ -540,6 +601,7 @@ function attackMobAtCrosshair(){if(!gameActive)return;const rc=new THREE.Raycast
 /* =========================================================
    ADVANCED P2P MULTIPLAYER + CHAT + EMOTES + PLAYER MODELS
    ========================================================= */
+const PEER_CONFIG={config:{iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"},{urls:"stun:stun2.l.google.com:19302"},{urls:"stun:global.stun.twilio.com:3478"}]}};
 const mp={
   peer:null,
   isHost:false,
@@ -768,8 +830,8 @@ function setupConnection(conn){
   if(!conn)return;
   mp.connections.set(conn.peer,conn);
   conn.on("open",()=>{
-    if(conn.peer!==mp.peer?.id)mp.peerReady=true;
-    if(mp.isHost)setMPStatus(`🟢 Room ${mp.roomCode} · waiting for players`);
+    mp.peerReady=true;
+    if(mp.isHost)setMPStatus(`🟢 Room ${mp.roomCode} · ${1+mp.remotePlayers.size} players`);
     else setMPStatus(`🟢 Connected to room ${mp.roomCode}`);
     sendPlayerHello();
     updateMPPlayers();
@@ -807,7 +869,7 @@ function initHostPeer(){
   if(!window.Peer)throw new Error("PeerJS failed to load. Check your internet connection.");
   destroyPeer();
   mp.isHost=true;setMPStatus("🟡 Creating room...");
-  const peer=new Peer();
+  const peer=new Peer(undefined,PEER_CONFIG);
   mp.peer=peer;
   peer.on("open",id=>{
     mp.peerReady=true;mp.connected=true;mp.hostId=id;mp.roomCode=id;mp.sessionId=id;
@@ -820,7 +882,7 @@ function initHostPeer(){
     console.error("PeerJS host error",err);
     setMPStatus("🔴 Room error: "+(err.message||err.type||"unknown error"));
   });
-  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected")});
+  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected");try{peer.reconnect()}catch(_){}});
   peer.on("close",()=>{mp.peerReady=false;mp.connected=false});
 }
 function initGuestPeer(roomId){
@@ -830,11 +892,12 @@ function initGuestPeer(roomId){
   destroyPeer();
   mp.isHost=false;mp.hostId=roomId;mp.roomCode=roomId;
   setMPStatus("🟡 Connecting to room...");
-  const peer=new Peer();
+  const peer=new Peer(undefined,PEER_CONFIG);
   mp.peer=peer;
   peer.on("open",id=>{
     mp.sessionId=id;
     const conn=peer.connect(roomId,{reliable:true});
+    mp.connected=true;
     setupConnection(conn);
   });
   peer.on("error",err=>{
@@ -842,7 +905,7 @@ function initGuestPeer(roomId){
     if(err.type==="peer-unavailable")setMPStatus("🔴 Room not found or host is offline.");
     else setMPStatus("🔴 Join error: "+(err.message||err.type||"unknown error"));
   });
-  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected")});
+  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected");try{peer.reconnect()}catch(_){}});
   peer.on("close",()=>{mp.peerReady=false;mp.connected=false});
 }
 function makeInvite(){
