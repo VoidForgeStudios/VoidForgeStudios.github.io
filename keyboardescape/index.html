@@ -26,6 +26,8 @@ canvas{
   display:block;
   position:fixed;
   inset:0;
+  z-index:0;
+  pointer-events:none;
 }
 
 button,input{
@@ -174,6 +176,11 @@ input:focus{
   position:fixed;
   inset:0;
   z-index:5;
+  pointer-events:none;
+}
+
+#game > *{
+  pointer-events:auto;
 }
 
 #top{
@@ -661,7 +668,7 @@ const me = {
 
   name:"",
 
-  pos:new THREE.Vector3(0,0,0),
+  pos:new THREE.Vector3(0,0.02,0),
 
   vel:new THREE.Vector3(0,0,0),
 
@@ -2574,11 +2581,10 @@ function rendererReady(){
     ()=>{
       if(
         started &&
-        matchMedia(
-          "(pointer:fine)"
-        ).matches &&
-        document.pointerLockElement !==
-        renderer.domElement
+        matchMedia("(pointer:fine)").matches &&
+        renderer &&
+        document.pointerLockElement !== renderer.domElement &&
+        !e.target.closest("input,button,form")
       ){
 
         renderer.domElement.requestPointerLock();
@@ -3115,7 +3121,14 @@ function cleanName(value){
    INIT
 ========================================================= */
 
-initThree();
+try{
+  initThree();
+}catch(error){
+  console.error("Three.js initialization failed:", error);
+  status.textContent =
+    "3D engine failed to initialize. Check WebGL/browser support.";
+  createBtn.disabled = false;
+}
 
 </script>
 
