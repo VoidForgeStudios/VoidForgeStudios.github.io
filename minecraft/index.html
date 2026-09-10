@@ -353,7 +353,12 @@ kbd{
   .mc-menu-footer{font-size:9px;bottom:14px}
 }
 </style>
-</head>
+<style id="peerjs-multiplayer-ui">
+#multiplayerPanel .mp-actions{grid-template-columns:1fr 1fr}
+#mpRoomCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;letter-spacing:.08em}
+#mpPlayers{text-align:center}
+@media(max-width:520px){#multiplayerPanel .mp-actions{grid-template-columns:1fr}}
+</style></head>
 <body><div id="ultra-bg"><div class="orb o1"></div><div class="orb o2"></div><div class="gridfx"></div></div>
 <div id="game"></div>
 <div id="loadingScreen"><div class="loading-box"><div class="loading-logo">Block<span>World</span></div><div class="loading-subtitle">Procedural voxel sandbox</div><div class="loading-bar"><div id="loadingProgress" class="loading-progress"></div></div><div id="loadingText" class="loading-text">Starting...</div><div id="loadingPercent" class="loading-percent">0%</div></div></div>
@@ -399,8 +404,23 @@ kbd{
 <div id="chatPanel" class="game-panel hidden"><button class="close-x" data-close="chatPanel">✕</button><h2>💬 Chat</h2><div id="chatLog" class="chat-log"></div><div class="chat-row"><input id="chatInput" maxlength="180" placeholder="Type a message..."><button id="chatSend" type="button">SEND</button></div></div>
 <div id="emotesPanel" class="game-panel hidden"><button class="close-x" data-close="emotesPanel">✕</button><h2>😀 Emotes</h2><div id="emoteGrid" class="emote-grid"></div></div>
 <div id="ingameOptionsPanel" class="game-panel hidden"><button class="close-x" data-close="ingameOptionsPanel">✕</button><h2>⚙️ In-game Options</h2><div class="option"><label for="mpName">Player Name</label><input id="mpName" class="mp-input" maxlength="20" value="Player"></div><button id="openMultiplayerButton" class="mp-button" type="button">👥 Multiplayer / P2P</button><button id="resumeButton" class="mp-button secondary" type="button">RESUME GAME</button></div>
-<div id="multiplayerPanel" class="game-panel hidden"><button class="close-x" data-close="multiplayerPanel">✕</button><h2>👥 P2P Multiplayer</h2><div id="mpStatus" class="mp-status">Offline · Create a host offer or join with an offer.</div><div class="option"><label for="mpName2">Player Name</label><input id="mpName2" class="mp-input" maxlength="20" value="Player"></div><div class="mp-actions"><button id="mpCreate" class="mp-button" type="button">CREATE HOST OFFER</button><button id="mpApply" class="mp-button secondary" type="button">JOIN WITH ANSWER</button></div><label class="option"><span style="display:block;margin-bottom:7px;color:#cbd5e1;font-size:13px;font-weight:700">Connection data</span><textarea id="mpArea" class="mp-area" placeholder="Host: copy the generated OFFER to the other player.
-Guest: paste the OFFER here, create an ANSWER, then send the ANSWER back."></textarea></label><button id="mpCopy" class="mp-button secondary" type="button">COPY DATA</button></div>
+<div id="multiplayerPanel" class="game-panel hidden">
+<button class="close-x" data-close="multiplayerPanel">✕</button>
+<h2>👥 Multiplayer Rooms</h2>
+<div id="mpStatus" class="mp-status">Offline · Create a room or join a friend's room.</div>
+<div class="option"><label for="mpName2">Player Name</label><input id="mpName2" class="mp-input" maxlength="20" value="Player"></div>
+<div class="mp-actions">
+<button id="mpCreate" class="mp-button" type="button">🏠 CREATE ROOM</button>
+</div>
+<div class="option"><label for="mpRoomCode">Your Room Code</label><input id="mpRoomCode" class="mp-input" readonly placeholder="Create a room first"></div>
+<div class="mp-actions">
+<button id="mpCopy" class="mp-button secondary" type="button">📋 COPY INVITE</button>
+<button id="mpShare" class="mp-button secondary" type="button">🔗 SHARE INVITE</button>
+</div>
+<div class="option"><label for="mpJoinCode">Join Room</label><input id="mpJoinCode" class="mp-input" maxlength="100" placeholder="Paste your friend's room code"></div>
+<div class="mp-actions"><button id="mpJoin" class="mp-button" type="button">🚪 JOIN ROOM</button><button id="mpDisconnect" class="mp-button secondary" type="button">DISCONNECT</button></div>
+<div id="mpPlayers" class="mp-status">Players: 1</div>
+</div>
 <div id="pcControls" aria-hidden="true">
   <div class="pc-controls-card">
     <div class="pc-controls-title">PC Controls</div>
@@ -426,6 +446,7 @@ Guest: paste the OFFER here, create an ANSWER, then send the ANSWER back."></tex
 </div>
 <div id="mobileControls"><div id="lookArea"></div><div id="joystick"><div id="joystickKnob"></div></div><button id="jumpButton" class="mobile-button" type="button">↑</button><button id="sprintButton" class="mobile-button" type="button">⚡</button><button id="breakButton" class="mobile-button" type="button">⛏</button><button id="placeButton" class="mobile-button" type="button">＋</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js';"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 "use strict";
 const THREE=window.THREE;
@@ -519,75 +540,331 @@ function attackMobAtCrosshair(){if(!gameActive)return;const rc=new THREE.Raycast
 /* =========================================================
    ADVANCED P2P MULTIPLAYER + CHAT + EMOTES + PLAYER MODELS
    ========================================================= */
-const mp={pc:null,dc:null,isHost:false,connected:false,remotePlayers:new Map(),lastSend:0,lastStateSent:null,sessionId:crypto.randomUUID?crypto.randomUUID():String(Date.now())};
-const mpEls={chatPanel:$("#chatPanel"),emotesPanel:$("#emotesPanel"),options:$("#ingameOptionsPanel"),multi:$("#multiplayerPanel"),log:$("#chatLog"),input:$("#chatInput"),name:$("#mpName"),name2:$("#mpName2"),area:$("#mpArea"),status:$("#mpStatus")};
+const mp={
+  peer:null,
+  isHost:false,
+  connected:false,
+  hostId:null,
+  roomCode:"",
+  connections:new Map(),
+  remotePlayers:new Map(),
+  lastSend:0,
+  sessionId:"",
+  peerReady:false
+};
+const mpEls={
+  chatPanel:$("#chatPanel"),
+  emotesPanel:$("#emotesPanel"),
+  options:$("#ingameOptionsPanel"),
+  multi:$("#multiplayerPanel"),
+  log:$("#chatLog"),
+  input:$("#chatInput"),
+  name:$("#mpName"),
+  name2:$("#mpName2"),
+  room:$("#mpRoomCode"),
+  join:$("#mpJoinCode"),
+  status:$("#mpStatus"),
+  players:$("#mpPlayers"),
+  copy:$("#mpCopy"),
+  share:$("#mpShare"),
+  create:$("#mpCreate"),
+  joinBtn:$("#mpJoin"),
+  disconnect:$("#mpDisconnect")
+};
 const EMOTES=["😀","😂","❤️","👍","👋","🎉","😎","😡","😭","🔥","💀","⭐"];
-const RTC_CONFIG={iceServers:[
- {urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302"]},
- {urls:"stun:stun.cloudflare.com:3478"}
-],iceCandidatePoolSize:10,bundlePolicy:"max-bundle"};
-function playerName(){return (mpEls.name2.value||mpEls.name.value||"Player").trim().slice(0,20)||"Player"}
-function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
-function setMPStatus(t){mpEls.status.textContent=t}
-function openPanel(id){["chatPanel","emotesPanel","ingameOptionsPanel","multiplayerPanel"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id))}
-function closePanels(){["chatPanel","emotesPanel","ingameOptionsPanel","multiplayerPanel"].forEach(x=>$("#"+x).classList.add("hidden"))}
-function addChat(name,msg,send=true){const line=document.createElement("div");line.className="chat-line";line.innerHTML=`<b>${escapeHtml(name)}</b>: ${escapeHtml(msg)}`;mpEls.log.appendChild(line);mpEls.log.scrollTop=mpEls.log.scrollHeight;if(send)mpSend({t:"chat",name:playerName(),msg:String(msg).slice(0,180)})}
-function mpSend(data){if(!mp.dc||mp.dc.readyState!=="open")return false;try{mp.dc.send(JSON.stringify(data));return true}catch(e){console.warn("P2P send failed",e);return false}}
-function closePeer(){if(mp.dc){try{mp.dc.close()}catch(_){}}if(mp.pc){try{mp.pc.close()}catch(_){}}mp.dc=null;mp.pc=null;mp.connected=false;for(const id of [...mp.remotePlayers.keys()])removeRemote(id)}
-function createPeer(){closePeer();const pc=new RTCPeerConnection(RTC_CONFIG);mp.pc=pc;pc.onconnectionstatechange=()=>{const s=pc.connectionState;console.log("WebRTC:",s);if(s==="connected"){mp.connected=true;setMPStatus("🟢 P2P CONNECTED")}else if(s==="connecting"){setMPStatus("🟡 Connecting P2P...")}else if(s==="disconnected"){mp.connected=false;setMPStatus("🟠 Network temporarily disconnected...")}else if(s==="failed"){mp.connected=false;setMPStatus("🔴 Connection failed. Create a fresh offer/answer and try again.")}else if(s==="closed"){mp.connected=false;setMPStatus("⚫ Connection closed")}};pc.oniceconnectionstatechange=()=>{const s=pc.iceConnectionState;if(s==="checking")setMPStatus("🟡 Checking network path...");if(s==="connected"||s==="completed")setMPStatus("🟢 Network path established");if(s==="failed")setMPStatus("🔴 ICE failed — a TURN server may be needed on this network")};pc.onicecandidateerror=e=>console.warn("ICE candidate error",e);pc.ondatachannel=e=>setupDataChannel(e.channel);return pc}
-function setupDataChannel(dc){mp.dc=dc;dc.binaryType="arraybuffer";dc.onopen=()=>{mp.connected=true;setMPStatus("🟢 P2P CONNECTED");sendPlayerHello()};dc.onclose=()=>{mp.connected=false;setMPStatus("🔴 P2P disconnected");for(const id of [...mp.remotePlayers.keys()])removeRemote(id)};dc.onerror=e=>{console.warn("DataChannel error",e);setMPStatus("⚠️ P2P data channel error")};dc.onmessage=e=>{try{handleMPMessage(JSON.parse(e.data))}catch(err){console.warn("Bad multiplayer packet",err)}}}
-async function waitIce(pc){if(pc.iceGatheringState==="complete")return;await new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;pc.removeEventListener("icegatheringstatechange",check);resolve()};const check=()=>{if(pc.iceGatheringState==="complete")finish()};pc.addEventListener("icegatheringstatechange",check);setTimeout(finish,9000)})}
-function modelColors(name){let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;const palette=[0x4f8cff,0x7b61ff,0x21b573,0xff8a3d,0xe84d8a,0x22a6b3,0xf1c40f];return {shirt:palette[h%palette.length],skin:[0xf2c6a5,0xd99b72,0x9a6040][(h>>>3)%3],pants:[0x273b63,0x39424e,0x5a3d2e][(h>>>5)%3]}}
-function makePlayerModel(name){const colors=modelColors(name),root=new THREE.Group();root.userData.isRemotePlayer=true;const shirtMat=new THREE.MeshLambertMaterial({color:colors.shirt}),skinMat=new THREE.MeshLambertMaterial({color:colors.skin}),pantsMat=new THREE.MeshLambertMaterial({color:colors.pants}),darkMat=new THREE.MeshLambertMaterial({color:0x1b1f2a});
- const body=new THREE.Mesh(new THREE.BoxGeometry(.62,1.0,.36),shirtMat);body.position.y=1.15;root.add(body);
- const head=new THREE.Mesh(new THREE.BoxGeometry(.52,.52,.52),skinMat);head.position.y=1.91;root.add(head);
- const hair=new THREE.Mesh(new THREE.BoxGeometry(.54,.18,.54),darkMat);hair.position.y=2.18;root.add(hair);
- const armL=new THREE.Group(),armR=new THREE.Group();const armGeo=new THREE.BoxGeometry(.20,.72,.22);const aL=new THREE.Mesh(armGeo,shirtMat),aR=new THREE.Mesh(armGeo,shirtMat);aL.position.y=-.34;aR.position.y=-.34;armL.position.set(-.43,1.55,0);armR.position.set(.43,1.55,0);armL.add(aL);armR.add(aR);root.add(armL,armR);
- const legGeo=new THREE.BoxGeometry(.23,.78,.25),legL=new THREE.Group(),legR=new THREE.Group(),lL=new THREE.Mesh(legGeo,pantsMat),lR=new THREE.Mesh(legGeo,pantsMat);lL.position.y=-.39;lR.position.y=-.39;legL.position.set(-.18,.78,0);legR.position.set(.18,.78,0);legL.add(lL);legR.add(lR);root.add(legL,legR);
- const eyeGeo=new THREE.BoxGeometry(.055,.055,.025),eyeMat=new THREE.MeshBasicMaterial({color:0x111111});for(const x of[-.105,.105]){const eye=new THREE.Mesh(eyeGeo,eyeMat);eye.position.set(x,1.96,.267);root.add(eye)}
- const label=document.createElement("div");label.className="remote-name";label.textContent=name||"Player";label.style.position="absolute";label.style.transform="translate(-50%,-50%)";label.style.pointerEvents="none";document.body.appendChild(label);
- root.userData.parts={armL,armR,legL,legR};root.userData.label=label;return {root,label,parts:root.userData.parts}}
-function createRemote(id,data){if(mp.remotePlayers.has(id)){const p=mp.remotePlayers.get(id);if(data.name&&data.name!==p.name){p.name=String(data.name).slice(0,20);p.label.textContent=p.name}return p}const model=makePlayerModel(data.name||"Player"),g=model.root;g.position.set(Number(data.x)||0,Number(data.y)||0,Number(data.z)||0);scene.add(g);const p={id,group:g,label:model.label,parts:model.parts,name:String(data.name||"Player").slice(0,20),target:new THREE.Vector3(Number(data.x)||0,Number(data.y)||0,Number(data.z)||0),yaw:Number(data.yaw)||0,walkTime:0,lastPos:g.position.clone()};mp.remotePlayers.set(id,p);return p}
-function removeRemote(id){const p=mp.remotePlayers.get(id);if(!p)return;scene.remove(p.group);p.label?.remove();p.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&!Array.isArray(o.material))o.material.dispose()});mp.remotePlayers.delete(id)}
-function sendPlayerHello(){mpSend({t:"hello",id:mp.sessionId,name:playerName(),x:player.position.x,y:player.position.y,z:player.position.z,yaw:player.yaw})}
-function handleMPMessage(d){if(!d||!d.t)return;if(d.t==="hello"){createRemote(d.id||"peer",d);mpSend({t:"hello",id:mp.sessionId,name:playerName(),x:player.position.x,y:player.position.y,z:player.position.z,yaw:player.yaw});return}if(d.t==="state"){const p=createRemote(d.id||"peer",d);p.target.set(Number(d.x)||0,Number(d.y)||0,Number(d.z)||0);p.yaw=Number(d.yaw)||0;return}if(d.t==="chat"){addChat(d.name||"Player",d.msg||"",false);return}if(d.t==="emote"){showEmote(d.id||"peer",d.emoji||"😀")}}
-function updateRemoteVisuals(dt){for(const p of mp.remotePlayers.values()){const before=p.group.position.distanceTo(p.target);p.group.position.lerp(p.target,Math.min(1,dt*12));const moving=before>.006;p.group.rotation.y=THREE.MathUtils.damp(p.group.rotation.y,p.yaw,10,dt);if(moving)p.walkTime+=dt*10;else p.walkTime=THREE.MathUtils.damp(p.walkTime,0,8,dt);const swing=moving?Math.sin(p.walkTime)*.55:0;p.parts.armL.rotation.x=swing;p.parts.armR.rotation.x=-swing;p.parts.legL.rotation.x=-swing;p.parts.legR.rotation.x=swing;const v=p.group.position.clone();v.y+=2.45;v.project(camera);p.label.style.left=((v.x*.5+.5)*innerWidth)+"px";p.label.style.top=((-v.y*.5+.5)*innerHeight)+"px"}}
-function showEmote(id,emoji){const p=mp.remotePlayers.get(id);if(!p)return;const pos=p.group.position.clone();pos.y+=2.5;pos.project(camera);const el=document.createElement("div");el.className="emote-pop";el.textContent=emoji;el.style.left=((pos.x*.5+.5)*innerWidth)+"px";el.style.top=((-pos.y*.5+.5)*innerHeight)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300)}
-function showLocalEmote(emoji){const pos=player.position.clone();pos.y+=2.5;pos.project(camera);const el=document.createElement("div");el.className="emote-pop";el.textContent=emoji;el.style.left=((pos.x*.5+.5)*innerWidth)+"px";el.style.top=((-pos.y*.5+.5)*innerHeight)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300)}
-function localEmote(emoji){showLocalEmote(emoji);mpSend({t:"emote",id:mp.sessionId,emoji})}
-async function createHost(){try{openPanel("multiplayerPanel");if(!window.RTCPeerConnection)throw new Error("WebRTC is not supported in this browser.");mp.isHost=true;mp.connected=false;setMPStatus("🟡 Creating host offer...");const pc=createPeer();setupDataChannel(pc.createDataChannel("blockworld",{ordered:true}));await pc.setLocalDescription(await pc.createOffer());setMPStatus("🟡 Gathering network candidates...");await waitIce(pc);mpEls.area.value=JSON.stringify(pc.localDescription);setMPStatus("🟡 OFFER READY — copy it to Player 2") }catch(e){console.error(e);setMPStatus("❌ Host error: "+(e.message||e))}}
-async function createAnswer(){try{
- const raw=mpEls.area.value.trim();
- if(!raw)throw new Error("Paste the HOST OFFER first.");
- let offer; try{offer=JSON.parse(raw)}catch(_){throw new Error("Connection data is not valid JSON.")}
- if(!offer||offer.type!=="offer"||!offer.sdp)throw new Error("This is not a valid HOST OFFER. Ask the host to create a new offer.");
- if(mp.pc){try{mp.pc.close()}catch(_){} mp.pc=null;mp.dc=null}
- mp.isHost=false;setMPStatus("🟡 Creating guest answer...");
- const pc=createPeer();
- await pc.setRemoteDescription(new RTCSessionDescription({type:"offer",sdp:offer.sdp}));
- await pc.setLocalDescription(await pc.createAnswer());
- setMPStatus("🟡 Gathering network candidates...");await waitIce(pc);
- if(!pc.localDescription)throw new Error("WebRTC did not create an answer.");
- mpEls.area.value=JSON.stringify({type:"answer",sdp:pc.localDescription.sdp});
- setMPStatus("🟡 ANSWER READY — copy it and send it back to the HOST.");
-}catch(e){console.error(e);setMPStatus("❌ Guest error: "+(e.message||e))}}
-async function applyAnswer(){try{
- if(!mp.pc||!mp.isHost)throw new Error("First press CREATE HOST OFFER.");
- if(mp.pc.signalingState!=="have-local-offer")throw new Error("Host is not waiting for an answer. Create a NEW HOST OFFER.");
- const raw=mpEls.area.value.trim();if(!raw)throw new Error("Paste the GUEST ANSWER first.");
- let answer;try{answer=JSON.parse(raw)}catch(_){throw new Error("Connection data is not valid JSON.")}
- if(!answer||answer.type!=="answer"||!answer.sdp)throw new Error("You pasted an OFFER, not an ANSWER. Paste the guest's ANSWER here.");
- await mp.pc.setRemoteDescription(new RTCSessionDescription({type:"answer",sdp:answer.sdp}));
- setMPStatus("🟡 ANSWER ACCEPTED — connecting P2P...");
-}catch(e){console.error(e);setMPStatus("❌ Answer error: "+(e.message||e))}}
-function updateMultiplayer(dt){copyMPMultiplayer(dt)}
-async function copyMP(){const text=mpEls.area.value.trim();if(!text){setMPStatus("⚠️ Nothing to copy yet.");return}try{await navigator.clipboard.writeText(text);setMPStatus("✅ Connection data copied.")}catch(e){mpEls.area.focus();mpEls.area.select();try{document.execCommand("copy");setMPStatus("✅ Connection data copied.")}catch(_){setMPStatus("⚠️ Copy failed — select and copy manually.")}}}
-function copyMPMultiplayer(dt){if(!gameActive||!mp.dc||mp.dc.readyState!=="open")return;mp.lastSend+=dt;if(mp.lastSend<.06)return;mp.lastSend=0;const packet={t:"state",id:mp.sessionId,name:playerName(),x:+player.position.x.toFixed(3),y:+player.position.y.toFixed(3),z:+player.position.z.toFixed(3),yaw:+player.yaw.toFixed(4)};mpSend(packet)}
-$("#mpCreate").addEventListener("click",createHost);$("#mpApply").addEventListener("click",()=>mp.pc&&mp.isHost?applyAnswer():createAnswer());$("#mpCopy").addEventListener("click",copyMP);$("#openMultiplayerButton").addEventListener("click",()=>{mpEls.name2.value=mpEls.name.value;openPanel("multiplayerPanel")});$("#resumeButton").addEventListener("click",closePanels);
-$("#chatButton").addEventListener("click",()=>openPanel("chatPanel"));$("#emotesButton").addEventListener("click",()=>openPanel("emotesPanel"));$("#optionsIngameButton").addEventListener("click",()=>openPanel("ingameOptionsPanel"));document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",closePanels));
-$("#chatSend").addEventListener("click",()=>{const v=mpEls.input.value.trim();if(!v)return;addChat(playerName(),v,true);mpEls.input.value=""});mpEls.input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("#chatSend").click()}});
-$("#emoteGrid").innerHTML=EMOTES.map(e=>`<button class="emote" type="button">${e}</button>`).join("");$("#emoteGrid").querySelectorAll(".emote").forEach(b=>b.addEventListener("click",()=>{localEmote(b.textContent);closePanels()}));mpEls.name.addEventListener("input",()=>mpEls.name2.value=mpEls.name.value);mpEls.name2.addEventListener("input",()=>mpEls.name.value=mpEls.name2.value);
 
+function playerName(){
+  return (mpEls.name2.value||mpEls.name.value||"Player").trim().slice(0,20)||"Player";
+}
+function escapeHtml(v){
+  return String(v).replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+}
+function setMPStatus(t){mpEls.status.textContent=t}
+function updateMPPlayers(){
+  const count=1+mp.remotePlayers.size;
+  mpEls.players.textContent=`Players: ${count}`;
+}
+function openPanel(id){
+  ["chatPanel","emotesPanel","ingameOptionsPanel","multiplayerPanel"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id));
+}
+function closePanels(){
+  ["chatPanel","emotesPanel","ingameOptionsPanel","multiplayerPanel"].forEach(x=>$("#"+x).classList.add("hidden"));
+}
+function addChat(name,msg,send=true){
+  const line=document.createElement("div");
+  line.className="chat-line";
+  line.innerHTML=`<b>${escapeHtml(name)}</b>: ${escapeHtml(msg)}`;
+  mpEls.log.appendChild(line);
+  mpEls.log.scrollTop=mpEls.log.scrollHeight;
+  if(send)mpSend({t:"chat",name:playerName(),msg:String(msg).slice(0,180)});
+}
+function peerSend(conn,data){
+  if(!conn||!conn.open)return false;
+  try{conn.send(data);return true}catch(e){console.warn("PeerJS send failed",e);return false}
+}
+function sendToHost(data){
+  if(mp.isHost)return hostBroadcast(data);
+  const c=mp.connections.get(mp.hostId);
+  return peerSend(c,data);
+}
+function hostBroadcast(data,exceptId=null){
+  let sent=false;
+  for(const [id,c] of mp.connections){
+    if(id===exceptId)continue;
+    if(peerSend(c,data))sent=true;
+  }
+  return sent;
+}
+function mpSend(data){
+  if(!mp.peerReady)return false;
+  if(mp.isHost)return hostBroadcast(data);
+  return sendToHost(data);
+}
+function updateRemoteVisuals(dt){
+  for(const p of mp.remotePlayers.values()){
+    const before=p.group.position.distanceTo(p.target);
+    p.group.position.lerp(p.target,Math.min(1,dt*12));
+    const moving=before>.006;
+    p.group.rotation.y=THREE.MathUtils.damp(p.group.rotation.y,p.yaw,10,dt);
+    if(moving)p.walkTime+=dt*10;
+    else p.walkTime=THREE.MathUtils.damp(p.walkTime,0,8,dt);
+    const swing=moving?Math.sin(p.walkTime)*.55:0;
+    p.parts.armL.rotation.x=swing;p.parts.armR.rotation.x=-swing;
+    p.parts.legL.rotation.x=-swing;p.parts.legR.rotation.x=swing;
+    const v=p.group.position.clone();v.y+=2.45;v.project(camera);
+    p.label.style.left=((v.x*.5+.5)*innerWidth)+"px";
+    p.label.style.top=((-v.y*.5+.5)*innerHeight)+"px";
+  }
+}
+function showEmote(id,emoji){
+  const p=mp.remotePlayers.get(id);if(!p)return;
+  const pos=p.group.position.clone();pos.y+=2.5;pos.project(camera);
+  const el=document.createElement("div");el.className="emote-pop";el.textContent=emoji;
+  el.style.left=((pos.x*.5+.5)*innerWidth)+"px";el.style.top=((-pos.y*.5+.5)*innerHeight)+"px";
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1300);
+}
+function showLocalEmote(emoji){
+  const pos=player.position.clone();pos.y+=2.5;pos.project(camera);
+  const el=document.createElement("div");el.className="emote-pop";el.textContent=emoji;
+  el.style.left=((pos.x*.5+.5)*innerWidth)+"px";el.style.top=((-pos.y*.5+.5)*innerHeight)+"px";
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1300);
+}
+function localEmote(emoji){
+  showLocalEmote(emoji);
+  mpSend({t:"emote",id:mp.peer?.id||mp.sessionId,emoji});
+}
+function modelColors(name){
+  let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;
+  const palette=[0x4f8cff,0x7b61ff,0x21b573,0xff8a3d,0xe84d8a,0x22a6b3,0xf1c40f];
+  return {shirt:palette[h%palette.length],skin:[0xf2c6a5,0xd99b72,0x9a6040][(h>>>3)%3],pants:[0x273b63,0x39424e,0x5a3d2e][(h>>>5)%3]};
+}
+function makePlayerModel(name){
+  const colors=modelColors(name),root=new THREE.Group();root.userData.isRemotePlayer=true;
+  const shirtMat=new THREE.MeshLambertMaterial({color:colors.shirt}),skinMat=new THREE.MeshLambertMaterial({color:colors.skin}),pantsMat=new THREE.MeshLambertMaterial({color:colors.pants}),darkMat=new THREE.MeshLambertMaterial({color:0x1b1f2a});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.62,1,.36),shirtMat);body.position.y=1.15;root.add(body);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.52,.52,.52),skinMat);head.position.y=1.91;root.add(head);
+  const hair=new THREE.Mesh(new THREE.BoxGeometry(.54,.18,.54),darkMat);hair.position.y=2.18;root.add(hair);
+  const armL=new THREE.Group(),armR=new THREE.Group(),armGeo=new THREE.BoxGeometry(.20,.72,.22);
+  const aL=new THREE.Mesh(armGeo,shirtMat),aR=new THREE.Mesh(armGeo,shirtMat);aL.position.y=-.34;aR.position.y=-.34;
+  armL.position.set(-.43,1.55,0);armR.position.set(.43,1.55,0);armL.add(aL);armR.add(aR);root.add(armL,armR);
+  const legGeo=new THREE.BoxGeometry(.23,.78,.25),legL=new THREE.Group(),legR=new THREE.Group(),lL=new THREE.Mesh(legGeo,pantsMat),lR=new THREE.Mesh(legGeo,pantsMat);
+  lL.position.y=-.39;lR.position.y=-.39;legL.position.set(-.18,.78,0);legR.position.set(.18,.78,0);legL.add(lL);legR.add(lR);root.add(legL,legR);
+  const eyeGeo=new THREE.BoxGeometry(.055,.055,.025),eyeMat=new THREE.MeshBasicMaterial({color:0x111111});
+  for(const x of[-.105,.105]){const eye=new THREE.Mesh(eyeGeo,eyeMat);eye.position.set(x,1.96,.267);root.add(eye)}
+  const label=document.createElement("div");label.className="remote-name";label.textContent=name||"Player";label.style.position="absolute";label.style.transform="translate(-50%,-50%)";label.style.pointerEvents="none";document.body.appendChild(label);
+  root.userData.parts={armL,armR,legL,legR};root.userData.label=label;return {root,label,parts:root.userData.parts};
+}
+function createRemote(id,data){
+  if(!id||id===mp.peer?.id)return null;
+  if(mp.remotePlayers.has(id)){
+    const p=mp.remotePlayers.get(id);
+    if(data.name&&data.name!==p.name){p.name=String(data.name).slice(0,20);p.label.textContent=p.name}
+    return p;
+  }
+  const model=makePlayerModel(data.name||"Player"),g=model.root;
+  const x=Number(data.x)||0,y=Number(data.y)||0,z=Number(data.z)||0;
+  g.position.set(x,y,z);scene.add(g);
+  const p={id,group:g,label:model.label,parts:model.parts,name:String(data.name||"Player").slice(0,20),target:new THREE.Vector3(x,y,z),yaw:Number(data.yaw)||0,walkTime:0,lastPos:g.position.clone()};
+  mp.remotePlayers.set(id,p);updateMPPlayers();return p;
+}
+function removeRemote(id){
+  const p=mp.remotePlayers.get(id);if(!p)return;
+  scene.remove(p.group);p.label?.remove();
+  p.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&!Array.isArray(o.material))o.material.dispose()});
+  mp.remotePlayers.delete(id);updateMPPlayers();
+}
+function localState(){
+  return {t:"state",id:mp.peer?.id||mp.sessionId,name:playerName(),
+    x:+player.position.x.toFixed(3),y:+player.position.y.toFixed(3),z:+player.position.z.toFixed(3),yaw:+player.yaw.toFixed(4)};
+}
+function sendPlayerHello(){
+  mpSend({t:"hello",id:mp.peer?.id||mp.sessionId,name:playerName(),x:player.position.x,y:player.position.y,z:player.position.z,yaw:player.yaw});
+}
+function handleMPMessage(d,fromId){
+  if(!d||!d.t)return;
+  const id=d.id||fromId||"peer";
+  if(d.t==="hello"){
+    createRemote(id,d);
+    if(mp.isHost){
+      peerSend(mp.connections.get(fromId),localState());
+      hostBroadcast({t:"playerJoined",id,name:d.name||"Player"},fromId);
+      for(const [otherId,p] of mp.remotePlayers){
+        if(otherId!==id)peerSend(mp.connections.get(fromId),{t:"state",id:otherId,name:p.name,x:p.group.position.x,y:p.group.position.y,z:p.group.position.z,yaw:p.yaw});
+      }
+    }
+    return;
+  }
+  if(d.t==="state"){
+    const p=createRemote(id,d);
+    if(p){p.target.set(Number(d.x)||0,Number(d.y)||0,Number(d.z)||0);p.yaw=Number(d.yaw)||0}
+    if(mp.isHost&&fromId)hostBroadcast(d,fromId);
+    return;
+  }
+  if(d.t==="chat"){
+    addChat(d.name||"Player",d.msg||"",false);
+    if(mp.isHost&&fromId)hostBroadcast(d,fromId);
+    return;
+  }
+  if(d.t==="emote"){
+    showEmote(id,d.emoji||"😀");
+    if(mp.isHost&&fromId)hostBroadcast(d,fromId);
+    return;
+  }
+  if(d.t==="playerJoined"){
+    if(id!==mp.peer?.id)setMPStatus(`🟢 Connected · ${1+mp.remotePlayers.size} players`);
+    return;
+  }
+  if(d.t==="playerLeft"){
+    removeRemote(id);
+    return;
+  }
+}
+function setupConnection(conn){
+  if(!conn)return;
+  mp.connections.set(conn.peer,conn);
+  conn.on("open",()=>{
+    if(conn.peer!==mp.peer?.id)mp.peerReady=true;
+    if(mp.isHost)setMPStatus(`🟢 Room ${mp.roomCode} · waiting for players`);
+    else setMPStatus(`🟢 Connected to room ${mp.roomCode}`);
+    sendPlayerHello();
+    updateMPPlayers();
+  });
+  conn.on("data",data=>{
+    try{
+      const d=typeof data==="string"?JSON.parse(data):data;
+      handleMPMessage(d,conn.peer);
+    }catch(e){console.warn("Bad multiplayer packet",e)}
+  });
+  const closed=()=>{
+    const id=conn.peer;
+    mp.connections.delete(id);
+    removeRemote(id);
+    if(mp.isHost){
+      hostBroadcast({t:"playerLeft",id});
+      setMPStatus(`🟢 Room ${mp.roomCode} · ${1+mp.remotePlayers.size} players`);
+    }else{
+      setMPStatus("🔴 Disconnected from room");
+      mp.connected=false;
+    }
+  };
+  conn.on("close",closed);
+  conn.on("error",e=>{console.warn("PeerJS connection error",e);setMPStatus("⚠️ Connection error: "+(e.message||"unknown error"))});
+}
+function destroyPeer(clearRemotes=true){
+  for(const c of mp.connections.values()){try{c.close()}catch(_){}}
+  mp.connections.clear();
+  if(mp.peer){try{mp.peer.destroy()}catch(_){}}
+  mp.peer=null;mp.peerReady=false;mp.connected=false;mp.isHost=false;mp.hostId=null;mp.roomCode="";
+  if(clearRemotes)for(const id of [...mp.remotePlayers.keys()])removeRemote(id);
+  mpEls.room.value="";updateMPPlayers();
+}
+function initHostPeer(){
+  if(!window.Peer)throw new Error("PeerJS failed to load. Check your internet connection.");
+  destroyPeer();
+  mp.isHost=true;setMPStatus("🟡 Creating room...");
+  const peer=new Peer();
+  mp.peer=peer;
+  peer.on("open",id=>{
+    mp.peerReady=true;mp.connected=true;mp.hostId=id;mp.roomCode=id;mp.sessionId=id;
+    mpEls.room.value=id;
+    setMPStatus(`🟢 Room created · ${id}`);
+    updateMPPlayers();
+  });
+  peer.on("connection",conn=>setupConnection(conn));
+  peer.on("error",err=>{
+    console.error("PeerJS host error",err);
+    setMPStatus("🔴 Room error: "+(err.message||err.type||"unknown error"));
+  });
+  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected")});
+  peer.on("close",()=>{mp.peerReady=false;mp.connected=false});
+}
+function initGuestPeer(roomId){
+  if(!window.Peer)throw new Error("PeerJS failed to load. Check your internet connection.");
+  roomId=String(roomId||"").trim();
+  if(!roomId)throw new Error("Enter a room code first.");
+  destroyPeer();
+  mp.isHost=false;mp.hostId=roomId;mp.roomCode=roomId;
+  setMPStatus("🟡 Connecting to room...");
+  const peer=new Peer();
+  mp.peer=peer;
+  peer.on("open",id=>{
+    mp.sessionId=id;
+    const conn=peer.connect(roomId,{reliable:true});
+    setupConnection(conn);
+  });
+  peer.on("error",err=>{
+    console.error("PeerJS guest error",err);
+    if(err.type==="peer-unavailable")setMPStatus("🔴 Room not found or host is offline.");
+    else setMPStatus("🔴 Join error: "+(err.message||err.type||"unknown error"));
+  });
+  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected")});
+  peer.on("close",()=>{mp.peerReady=false;mp.connected=false});
+}
+function makeInvite(){
+  if(!mp.roomCode)return "";
+  return location.href.split("#")[0]+"#room="+encodeURIComponent(mp.roomCode);
+}
+async function copyMP(){
+  const text=makeInvite();
+  if(!text){setMPStatus("⚠️ Create or join a room first.");return}
+  try{await navigator.clipboard.writeText(text);setMPStatus("✅ Invite link copied.");}
+  catch(e){mpEls.room.focus();mpEls.room.select();try{document.execCommand("copy");setMPStatus("✅ Room code selected — copy it manually.")}catch(_){setMPStatus("⚠️ Copy failed.")}}
+}
+async function shareMP(){
+  const text=makeInvite();
+  if(!text){setMPStatus("⚠️ Create a room first.");return}
+  if(navigator.share){
+    try{await navigator.share({title:"BlockWorld Multiplayer",text:"Join my BlockWorld room",url:text});setMPStatus("✅ Invite shared.");return}catch(e){}
+  }
+  await copyMP();
+}
+function disconnectMP(){
+  if(mp.isHost&&mp.roomCode)hostBroadcast({t:"playerLeft",id:mp.peer?.id});
+  destroyPeer();
+  setMPStatus("Offline · Create a room or join a friend's room.");
+}
+function updateMultiplayer(dt){copyMPMultiplayer(dt)}
+function copyMPMultiplayer(dt){
+  if(!gameActive||!mp.peerReady)return;
+  mp.lastSend+=dt;if(mp.lastSend<.06)return;mp.lastSend=0;
+  mpSend(localState());
+}
+mpEls.create.addEventListener("click",()=>{try{mpEls.name2.value=playerName();initHostPeer()}catch(e){console.error(e);setMPStatus("🔴 "+(e.message||e))}});
+mpEls.joinBtn.addEventListener("click",()=>{try{mpEls.name2.value=playerName();initGuestPeer(mpEls.join.value)}catch(e){console.error(e);setMPStatus("🔴 "+(e.message||e))}});
+mpEls.copy.addEventListener("click",copyMP);mpEls.share.addEventListener("click",shareMP);mpEls.disconnect.addEventListener("click",disconnectMP);
+$("#openMultiplayerButton").addEventListener("click",()=>{mpEls.name2.value=mpEls.name.value;openPanel("multiplayerPanel")});$("#resumeButton").addEventListener("click",closePanels);
+$("#chatButton").addEventListener("click",()=>openPanel("chatPanel"));
+$("#emotesButton").addEventListener("click",()=>openPanel("emotesPanel"));
+$("#optionsIngameButton").addEventListener("click",()=>openPanel("ingameOptionsPanel"));
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",closePanels));
+$("#chatSend").addEventListener("click",()=>{const v=mpEls.input.value.trim();if(!v)return;addChat(playerName(),v,true);mpEls.input.value=""});
+mpEls.input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("#chatSend").click()}});
+$("#emoteGrid").innerHTML=EMOTES.map(e=>`<button class="emote" type="button">${e}</button>`).join("");
+$("#emoteGrid").querySelectorAll(".emote").forEach(b=>b.addEventListener("click",()=>{localEmote(b.textContent);closePanels()}));
+mpEls.name.addEventListener("input",()=>mpEls.name2.value=mpEls.name.value);
+mpEls.name2.addEventListener("input",()=>mpEls.name.value=mpEls.name2.value);
+const initialRoomMatch=location.hash.match(/^#room=(.+)$/);
+if(initialRoomMatch){try{mpEls.join.value=decodeURIComponent(initialRoomMatch[1]);setMPStatus("🔗 Room invite detected · press JOIN ROOM")}catch(_){}}
 const saveShortcut=document.createElement("button");saveShortcut.type="button";saveShortcut.id="saveWorldShortcut";saveShortcut.textContent="💾";saveShortcut.title="Save world";saveShortcut.style.cssText="position:fixed;right:18px;top:18px;z-index:90;display:none;width:46px;height:46px;border-radius:14px;border:1px solid #ffffff22;background:#111827cc;color:white;font-size:20px;backdrop-filter:blur(10px);cursor:pointer";document.body.appendChild(saveShortcut);saveShortcut.addEventListener("click",async()=>{saveShortcut.textContent="⏳";await saveWorldNow();saveShortcut.textContent="✓";setTimeout(()=>saveShortcut.textContent="💾",900)});
 
 /* menus / generator */
