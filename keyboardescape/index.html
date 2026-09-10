@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -52,6 +51,9 @@ button{
   background:rgba(5,11,24,.94);
   border:1px solid rgba(255,255,255,.12);
   box-shadow:0 30px 100px rgba(0,0,0,.55);
+  transition:all .25s ease;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
 }
 
 .logo{
@@ -101,6 +103,17 @@ input:focus{
   border-radius:12px;
   margin-top:10px;
   font-weight:900;
+  transition:transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+
+#menu .btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.12);
+  box-shadow:0 8px 24px rgba(0,0,0,.22);
+}
+
+#menu .btn:active{
+  transform:translateY(1px) scale(.99);
 }
 
 .primary{
@@ -170,28 +183,6 @@ input:focus{
   margin-top:14px;
   color:#9aaac1;
   font-size:12px;
-}
-
-#menu{
-  transition:all .25s ease;
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-}
-
-#menu .btn{
-  cursor:pointer;
-  color:#fff;
-  transition:transform .16s ease, filter .16s ease, box-shadow .16s ease;
-}
-
-#menu .btn:hover{
-  transform:translateY(-1px);
-  filter:brightness(1.12);
-  box-shadow:0 8px 24px rgba(0,0,0,.22);
-}
-
-#menu .btn:active{
-  transform:translateY(1px) scale(.99);
 }
 
 #menu.playing{
@@ -384,7 +375,7 @@ input:focus{
   font-weight:900;
 }
 
-/* MOBILE */
+/* MOBILE CONTROLS */
 
 #mobile{
   display:none;
@@ -490,1266 +481,484 @@ input:focus{
 <body>
 
 <div id="menu">
-
-  <div class="logo">
-    SKY<span>FORGE</span>
-  </div>
-
-  <div class="sub">
-    Public WebRTC multiplayer platform
-  </div>
+  <div class="logo">SKY<span>FORGE</span></div>
+  <div class="sub">Public WebRTC multiplayer platform</div>
 
   <label>PLAYER NAME</label>
   <input id="name" maxlength="18" placeholder="Enter your name">
 
-  <button id="create" class="btn primary">
-    CREATE ROOM
-  </button>
-
-  <button id="showJoin" class="btn secondary">
-    JOIN ROOM
-  </button>
+  <button id="create" class="btn primary">CREATE ROOM</button>
+  <button id="showJoin" class="btn secondary">JOIN ROOM</button>
 
   <div id="roomBox">
-
-    <div class="roomTitle">
-      YOUR ROOM ID
-    </div>
-
+    <div class="roomTitle">YOUR ROOM ID</div>
     <div class="smallRow">
       <input id="roomId" readonly>
-      <button id="copyId">
-        COPY
-      </button>
+      <button id="copyId">COPY</button>
     </div>
 
-    <div class="roomTitle" style="margin-top:14px">
-      INVITE LINK
-    </div>
-
+    <div class="roomTitle" style="margin-top:14px">INVITE LINK</div>
     <div id="inviteLink"></div>
-
-    <button id="copyLink" class="btn secondary">
-      COPY INVITE LINK
-    </button>
+    <button id="copyLink" class="btn secondary">COPY INVITE LINK</button>
 
     <div class="roomActions">
       <button id="shareRoom">SHARE ROOM</button>
       <button id="newRoom">NEW ROOM</button>
     </div>
     <button id="closeRoomPanel">HIDE ROOM PANEL</button>
-
   </div>
 
   <div id="joinBox">
-
     <label>ROOM ID OR INVITE LINK</label>
-
-    <input
-      id="joinInput"
-      placeholder="Paste Room ID or invite link">
-
-    <button id="join" class="btn primary">
-      JOIN ROOM
-    </button>
-
+    <input id="joinInput" placeholder="Paste Room ID or invite link">
+    <button id="join" class="btn primary">JOIN ROOM</button>
   </div>
 
-  <div id="status">
-    Ready.
-  </div>
-
+  <div id="status">Ready.</div>
 </div>
 
-
 <div id="game">
-
   <div id="top">
-
     <div class="hud">
       <b>SKYFORGE</b>
-      <div id="players">
-        Players: 1
-      </div>
+      <div id="players">Players: 1</div>
     </div>
-
-    <div id="ping" class="hud">
-      P2P
-    </div>
-
+    <div id="ping" class="hud">P2P</div>
   </div>
 
   <div id="crosshair"></div>
 
   <div id="chat">
-
     <div id="messages"></div>
-
     <form id="chatForm">
       <input id="chatInput" maxlength="100" placeholder="Chat...">
       <button id="chatSend">→</button>
     </form>
-
   </div>
 
-  <button id="leave">
-    LEAVE
-  </button>
+  <button id="leave">LEAVE</button>
 
   <div id="mobile">
-
     <div id="lookArea"></div>
-
     <div id="joystick">
       <div id="stick"></div>
     </div>
-
-    <button id="jump" class="action">
-      JUMP
-    </button>
-
-    <button id="run" class="action">
-      RUN
-    </button>
-
+    <button id="jump" class="action">JUMP</button>
+    <button id="run" class="action">RUN</button>
   </div>
-
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
-
 <script type="module">
-
-import * as THREE from
-"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
-
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 
 /* =========================================================
    SETTINGS
 ========================================================= */
-
 const WORLD = 220;
-
 const WALK = 6;
-
 const RUN = 10;
-
 const GRAVITY = 22;
-
 const JUMP = 8;
-
 const NET_RATE = 30;
 
-
 /* =========================================================
-   UI
+   UI ELEMENTS
 ========================================================= */
-
-const menu =
-document.getElementById("menu");
-
-const game =
-document.getElementById("game");
-
-const nameInput =
-document.getElementById("name");
-
-const createBtn =
-document.getElementById("create");
-
-const showJoin =
-document.getElementById("showJoin");
-
-const joinBox =
-document.getElementById("joinBox");
-
-const joinInput =
-document.getElementById("joinInput");
-
-const joinBtn =
-document.getElementById("join");
-
-const roomBox =
-document.getElementById("roomBox");
-
-const roomIdInput =
-document.getElementById("roomId");
-
-const inviteLink =
-document.getElementById("inviteLink");
-
-const copyId =
-document.getElementById("copyId");
-
-const copyLink =
-document.getElementById("copyLink");
-
-const status =
-document.getElementById("status");
-
-const playersText =
-document.getElementById("players");
-
-const pingText =
-document.getElementById("ping");
-
-const messages =
-document.getElementById("messages");
-
-const chatForm =
-document.getElementById("chatForm");
-
-const chatInput =
-document.getElementById("chatInput");
-
-const leave =
-document.getElementById("leave");
-
+const menu = document.getElementById("menu");
+const game = document.getElementById("game");
+const nameInput = document.getElementById("name");
+const createBtn = document.getElementById("create");
+const showJoin = document.getElementById("showJoin");
+const joinBox = document.getElementById("joinBox");
+const joinInput = document.getElementById("joinInput");
+const joinBtn = document.getElementById("join");
+const roomBox = document.getElementById("roomBox");
+const roomIdInput = document.getElementById("roomId");
+const inviteLink = document.getElementById("inviteLink");
+const copyId = document.getElementById("copyId");
+const copyLink = document.getElementById("copyLink");
+const status = document.getElementById("status");
+const playersText = document.getElementById("players");
+const pingText = document.getElementById("ping");
+const messages = document.getElementById("messages");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const leave = document.getElementById("leave");
 
 /* =========================================================
    NETWORK STATE
 ========================================================= */
-
 let peer = null;
-
 let myId = "";
-
 let hostId = "";
-
 let isHost = false;
-
 let started = false;
-
 const connections = new Map();
-
 const remotePlayers = new Map();
-
 let lastSend = 0;
-
 let lastPing = 0;
 
-
 /* =========================================================
-   THREE
+   THREE JS SCENE SETUP
 ========================================================= */
-
-let scene;
-
-let camera;
-
-let renderer;
-
-let clock;
-
-let localMesh;
-
-let nameSprite;
-
-let world;
-
+let scene, camera, renderer, clock, localMesh, world;
 
 /* =========================================================
    PLAYER STATE
 ========================================================= */
-
 const me = {
-
-  name:"",
-
-  pos:new THREE.Vector3(0,0.02,0),
-
-  vel:new THREE.Vector3(0,0,0),
-
-  yaw:0,
-
-  pitch:0,
-
-  grounded:false,
-
-  running:false
-
+  name: "",
+  pos: new THREE.Vector3(0, 0.02, 0),
+  vel: new THREE.Vector3(0, 0, 0),
+  yaw: 0,
+  pitch: 0,
+  grounded: false,
+  running: false
 };
 
-
 /* =========================================================
-   INPUT
+   INPUT STATE
 ========================================================= */
-
 const keys = {};
-
 let joyX = 0;
-
 let joyY = 0;
-
 let joyActive = false;
-
 let lookActive = false;
-
 let lookX = 0;
-
 let lookY = 0;
 
-
 /* =========================================================
-   THREE INIT
+   INITIALIZATION
 ========================================================= */
-
 function initThree(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x071426);
+  scene.fog = new THREE.FogExp2(0x071426, .006);
 
-  scene =
-  new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, .05, 700);
 
-  scene.background =
-  new THREE.Color(0x071426);
-
-  scene.fog =
-  new THREE.FogExp2(
-    0x071426,
-    .006
-  );
-
-
-  camera =
-  new THREE.PerspectiveCamera(
-    75,
-    innerWidth/innerHeight,
-    .05,
-    700
-  );
-
-
-  renderer =
-  new THREE.WebGLRenderer({
-    antialias:true,
-    powerPreference:"high-performance"
+  renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance"
   });
-
-
-  renderer.setPixelRatio(
-    Math.min(devicePixelRatio,2)
-  );
-
-  renderer.setSize(
-    innerWidth,
-    innerHeight
-  );
-
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
   renderer.shadowMap.enabled = true;
+  document.body.appendChild(renderer.domElement);
 
-  document.body.appendChild(
-    renderer.domElement
-  );
+  clock = new THREE.Clock();
 
-
-  clock =
-  new THREE.Clock();
-
-
-  const hemi =
-  new THREE.HemisphereLight(
-    0xaad8ff,
-    0x172235,
-    1.7
-  );
-
+  const hemi = new THREE.HemisphereLight(0xaad8ff, 0x172235, 1.7);
   scene.add(hemi);
 
-
-  const sun =
-  new THREE.DirectionalLight(
-    0xffffff,
-    3
-  );
-
-  sun.position.set(
-    60,
-    100,
-    50
-  );
-
+  const sun = new THREE.DirectionalLight(0xffffff, 3);
+  sun.position.set(60, 100, 50);
   sun.castShadow = true;
-
-  sun.shadow.mapSize.set(
-    2048,
-    2048
-  );
-
+  sun.shadow.mapSize.set(2048, 2048);
   scene.add(sun);
 
-
-  world =
-  new THREE.Group();
-
+  world = new THREE.Group();
   scene.add(world);
 
-
   createWorld();
-
   createLocalPlayer();
 
-
-  addEventListener(
-    "resize",
-    resize
-  );
-
-
+  addEventListener("resize", resize);
   animate();
-
 }
 
-
 /* =========================================================
-   WORLD
+   WORLD CREATION
 ========================================================= */
-
 function createWorld(){
-
-  const ground =
-  new THREE.Mesh(
-    new THREE.BoxGeometry(
-      WORLD,
-      2,
-      WORLD
-    ),
-    new THREE.MeshStandardMaterial({
-      color:0x172a40,
-      roughness:.8
-    })
+  const ground = new THREE.Mesh(
+    new THREE.BoxGeometry(WORLD, 2, WORLD),
+    new THREE.MeshStandardMaterial({ color: 0x172a40, roughness: .8 })
   );
-
   ground.position.y = -1;
-
   ground.receiveShadow = true;
-
   world.add(ground);
 
-
-  const grid =
-  new THREE.GridHelper(
-    WORLD,
-    55,
-    0x4d789d,
-    0x29435e
-  );
-
+  const grid = new THREE.GridHelper(WORLD, 55, 0x4d789d, 0x29435e);
   grid.position.y = .02;
-
   grid.material.transparent = true;
-
   grid.material.opacity = .35;
-
   world.add(grid);
 
+  const material = new THREE.MeshStandardMaterial({ color: 0x294761, roughness: .65 });
 
-  const material =
-  new THREE.MeshStandardMaterial({
-    color:0x294761,
-    roughness:.65
-  });
+  for(let i = 0; i < 80; i++){
+    const x = (Math.random() - .5) * (WORLD - 10);
+    const z = (Math.random() - .5) * (WORLD - 10);
+    const w = 2 + Math.random() * 6;
+    const h = 1 + Math.random() * 8;
+    const d = 2 + Math.random() * 6;
 
-
-  for(let i=0;i<80;i++){
-
-    const x =
-    (Math.random()-.5)*(WORLD-10);
-
-    const z =
-    (Math.random()-.5)*(WORLD-10);
-
-    const w =
-    2+Math.random()*6;
-
-    const h =
-    1+Math.random()*8;
-
-    const d =
-    2+Math.random()*6;
-
-
-    const block =
-    new THREE.Mesh(
-      new THREE.BoxGeometry(
-        w,h,d
-      ),
-      material
-    );
-
-    block.position.set(
-      x,
-      h/2,
-      z
-    );
-
+    const block = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+    block.position.set(x, h/2, z);
     block.castShadow = true;
-
     block.receiveShadow = true;
-
     world.add(block);
-
   }
 
+  createPlatform(-25, 10, -20, 18, 2, 18);
+  createPlatform(30, 14, -5, 20, 2, 15);
+  createPlatform(0, 20, 35, 15, 2, 15);
 
-  createPlatform(
-    -25,10,-20,
-    18,2,18
-  );
-
-  createPlatform(
-    30,14,-5,
-    20,2,15
-  );
-
-  createPlatform(
-    0,20,35,
-    15,2,15
-  );
-
-
-  const starGeo =
-  new THREE.BufferGeometry();
-
+  const starGeo = new THREE.BufferGeometry();
   const count = 1200;
+  const positions = new Float32Array(count * 3);
 
-  const positions =
-  new Float32Array(count*3);
-
-
-  for(let i=0;i<count;i++){
-
-    positions[i*3] =
-    (Math.random()-.5)*500;
-
-    positions[i*3+1] =
-    30+Math.random()*230;
-
-    positions[i*3+2] =
-    (Math.random()-.5)*500;
-
+  for(let i = 0; i < count; i++){
+    positions[i*3] = (Math.random() - .5) * 500;
+    positions[i*3+1] = 30 + Math.random() * 230;
+    positions[i*3+2] = (Math.random() - .5) * 500;
   }
 
-
-  starGeo.setAttribute(
-    "position",
-    new THREE.BufferAttribute(
-      positions,
-      3
-    )
-  );
-
-
-  const stars =
-  new THREE.Points(
-    starGeo,
-    new THREE.PointsMaterial({
-      color:0xffffff,
-      size:.7
-    })
-  );
-
+  starGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: .7 }));
   scene.add(stars);
-
 }
 
-
-function createPlatform(
-  x,y,z,w,h,d
-){
-
-  const mesh =
-  new THREE.Mesh(
-    new THREE.BoxGeometry(
-      w,h,d
-    ),
-    new THREE.MeshStandardMaterial({
-      color:0x37617e,
-      roughness:.6
-    })
+function createPlatform(x, y, z, w, h, d){
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshStandardMaterial({ color: 0x37617e, roughness: .6 })
   );
-
-  mesh.position.set(
-    x,y,z
-  );
-
+  mesh.position.set(x, y, z);
   mesh.castShadow = true;
-
   mesh.receiveShadow = true;
-
   world.add(mesh);
-
 }
-
 
 /* =========================================================
-   PLAYER MESH
+   CHARACTER CREATION
 ========================================================= */
+function createCharacter(color, name){
+  const group = new THREE.Group();
 
-function createCharacter(
-  color,
-  name
-){
-
-  const group =
-  new THREE.Group();
-
-
-  const body =
-  new THREE.Mesh(
-    new THREE.CapsuleGeometry(
-      .38,
-      .95,
-      5,
-      10
-    ),
-    new THREE.MeshStandardMaterial({
-      color,
-      roughness:.55
-    })
+  const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(.38, .95, 5, 10),
+    new THREE.MeshStandardMaterial({ color, roughness: .55 })
   );
-
-  body.position.y =
-  .9;
-
+  body.position.y = .9;
   body.castShadow = true;
-
   group.add(body);
 
-
-  const head =
-  new THREE.Mesh(
-    new THREE.SphereGeometry(
-      .34,
-      16,
-      12
-    ),
-    new THREE.MeshStandardMaterial({
-      color:0xd7efff
-    })
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(.34, 16, 12),
+    new THREE.MeshStandardMaterial({ color: 0xd7efff })
   );
-
-  head.position.y =
-  1.65;
-
+  head.position.y = 1.65;
   head.castShadow = true;
-
   group.add(head);
 
-
-  const tag =
-  createNameTag(name);
-
-  tag.position.y =
-  2.35;
-
+  const tag = createNameTag(name);
+  tag.position.y = 2.35;
   group.add(tag);
 
-
   return group;
-
 }
-
 
 function createLocalPlayer(){
-
-  localMesh =
-  createCharacter(
-    0x269eff,
-    me.name
-  );
-
+  localMesh = createCharacter(0x269eff, me.name);
   scene.add(localMesh);
-
 }
-
 
 function createNameTag(name){
-
-  const canvas =
-  document.createElement("canvas");
-
+  const canvas = document.createElement("canvas");
   canvas.width = 512;
-
   canvas.height = 128;
 
-
-  const ctx =
-  canvas.getContext("2d");
-
-  ctx.fillStyle =
-  "rgba(4,10,20,.8)";
-
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "rgba(4,10,20,.8)";
   ctx.beginPath();
-
-  ctx.roundRect(
-    35,20,442,88,22
-  );
-
+  ctx.roundRect(35, 20, 442, 88, 22);
   ctx.fill();
 
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 46px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(name, 256, 64);
 
-  ctx.fillStyle =
-  "#fff";
-
-  ctx.font =
-  "bold 46px Arial";
-
-  ctx.textAlign =
-  "center";
-
-  ctx.textBaseline =
-  "middle";
-
-  ctx.fillText(
-    name,
-    256,
-    64
+  const texture = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false })
   );
-
-
-  const texture =
-  new THREE.CanvasTexture(canvas);
-
-  const sprite =
-  new THREE.Sprite(
-    new THREE.SpriteMaterial({
-      map:texture,
-      transparent:true,
-      depthTest:false
-    })
-  );
-
-  sprite.scale.set(
-    3.2,.8,1
-  );
-
+  sprite.scale.set(3.2, .8, 1);
   return sprite;
-
 }
 
-
 /* =========================================================
-   REMOTE PLAYER
+   REMOTE PLAYERS MANAGEMENT
 ========================================================= */
-
 function addRemote(data){
+  if(data.id === myId || remotePlayers.has(data.id)) return;
 
-  if(data.id === myId)
-    return;
-
-
-  if(remotePlayers.has(data.id))
-    return;
-
-
-  const mesh =
-  createCharacter(
-    playerColor(data.id),
-    data.name
-  );
-
-
-  mesh.position.set(
-    data.x || 0,
-    data.y || 0,
-    data.z || 0
-  );
-
-
+  const mesh = createCharacter(playerColor(data.id), data.name);
+  mesh.position.set(data.x || 0, data.y || 0, data.z || 0);
   scene.add(mesh);
 
-
-  remotePlayers.set(
-    data.id,
-    {
-      mesh,
-
-      target:
-      new THREE.Vector3(
-        data.x || 0,
-        data.y || 0,
-        data.z || 0
-      ),
-
-      yaw:data.yaw || 0,
-
-      name:data.name,
-
-      lastUpdate:performance.now()
-    }
-  );
-
+  remotePlayers.set(data.id, {
+    mesh,
+    target: new THREE.Vector3(data.x || 0, data.y || 0, data.z || 0),
+    yaw: data.yaw || 0,
+    name: data.name,
+    lastUpdate: performance.now()
+  });
 
   updatePlayerCount();
-
 }
-
 
 function updateRemote(data){
-
-  let p =
-  remotePlayers.get(data.id);
-
-
+  let p = remotePlayers.get(data.id);
   if(!p){
-
     addRemote(data);
-
-    p =
-    remotePlayers.get(data.id);
-
+    p = remotePlayers.get(data.id);
   }
+  if(!p) return;
 
-
-  if(!p)
-    return;
-
-
-  p.target.set(
-    data.x,
-    data.y,
-    data.z
-  );
-
-  p.yaw =
-  data.yaw || 0;
-
-  p.lastUpdate =
-  performance.now();
-
+  p.target.set(data.x, data.y, data.z);
+  p.yaw = data.yaw || 0;
+  p.lastUpdate = performance.now();
 }
-
 
 function removeRemote(id){
+  const p = remotePlayers.get(id);
+  if(!p) return;
 
-  const p =
-  remotePlayers.get(id);
-
-  if(!p)
-    return;
-
-
-  scene.remove(
-    p.mesh
-  );
-
+  scene.remove(p.mesh);
   remotePlayers.delete(id);
-
   updatePlayerCount();
-
 }
-
 
 function updatePlayerCount(){
-
-  playersText.textContent =
-  "Players: " +
-  (remotePlayers.size+1);
-
+  playersText.textContent = "Players: " + (remotePlayers.size + 1);
 }
-
 
 function playerColor(id){
-
   let n = 0;
-
-  for(
-    let i=0;
-    i<id.length;
-    i++
-  ){
-
-    n =
-    ((n<<5)-n)+
-    id.charCodeAt(i);
-
+  for(let i = 0; i < id.length; i++){
+    n = ((n << 5) - n) + id.charCodeAt(i);
     n |= 0;
-
   }
-
-
-  const colors = [
-    0xff4d6d,
-    0xffb84d,
-    0x4dffb8,
-    0x8c7bff,
-    0xff66d9,
-    0x55d6ff,
-    0xd4ff4d
-  ];
-
-
-  return colors[
-    Math.abs(n)%colors.length
-  ];
-
+  const colors = [0xff4d6d, 0xffb84d, 0x4dffb8, 0x8c7bff, 0xff66d9, 0x55d6ff, 0xd4ff4d];
+  return colors[Math.abs(n) % colors.length];
 }
-
 
 /* =========================================================
-   NETWORK PACKETS
+   NETWORK COMMUNICATIONS (PEERJS)
 ========================================================= */
-
-function packet(type,data={}){
-
-  return {
-    type,
-    ...data
-  };
-
+function packet(type, data = {}){
+  return { type, ...data };
 }
 
-
-function send(conn,data){
-
-  if(
-    conn &&
-    conn.open
-  ){
-
-    try{
-      conn.send(data);
-    }catch(e){
-      console.warn(e);
-    }
-
+function send(conn, data){
+  if(conn && conn.open){
+    try { conn.send(data); } catch(e){ console.warn(e); }
   }
-
 }
 
-
-function broadcast(data,except=null){
-
-  for(
-    const [id,conn]
-    of connections
-  ){
-
-    if(id === except)
-      continue;
-
-    send(
-      conn,
-      data
-    );
-
+function broadcast(data, except = null){
+  for(const [id, conn] of connections){
+    if(id === except) continue;
+    send(conn, data);
   }
-
 }
 
-
-/* =========================================================
-   CREATE ROOM
-========================================================= */
-
-createBtn.onclick =
-createRoom;
-
+createBtn.onclick = createRoom;
 
 function createRoom(){
-
-  const name =
-  cleanName(
-    nameInput.value
-  );
-
-
+  const name = cleanName(nameInput.value);
   if(!name){
-
-    status.textContent =
-    "Enter a player name first.";
-
+    status.textContent = "Enter a player name first.";
     nameInput.focus();
-
     return;
-
   }
 
+  me.name = name;
+  isHost = true;
+  status.textContent = "Connecting to public signaling...";
+  createBtn.disabled = true;
 
-  me.name =
-  name;
+  peer = new Peer({ host: "0.peerjs.com", port: 443, secure: true, debug: 1 });
 
-  isHost =
-  true;
-
-
-  status.textContent =
-  "Connecting to public signaling...";
-
-
-  createBtn.disabled =
-  true;
-
-
-  peer =
-  new Peer({
-    host:"0.peerjs.com",
-    port:443,
-    secure:true,
-    debug:1
+  peer.on("open", id => {
+    myId = id;
+    hostId = id;
+    showRoom(id);
+    status.textContent = "ROOM READY — share the Room ID or invite link.";
+    startGame();
   });
 
-
-  peer.on(
-    "open",
-    id=>{
-
-      myId =
-      id;
-
-      hostId =
-      id;
-
-
-      showRoom(
-        id
-      );
-
-
-      status.textContent =
-      "ROOM READY — share the Room ID or invite link.";
-
-
-      startGame();
-
-    }
-  );
-
-
-  peer.on(
-    "connection",
-    conn=>{
-
-      setupConnection(
-        conn
-      );
-
-    }
-  );
-
-
-  peer.on(
-    "disconnected",
-    ()=>{
-      status.textContent =
-      "Signaling disconnected. Trying again...";
-
-      try{
-        peer.reconnect();
-      }catch{}
-
-    }
-  );
-
-
-  peer.on(
-    "error",
-    error=>{
-
-      console.error(
-        "Peer error:",
-        error
-      );
-
-
-      status.textContent =
-      "PeerJS error: " +
-      error.type;
-
-
-      createBtn.disabled =
-      false;
-
-    }
-  );
-
+  peer.on("connection", conn => { setupConnection(conn); });
+  peer.on("disconnected", () => {
+    status.textContent = "Signaling disconnected. Trying again...";
+    try { peer.reconnect(); } catch{}
+  });
+  peer.on("error", error => {
+    console.error("Peer error:", error);
+    status.textContent = "PeerJS error: " + error.type;
+    createBtn.disabled = false;
+  });
 }
-
-
-/* =========================================================
-   SHOW ROOM ID
-========================================================= */
 
 function showRoom(id){
-
-  roomBox.style.display =
-  "block";
-
-
-  roomIdInput.value =
-  id;
-
-
-  const link =
-  location.origin +
-  location.pathname +
-  "#room=" +
-  encodeURIComponent(id);
-
-
-  inviteLink.textContent =
-  link;
-
-
-  joinInput.value =
-  "";
-
+  roomBox.style.display = "block";
+  roomIdInput.value = id;
+  const link = location.origin + location.pathname + "#room=" + encodeURIComponent(id);
+  inviteLink.textContent = link;
+  joinInput.value = "";
 }
 
-
-/* =========================================================
-   JOIN ROOM
-========================================================= */
-
-showJoin.onclick =
-()=>{
-  joinBox.style.display =
-  joinBox.style.display === "block"
-  ? "none"
-  : "block";
+showJoin.onclick = () => {
+  joinBox.style.display = joinBox.style.display === "block" ? "none" : "block";
 };
 
-
-joinBtn.onclick =
-joinRoom;
-
+joinBtn.onclick = joinRoom;
 
 function joinRoom(){
-
-  const name =
-  cleanName(
-    nameInput.value
-  );
-
-
+  const name = cleanName(nameInput.value);
   if(!name){
-
-    status.textContent =
-    "Enter a player name first.";
-
+    status.textContent = "Enter a player name first.";
     nameInput.focus();
-
     return;
-
   }
 
-
-  let room =
-  joinInput.value.trim();
-
-
+  let room = joinInput.value.trim();
   if(!room){
-
-    status.textContent =
-    "Enter a Room ID.";
-
+    status.textContent = "Enter a Room ID.";
     return;
-
   }
 
+  if(room.includes("#room=")) room = room.split("#room=")[1];
+  try { room = decodeURIComponent(room); } catch{}
+  room = room.replace(/^room=/, "").trim();
 
-  if(
-    room.includes("#room=")
-  ){
+  me.name = name;
+  isHost = false;
+  hostId = room;
 
-    room =
-    room.split("#room=")[1];
+  status.textContent = "Connecting to Room " + room + "...";
+  joinBtn.disabled = true;
 
-  }
+  peer = new Peer({ host: "0.peerjs.com", port: 443, secure: true, debug: 1 });
 
-
-  try{
-    room =
-    decodeURIComponent(room);
-  }catch{}
-
-
-  room =
-  room.replace(
-    /^room=/,
-    ""
-  ).trim();
-
-
-  me.name =
-  name;
-
-  isHost =
-  false;
-
-  hostId =
-  room;
-
-
-  status.textContent =
-  "Connecting to Room " +
-  room +
-  "...";
-
-
-  joinBtn.disabled =
-  true;
-
-
-  peer =
-  new Peer({
-    host:"0.peerjs.com",
-    port:443,
-    secure:true,
-    debug:1
+  peer.on("open", id => {
+    myId = id;
+    const conn = peer.connect(hostId, { reliable: true, serialization: "json" });
+    setupConnection(conn);
   });
 
-
-  peer.on(
-    "open",
-    id=>{
-
-      myId =
-      id;
-
-
-      const conn =
-      peer.connect(
-        hostId,
-        {
-          reliable:true,
-          serialization:"json"
-        }
-      );
-
-
-      setupConnection(
-        conn
-      );
-
-    }
-  );
-
-
-  peer.on(
-    "error",
-    error=>{
-
-      console.error(
-        error
-      );
-
-
-      status.textContent =
-      "Unable to join: " +
-      error.type;
-
-
-      joinBtn.disabled =
-      false;
-
-    }
-  );
-
+  peer.on("error", error => {
+    console.error(error);
+    status.textContent = "Unable to join: " + error.type;
+    joinBtn.disabled = false;
+  });
 }
-
-
 
 const shareRoom = document.getElementById("shareRoom");
 const newRoom = document.getElementById("newRoom");
@@ -1758,1499 +967,463 @@ const closeRoomPanel = document.getElementById("closeRoomPanel");
 async function copyInvite(){
   const url = inviteLink.textContent.trim();
   if(!url) return;
-  try{
+  try {
     await navigator.clipboard.writeText(url);
     status.textContent = "Invite link copied!";
-  }catch{
+  } catch {
     window.prompt("Copy this invite link:", url);
   }
 }
 
-shareRoom.onclick = async()=>{
+shareRoom.onclick = async () => {
   const url = inviteLink.textContent.trim();
   if(!url) return;
   if(navigator.share){
-    try{ await navigator.share({title:"SkyForge Room", text:"Join my SkyForge room", url}); }catch{}
-  }else{
+    try { await navigator.share({ title: "SkyForge Room", text: "Join my SkyForge room", url }); } catch{}
+  } else {
     await copyInvite();
   }
 };
 
-newRoom.onclick = ()=>{
-  if(peer){ try{peer.destroy();}catch{} }
+newRoom.onclick = () => {
+  if(peer){ try { peer.destroy(); } catch{} }
   location.hash = "";
   location.reload();
 };
 
-closeRoomPanel.onclick = ()=>{
+closeRoomPanel.onclick = () => {
   menu.classList.remove("playing");
   menu.style.display = "none";
 };
 
-/* =========================================================
-   CONNECTION SETUP
-========================================================= */
-
 function setupConnection(conn){
+  conn.on("open", () => {
+    connections.set(conn.peer, conn);
 
-  conn.on(
-    "open",
-    ()=>{
+    send(conn, packet("hello", {
+      id: myId, name: me.name, x: me.pos.x, y: me.pos.y, z: me.pos.z, yaw: me.yaw
+    }));
 
-      connections.set(
-        conn.peer,
-        conn
-      );
-
-
-      send(
-        conn,
-        packet(
-          "hello",
-          {
-            id:myId,
-            name:me.name,
-            x:me.pos.x,
-            y:me.pos.y,
-            z:me.pos.z,
-            yaw:me.yaw
-          }
-        )
-      );
-
-
-      if(isHost){
-
-        sendWorldState(
-          conn
-        );
-
-        broadcast(
-          packet(
-            "playerJoined",
-            {
-              id:myId,
-              name:me.name,
-              x:me.pos.x,
-              y:me.pos.y,
-              z:me.pos.z,
-              yaw:me.yaw
-            }
-          ),
-          conn.peer
-        );
-
-      }
-
-
-      startGame();
-
+    if(isHost){
+      sendWorldState(conn);
+      broadcast(packet("playerJoined", {
+        id: myId, name: me.name, x: me.pos.x, y: me.pos.y, z: me.pos.z, yaw: me.yaw
+      }), conn.peer);
     }
-  );
 
-
-  conn.on(
-    "data",
-    data=>{
-
-      handlePacket(
-        conn,
-        data
-      );
-
-    }
-  );
-
-
-  conn.on(
-    "close",
-    ()=>{
-
-      connections.delete(
-        conn.peer
-      );
-
-      removeRemote(
-        conn.peer
-      );
-
-
-      if(isHost){
-
-        broadcast(
-          packet(
-            "playerLeft",
-            {
-              id:conn.peer
-            }
-          )
-        );
-
-      }
-
-    }
-  );
-
-
-  conn.on(
-    "error",
-    error=>{
-      console.warn(
-        "Connection error",
-        error
-      );
-    }
-  );
-
-}
-
-
-/* =========================================================
-   WORLD STATE
-========================================================= */
-
-function sendWorldState(conn){
-
-  const list = [];
-
-
-  list.push({
-
-    id:myId,
-
-    name:me.name,
-
-    x:me.pos.x,
-
-    y:me.pos.y,
-
-    z:me.pos.z,
-
-    yaw:me.yaw
-
+    startGame();
   });
 
-
-  for(
-    const [id,p]
-    of remotePlayers
-  ){
-
-    list.push({
-
-      id,
-
-      name:p.name,
-
-      x:p.mesh.position.x,
-
-      y:p.mesh.position.y,
-
-      z:p.mesh.position.z,
-
-      yaw:p.mesh.rotation.y
-
-    });
-
-  }
-
-
-  send(
-    conn,
-    packet(
-      "worldState",
-      {
-        players:list
-      }
-    )
-  );
-
+  conn.on("data", data => { handlePacket(conn, data); });
+  conn.on("close", () => {
+    connections.delete(conn.peer);
+    removeRemote(conn.peer);
+    if(isHost) broadcast(packet("playerLeft", { id: conn.peer }));
+  });
+  conn.on("error", error => { console.warn("Connection error", error); });
 }
 
+function sendWorldState(conn){
+  const list = [{ id: myId, name: me.name, x: me.pos.x, y: me.pos.y, z: me.pos.z, yaw: me.yaw }];
+  for(const [id, p] of remotePlayers){
+    list.push({
+      id, name: p.name, x: p.mesh.position.x, y: p.mesh.position.y, z: p.mesh.position.z, yaw: p.mesh.rotation.y
+    });
+  }
+  send(conn, packet("worldState", { players: list }));
+}
 
-/* =========================================================
-   PACKET HANDLER
-========================================================= */
-
-function handlePacket(
-  conn,
-  data
-){
-
-  if(
-    !data ||
-    !data.type
-  )
-    return;
-
+function handlePacket(conn, data){
+  if(!data || !data.type) return;
 
   switch(data.type){
-
     case "hello":
-
       addRemote(data);
-
-
       if(isHost){
-
-        sendWorldState(
-          conn
-        );
-
-
-        broadcast(
-          packet(
-            "playerJoined",
-            data
-          ),
-          conn.peer
-        );
-
+        sendWorldState(conn);
+        broadcast(packet("playerJoined", data), conn.peer);
       }
-
       break;
-
-
     case "worldState":
-
-      for(
-        const p
-        of data.players || []
-      ){
-
-        if(
-          p.id !== myId
-        ){
-
-          addRemote(p);
-
-        }
-
+      for(const p of data.players || []){
+        if(p.id !== myId) addRemote(p);
       }
-
       break;
-
-
     case "playerJoined":
-
-      if(
-        data.id !== myId
-      ){
-
+      if(data.id !== myId){
         addRemote(data);
-
-        systemMessage(
-          data.name +
-          " joined the game."
-        );
-
+        systemMessage(data.name + " joined the game.");
       }
-
-
-      if(isHost){
-
-        broadcast(
-          data,
-          conn.peer
-        );
-
-      }
-
+      if(isHost) broadcast(data, conn.peer);
       break;
-
-
     case "playerState":
-
-      if(
-        data.id !== myId
-      ){
-
-        updateRemote(data);
-
-      }
-
-
-      if(isHost){
-
-        broadcast(
-          data,
-          conn.peer
-        );
-
-      }
-
+      if(data.id !== myId) updateRemote(data);
+      if(isHost) broadcast(data, conn.peer);
       break;
-
-
     case "playerLeft":
-
-      removeRemote(
-        data.id
-      );
-
-
-      if(isHost){
-
-        broadcast(
-          data,
-          conn.peer
-        );
-
-      }
-
+      removeRemote(data.id);
+      if(isHost) broadcast(data, conn.peer);
       break;
-
-
     case "chat":
-
-      addChat(
-        data.name,
-        data.message
-      );
-
-
-      if(isHost){
-
-        broadcast(
-          data,
-          conn.peer
-        );
-
-      }
-
+      addChat(data.name, data.message);
+      if(isHost) broadcast(data, conn.peer);
       break;
-
-
     case "ping":
-
-      send(
-        conn,
-        packet(
-          "pong",
-          {
-            time:data.time
-          }
-        )
-      );
-
+      send(conn, packet("pong", { time: data.time }));
       break;
-
-
     case "pong":
-
-      lastPing =
-      performance.now() -
-      data.time;
-
-
-      pingText.textContent =
-      "P2P " +
-      Math.round(lastPing) +
-      " ms";
-
+      lastPing = performance.now() - data.time;
+      pingText.textContent = "P2P " + Math.round(lastPing) + " ms";
       break;
-
   }
-
 }
-
-
-/* =========================================================
-   START
-========================================================= */
 
 function startGame(){
-
   if(started) return;
-
   started = true;
-
   game.style.display = "block";
-
-  // Keep the room controls visible so the host can copy/share the room
-  // after creating it. The panel becomes a compact in-game lobby card.
   menu.classList.add("playing");
-
   updateLocalName();
-
 }
-
 
 function updateLocalName(){
-
-  if(!localMesh)
-    return;
-
-
-  const tag =
-  localMesh.children.find(
-    x=>x.isSprite
-  );
-
-
-  if(tag){
-
-    tag.quaternion.copy(
-      camera.quaternion
-    );
-
-  }
-
+  if(!localMesh) return;
+  const tag = localMesh.children.find(x => x.isSprite);
+  if(tag) tag.quaternion.copy(camera.quaternion);
 }
 
-
 /* =========================================================
-   PLAYER MOVEMENT
+   MOVEMENT LOGIC (CROSS-PLATFORM)
 ========================================================= */
-
 function updateMovement(dt){
+  if(!started) return;
 
-  if(!started)
-    return;
+  let forward = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) - joyY;
+  let side = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joyX;
 
-
-  let forward =
-  (keys.KeyW ? 1 : 0) -
-  (keys.KeyS ? 1 : 0) -
-  joyY;
-
-
-  let side =
-  (keys.KeyD ? 1 : 0) -
-  (keys.KeyA ? 1 : 0) +
-  joyX;
-
-
-  const length =
-  Math.hypot(
-    forward,
-    side
-  );
-
-
+  const length = Math.hypot(forward, side);
   if(length > 1){
-
     forward /= length;
     side /= length;
-
   }
 
+  const speed = (me.running || keys.ShiftLeft || keys.ShiftRight) ? RUN : WALK;
+  const sin = Math.sin(me.yaw);
+  const cos = Math.cos(me.yaw);
 
-  const speed =
-  me.running ||
-  keys.ShiftLeft ||
-  keys.ShiftRight
-  ? RUN
-  : WALK;
+  const vx = (-sin * forward + cos * side) * speed;
+  const vz = (-cos * forward - sin * side) * speed;
 
+  me.vel.x = THREE.MathUtils.damp(me.vel.x, vx, 12, dt);
+  me.vel.z = THREE.MathUtils.damp(me.vel.z, vz, 12, dt);
+  me.vel.y -= GRAVITY * dt;
 
-  const sin =
-  Math.sin(me.yaw);
+  me.pos.addScaledVector(me.vel, dt);
 
-  const cos =
-  Math.cos(me.yaw);
-
-
-  const vx =
-  (-sin*forward + cos*side) *
-  speed;
-
-
-  const vz =
-  (-cos*forward - sin*side) *
-  speed;
-
-
-  me.vel.x =
-  THREE.MathUtils.damp(
-    me.vel.x,
-    vx,
-    12,
-    dt
-  );
-
-
-  me.vel.z =
-  THREE.MathUtils.damp(
-    me.vel.z,
-    vz,
-    12,
-    dt
-  );
-
-
-  me.vel.y -=
-  GRAVITY*dt;
-
-
-  me.pos.addScaledVector(
-    me.vel,
-    dt
-  );
-
-
-  if(
-    me.pos.y <= 0
-  ){
-
+  if(me.pos.y <= 0){
     me.pos.y = 0;
-
     me.vel.y = 0;
-
     me.grounded = true;
-
-  }else{
-
+  } else {
     me.grounded = false;
-
   }
 
+  const limit = WORLD / 2 - 2;
+  me.pos.x = THREE.MathUtils.clamp(me.pos.x, -limit, limit);
+  me.pos.z = THREE.MathUtils.clamp(me.pos.z, -limit, limit);
 
-  const limit =
-  WORLD/2-2;
-
-
-  me.pos.x =
-  THREE.MathUtils.clamp(
-    me.pos.x,
-    -limit,
-    limit
-  );
-
-
-  me.pos.z =
-  THREE.MathUtils.clamp(
-    me.pos.z,
-    -limit,
-    limit
-  );
-
-
-  if(
-    me.pos.y < -25
-  ){
-
-    me.pos.set(
-      0,5,0
-    );
-
-    me.vel.set(
-      0,0,0
-    );
-
+  if(me.pos.y < -25){
+    me.pos.set(0, 5, 0);
+    me.vel.set(0, 0, 0);
   }
 
+  localMesh.position.copy(me.pos);
+  localMesh.rotation.y = me.yaw;
 
-  localMesh.position.copy(
-    me.pos
-  );
-
-
-  localMesh.rotation.y =
-  me.yaw;
-
-
-  camera.position.set(
-    me.pos.x,
-    me.pos.y+1.55,
-    me.pos.z
-  );
-
-
-  camera.rotation.order =
-  "YXZ";
-
-  camera.rotation.y =
-  me.yaw;
-
-  camera.rotation.x =
-  me.pitch;
-
+  camera.position.set(me.pos.x, me.pos.y + 1.55, me.pos.z);
+  camera.rotation.order = "YXZ";
+  camera.rotation.y = me.yaw;
+  camera.rotation.x = me.pitch;
 }
-
-
-/* =========================================================
-   JUMP
-========================================================= */
 
 function jump(){
-
-  if(
-    !started ||
-    !me.grounded
-  )
-    return;
-
-
-  me.vel.y =
-  JUMP;
-
-  me.grounded =
-  false;
-
+  if(!started || !me.grounded) return;
+  me.vel.y = JUMP;
+  me.grounded = false;
 }
-
-
-/* =========================================================
-   NETWORK UPDATE
-========================================================= */
 
 function sendPlayerState(){
+  const now = performance.now();
+  if(now - lastSend < 1000 / NET_RATE) return;
+  lastSend = now;
 
-  const now =
-  performance.now();
-
-
-  if(
-    now-lastSend <
-    1000/NET_RATE
-  )
-    return;
-
-
-  lastSend =
-  now;
-
-
-  const data =
-  packet(
-    "playerState",
-    {
-      id:myId,
-      name:me.name,
-      x:me.pos.x,
-      y:me.pos.y,
-      z:me.pos.z,
-      yaw:me.yaw
-    }
-  );
-
+  const data = packet("playerState", {
+    id: myId, name: me.name, x: me.pos.x, y: me.pos.y, z: me.pos.z, yaw: me.yaw
+  });
 
   if(isHost){
-
     broadcast(data);
-
-  }else{
-
-    const host =
-    connections.get(hostId);
-
-    send(
-      host,
-      data
-    );
-
+  } else {
+    send(connections.get(hostId), data);
   }
-
 }
-
-
-/* =========================================================
-   REMOTE INTERPOLATION
-========================================================= */
 
 function updateRemotePlayers(){
+  for(const p of remotePlayers.values()){
+    p.mesh.position.lerp(p.target, .18);
 
-  for(
-    const p
-    of remotePlayers.values()
-  ){
+    let diff = p.yaw - p.mesh.rotation.y;
+    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+    p.mesh.rotation.y += diff * .18;
 
-    p.mesh.position.lerp(
-      p.target,
-      .18
-    );
-
-
-    let diff =
-    p.yaw -
-    p.mesh.rotation.y;
-
-
-    diff =
-    Math.atan2(
-      Math.sin(diff),
-      Math.cos(diff)
-    );
-
-
-    p.mesh.rotation.y +=
-    diff*.18;
-
-
-    p.mesh.children.forEach(
-      child=>{
-        if(child.isSprite){
-
-          child.quaternion.copy(
-            camera.quaternion
-          );
-
-        }
-      }
-    );
-
+    p.mesh.children.forEach(child => {
+      if(child.isSprite) child.quaternion.copy(camera.quaternion);
+    });
   }
-
 }
 
-
 /* =========================================================
-   CHAT
+   CHAT SYSTEM
 ========================================================= */
-
-chatForm.onsubmit =
-e=>{
-
+chatForm.onsubmit = e => {
   e.preventDefault();
+  const message = chatInput.value.trim();
+  if(!message) return;
 
+  const data = packet("chat", {
+    id: myId, name: me.name, message: message.substring(0, 100)
+  });
 
-  const message =
-  chatInput.value.trim();
-
-
-  if(!message)
-    return;
-
-
-  const data =
-  packet(
-    "chat",
-    {
-      id:myId,
-      name:me.name,
-      message:
-      message.substring(0,100)
-    }
-  );
-
-
-  addChat(
-    me.name,
-    data.message
-  );
-
+  addChat(me.name, data.message);
 
   if(isHost){
-
     broadcast(data);
-
-  }else{
-
-    send(
-      connections.get(hostId),
-      data
-    );
-
+  } else {
+    send(connections.get(hostId), data);
   }
 
-
-  chatInput.value =
-  "";
-
+  chatInput.value = "";
 };
 
-
-function addChat(
-  name,
-  message
-){
-
-  const div =
-  document.createElement("div");
-
-  div.className =
-  "msg";
-
-  const b =
-  document.createElement("b");
-
-  b.textContent =
-  name;
-
+function addChat(name, message){
+  const div = document.createElement("div");
+  div.className = "msg";
+  const b = document.createElement("b");
+  b.textContent = name;
   div.appendChild(b);
-
-  div.appendChild(
-    document.createTextNode(
-      ": " + message
-    )
-  );
-
-
-  messages.appendChild(
-    div
-  );
-
-
-  messages.scrollTop =
-  messages.scrollHeight;
-
-
-  while(
-    messages.children.length > 30
-  ){
-
-    messages.firstChild.remove();
-
-  }
-
-}
-
-
-function systemMessage(
-  text
-){
-
-  const div =
-  document.createElement("div");
-
-  div.className =
-  "msg";
-
-  div.style.opacity =
-  ".6";
-
-  div.textContent =
-  text;
-
+  div.appendChild(document.createTextNode(": " + message));
   messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
 
+  while(messages.children.length > 30){
+    messages.firstChild.remove();
+  }
 }
 
-
-/* =========================================================
-   PING
-========================================================= */
-
-setInterval(
-  ()=>{
-
-    if(!started)
-      return;
-
-
-    const conn =
-    isHost
-    ? connections.values().next().value
-    : connections.get(hostId);
-
-
-    if(!conn)
-      return;
-
-
-    send(
-      conn,
-      packet(
-        "ping",
-        {
-          time:performance.now()
-        }
-      )
-    );
-
-  },
-  3000
-);
-
-
-/* =========================================================
-   DESKTOP INPUT
-========================================================= */
-
-addEventListener(
-  "keydown",
-  e=>{
-
-    keys[e.code] =
-    true;
-
-
-    if(
-      e.code === "Space" &&
-      !e.repeat
-    ){
-
-      e.preventDefault();
-
-      jump();
-
-    }
-
-  }
-);
-
-
-addEventListener(
-  "keyup",
-  e=>{
-    keys[e.code] =
-    false;
-  }
-);
-
-
-rendererReady();
-
-
-function rendererReady(){
-
-  document.addEventListener(
-    "click",
-    e=>{
-      if(
-        started &&
-        matchMedia("(pointer:fine)").matches &&
-        renderer &&
-        document.pointerLockElement !== renderer.domElement &&
-        !e.target.closest("input,button,form")
-      ){
-
-        renderer.domElement.requestPointerLock();
-
-      }
-
-    }
-  );
-
+function systemMessage(text){
+  const div = document.createElement("div");
+  div.className = "msg";
+  div.style.opacity = ".6";
+  div.textContent = text;
+  messages.appendChild(div);
 }
 
-
-addEventListener(
-  "mousemove",
-  e=>{
-
-    if(
-      document.pointerLockElement !==
-      renderer.domElement
-    )
-      return;
-
-
-    me.yaw -=
-    e.movementX*.0025;
-
-
-    me.pitch -=
-    e.movementY*.0025;
-
-
-    me.pitch =
-    THREE.MathUtils.clamp(
-      me.pitch,
-      -1.35,
-      1.35
-    );
-
-  }
-);
-
+setInterval(() => {
+  if(!started) return;
+  const conn = isHost ? connections.values().next().value : connections.get(hostId);
+  if(!conn) return;
+  send(conn, packet("ping", { time: performance.now() }));
+}, 3000);
 
 /* =========================================================
-   MOBILE JOYSTICK
+   DESKTOP INPUT LISTENERS
 ========================================================= */
-
-const joystick =
-document.getElementById("joystick");
-
-const stick =
-document.getElementById("stick");
-
-
-joystick.addEventListener(
-  "pointerdown",
-  e=>{
-
-    joyActive =
-    true;
-
-    joystick.setPointerCapture(
-      e.pointerId
-    );
-
-    moveJoystick(e);
-
-  }
-);
-
-
-joystick.addEventListener(
-  "pointermove",
-  e=>{
-
-    if(joyActive)
-      moveJoystick(e);
-
-  }
-);
-
-
-joystick.addEventListener(
-  "pointerup",
-  resetJoystick
-);
-
-
-joystick.addEventListener(
-  "pointercancel",
-  resetJoystick
-);
-
-
-function moveJoystick(e){
-
-  const rect =
-  joystick.getBoundingClientRect();
-
-
-  const cx =
-  rect.left+rect.width/2;
-
-  const cy =
-  rect.top+rect.height/2;
-
-
-  let x =
-  e.clientX-cx;
-
-  let y =
-  e.clientY-cy;
-
-
-  const max =
-  rect.width*.32;
-
-
-  const len =
-  Math.hypot(x,y);
-
-
-  if(len > max){
-
-    x =
-    x/len*max;
-
-    y =
-    y/len*max;
-
-  }
-
-
-  joyX =
-  x/max;
-
-  joyY =
-  y/max;
-
-
-  stick.style.transform =
-  `translate(
-    calc(-50% + ${x}px),
-    calc(-50% + ${y}px)
-  )`;
-
-}
-
-
-function resetJoystick(){
-
-  joyActive =
-  false;
-
-  joyX =
-  0;
-
-  joyY =
-  0;
-
-  stick.style.transform =
-  "translate(-50%,-50%)";
-
-}
-
-
-/* =========================================================
-   MOBILE CAMERA
-========================================================= */
-
-const lookArea =
-document.getElementById("lookArea");
-
-
-lookArea.addEventListener(
-  "pointerdown",
-  e=>{
-
-    lookActive =
-    true;
-
-    lookX =
-    e.clientX;
-
-    lookY =
-    e.clientY;
-
-    lookArea.setPointerCapture(
-      e.pointerId
-    );
-
-  }
-);
-
-
-lookArea.addEventListener(
-  "pointermove",
-  e=>{
-
-    if(!lookActive)
-      return;
-
-
-    const dx =
-    e.clientX-lookX;
-
-    const dy =
-    e.clientY-lookY;
-
-
-    lookX =
-    e.clientX;
-
-    lookY =
-    e.clientY;
-
-
-    me.yaw -=
-    dx*.007;
-
-
-    me.pitch -=
-    dy*.007;
-
-
-    me.pitch =
-    THREE.MathUtils.clamp(
-      me.pitch,
-      -1.35,
-      1.35
-    );
-
-  }
-);
-
-
-lookArea.addEventListener(
-  "pointerup",
-  ()=>{
-    lookActive =
-    false;
-  }
-);
-
-
-lookArea.addEventListener(
-  "pointercancel",
-  ()=>{
-    lookActive =
-    false;
-  }
-);
-
-
-/* =========================================================
-   MOBILE BUTTONS
-========================================================= */
-
-document
-.getElementById("jump")
-.addEventListener(
-  "pointerdown",
-  e=>{
+addEventListener("keydown", e => {
+  keys[e.code] = true;
+  if(e.code === "Space" && !e.repeat){
     e.preventDefault();
     jump();
   }
-);
+});
 
+addEventListener("keyup", e => { keys[e.code] = false; });
 
-const run =
-document.getElementById("run");
-
-
-run.addEventListener(
-  "pointerdown",
-  ()=>{
-    me.running =
-    true;
+document.addEventListener("click", e => {
+  if(started && matchMedia("(pointer:fine)").matches && renderer &&
+     document.pointerLockElement !== renderer.domElement &&
+     !e.target.closest("input,button,form")){
+    renderer.domElement.requestPointerLock();
   }
-);
+});
 
-
-run.addEventListener(
-  "pointerup",
-  ()=>{
-    me.running =
-    false;
-  }
-);
-
-
-run.addEventListener(
-  "pointercancel",
-  ()=>{
-    me.running =
-    false;
-  }
-);
-
+addEventListener("mousemove", e => {
+  if(document.pointerLockElement !== renderer.domElement) return;
+  me.yaw -= e.movementX * .0025;
+  me.pitch -= e.movementY * .0025;
+  me.pitch = THREE.MathUtils.clamp(me.pitch, -1.35, 1.35);
+});
 
 /* =========================================================
-   COPY ROOM ID
+   MOBILE INPUT LISTENERS
 ========================================================= */
+const joystick = document.getElementById("joystick");
+const stick = document.getElementById("stick");
 
-copyId.onclick =
-async()=>{
+joystick.addEventListener("pointerdown", e => {
+  joyActive = true;
+  joystick.setPointerCapture(e.pointerId);
+  moveJoystick(e);
+});
 
-  try{
+joystick.addEventListener("pointermove", e => {
+  if(joyActive) moveJoystick(e);
+});
 
-    await navigator.clipboard.writeText(
-      roomIdInput.value
-    );
+joystick.addEventListener("pointerup", resetJoystick);
+joystick.addEventListener("pointercancel", resetJoystick);
 
-    copyId.textContent =
-    "COPIED";
+function moveJoystick(e){
+  const rect = joystick.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  let x = e.clientX - cx;
+  let y = e.clientY - cy;
 
-    setTimeout(
-      ()=>{
-        copyId.textContent =
-        "COPY";
-      },
-      1200
-    );
+  const max = rect.width * .32;
+  const len = Math.hypot(x, y);
 
-  }catch{
+  if(len > max){
+    x = x / len * max;
+    y = y / len * max;
+  }
 
+  joyX = x / max;
+  joyY = y / max;
+
+  stick.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+}
+
+function resetJoystick(){
+  joyActive = false;
+  joyX = 0;
+  joyY = 0;
+  stick.style.transform = "translate(-50%,-50%)";
+}
+
+const lookArea = document.getElementById("lookArea");
+
+lookArea.addEventListener("pointerdown", e => {
+  lookActive = true;
+  lookX = e.clientX;
+  lookY = e.clientY;
+  lookArea.setPointerCapture(e.pointerId);
+});
+
+lookArea.addEventListener("pointermove", e => {
+  if(!lookActive) return;
+  const dx = e.clientX - lookX;
+  const dy = e.clientY - lookY;
+  lookX = e.clientX;
+  lookY = e.clientY;
+
+  me.yaw -= dx * .007;
+  me.pitch -= dy * .007;
+  me.pitch = THREE.MathUtils.clamp(me.pitch, -1.35, 1.35);
+});
+
+lookArea.addEventListener("pointerup", () => { lookActive = false; });
+lookArea.addEventListener("pointercancel", () => { lookActive = false; });
+
+document.getElementById("jump").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  jump();
+});
+
+const run = document.getElementById("run");
+run.addEventListener("pointerdown", () => { me.running = true; });
+run.addEventListener("pointerup", () => { me.running = false; });
+run.addEventListener("pointercancel", () => { me.running = false; });
+
+/* =========================================================
+   ROOM COPYING & AUTO-JOIN
+========================================================= */
+copyId.onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(roomIdInput.value);
+    copyId.textContent = "COPIED";
+    setTimeout(() => { copyId.textContent = "COPY"; }, 1200);
+  } catch {
     roomIdInput.select();
-
   }
-
 };
 
-
-/* =========================================================
-   COPY LINK
-========================================================= */
-
-copyLink.onclick =
-async()=>{
-
-  try{
-
-    await navigator.clipboard.writeText(
-      inviteLink.textContent
-    );
-
-    copyLink.textContent =
-    "LINK COPIED";
-
-    setTimeout(
-      ()=>{
-        copyLink.textContent =
-        "COPY INVITE LINK";
-      },
-      1200
-    );
-
-  }catch{}
-
+copyLink.onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(inviteLink.textContent);
+    copyLink.textContent = "LINK COPIED";
+    setTimeout(() => { copyLink.textContent = "COPY INVITE LINK"; }, 1200);
+  } catch{}
 };
-
-
-/* =========================================================
-   AUTO JOIN FROM URL
-========================================================= */
 
 function checkURL(){
-
-  if(
-    location.hash.startsWith(
-      "#room="
-    )
-  ){
-
-    let id =
-    location.hash.substring(6);
-
-    try{
-      id =
-      decodeURIComponent(id);
-    }catch{}
-
-
-    joinInput.value =
-    id;
-
-
-    joinBox.style.display =
-    "block";
-
-
-    status.textContent =
-    "Invite room detected — enter your name and join.";
-
+  if(location.hash.startsWith("#room=")){
+    let id = location.hash.substring(6);
+    try { id = decodeURIComponent(id); } catch{}
+    joinInput.value = id;
+    joinBox.style.display = "block";
+    status.textContent = "Invite room detected — enter your name and join.";
   }
-
 }
-
-
 checkURL();
 
-
-/* =========================================================
-   LEAVE
-========================================================= */
-
-leave.onclick =
-()=>{
-
-  try{
-
-    broadcast(
-      packet(
-        "playerLeft",
-        {
-          id:myId
-        }
-      )
-    );
-
-  }catch{}
-
-
-  try{
-
-    for(
-      const c
-      of connections.values()
-    ){
-
-      c.close();
-
-    }
-
-  }catch{}
-
-
-  try{
-    peer.destroy();
-  }catch{}
-
-
-  location.href =
-  location.pathname;
-
+leave.onclick = () => {
+  try { broadcast(packet("playerLeft", { id: myId })); } catch{}
+  try { for(const c of connections.values()) c.close(); } catch{}
+  try { peer.destroy(); } catch{}
+  location.href = location.pathname;
 };
 
-
 /* =========================================================
-   RESIZE
+   RESIZE & RENDER LOOP
 ========================================================= */
-
 function resize(){
-
-  camera.aspect =
-  innerWidth/innerHeight;
-
+  camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-
-  renderer.setSize(
-    innerWidth,
-    innerHeight
-  );
-
+  renderer.setSize(innerWidth, innerHeight);
 }
-
-
-/* =========================================================
-   LOOP
-========================================================= */
 
 function animate(){
-
-  requestAnimationFrame(
-    animate
-  );
-
-
-  const dt =
-  Math.min(
-    clock.getDelta(),
-    .05
-  );
-
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), .05);
 
   updateMovement(dt);
-
   updateRemotePlayers();
-
   sendPlayerState();
 
-
   if(localMesh){
-
-    localMesh.children.forEach(
-      child=>{
-
-        if(child.isSprite){
-
-          child.quaternion.copy(
-            camera.quaternion
-          );
-
-        }
-
-      }
-    );
-
+    localMesh.children.forEach(child => {
+      if(child.isSprite) child.quaternion.copy(camera.quaternion);
+    });
   }
 
-
-  renderer.render(
-    scene,
-    camera
-  );
-
+  renderer.render(scene, camera);
 }
 
-
 /* =========================================================
-   HELPERS
+   HELPERS & STARTUP
 ========================================================= */
-
 function cleanName(value){
-
-  return value
-  .replace(/[<>]/g,"")
-  .trim()
-  .substring(0,18);
-
+  return value.replace(/[<>]/g, "").trim().substring(0, 18);
 }
 
-
-/* =========================================================
-   INIT
-========================================================= */
-
-try{
+try {
   initThree();
-}catch(error){
+} catch(error){
   console.error("Three.js initialization failed:", error);
-  status.textContent =
-    "3D engine failed to initialize. Check WebGL/browser support.";
+  status.textContent = "3D engine failed to initialize. Check WebGL/browser support.";
   createBtn.disabled = false;
 }
-
 </script>
-
 
 </body>
 </html>
