@@ -137,7 +137,9 @@ input[type=range]{accent-color:var(--ui-accent);height:6px}
 
 /* In-game client HUD is hidden until gameplay actually starts. */
 #survivalHud,#worldTime,#crosshair,#status,#hotbar,#help,#mobileExtraButtons{display:none !important}
-body.in-game-ui #survivalHud,body.in-game-ui #worldTime,body.in-game-ui #crosshair,body.in-game-ui #status,body.in-game-ui #hotbar,body.in-game-ui #help{display:block !important}
+body.in-game-ui #survivalHud{display:grid !important}
+body.in-game-ui #worldTime,body.in-game-ui #crosshair,body.in-game-ui #status,body.in-game-ui #help{display:block !important}
+body.in-game-ui #hotbar{display:flex !important}
 body.in-game-ui #mobileExtraButtons{display:flex !important}
 
 </style><style id="ultra-ui">
@@ -398,7 +400,45 @@ kbd{
 }
 
 /* Keep this block near the end so overrides are predictable. */
-</style></head>
+</style>
+<style id="minecraft-blue-menu-fix">
+/* Clean Minecraft-style menus: blue sky background, no modern overlay graphics. */
+#ultra-bg{display:none!important}
+#mainMenu.minecraft-menu{background:#79bce8!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+#mainMenu.minecraft-menu::before,#mainMenu.minecraft-menu::after{display:none!important}
+#mainMenu .mc-menu-bg{background:#79bce8!important}
+#mainMenu .mc-menu-bg::before{display:none!important}
+#mainMenu .mc-menu-content{background:transparent!important}
+/* Apply the same blocky Minecraft look to every menu, including account/login. */
+#authMenu.screen,#worldMenu.screen,#settingsMenu.screen,#realmsMenu.screen,#marketplaceMenu.screen,#profileMenu.screen,#dressingRoomMenu.screen{
+  background:#79bce8!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+#authMenu .panel,#worldMenu .panel,#settingsMenu .panel,#realmsMenu .panel,#marketplaceMenu .panel,#profileMenu .panel,#dressingRoomMenu .panel{
+  width:min(520px,92vw)!important;padding:26px!important;background:rgba(44,44,44,.98)!important;
+  border:2px solid #111!important;border-radius:3px!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.5),0 8px 0 rgba(0,0,0,.45)!important;
+}
+#authMenu .panel h2,#worldMenu .panel h2,#settingsMenu .panel h2,#realmsMenu .panel h2,#marketplaceMenu .panel h2,#profileMenu .panel h2,#dressingRoomMenu .panel h2{
+  font-family:Arial,sans-serif!important;font-weight:900!important;color:#fff!important;text-align:center!important;
+  text-shadow:2px 2px 0 #111!important;
+}
+#authMenu .option label,#worldMenu .option label,#settingsMenu .option label{color:#fff!important;text-shadow:1px 1px #111!important}
+#authMenu input,#worldMenu input,#worldMenu select,#settingsMenu select{
+  background:#181818!important;color:#fff!important;border:2px solid #090909!important;border-radius:2px!important;
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.65)!important;
+}
+#authMenu .button,#worldMenu .button,#settingsMenu .button,#realmsMenu .button,#marketplaceMenu .button,#profileMenu .button,#dressingRoomMenu .button{
+  border:2px solid #202020!important;border-radius:2px!important;background:linear-gradient(#777,#555)!important;
+  color:#fff!important;text-shadow:2px 2px 0 #333!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.22),inset 0 -2px 0 rgba(0,0,0,.4),0 2px 0 #111!important;
+}
+#authMenu .button:hover,#worldMenu .button:hover,#settingsMenu .button:hover,#realmsMenu .button:hover,#marketplaceMenu .button:hover,#profileMenu .button:hover,#dressingRoomMenu .button:hover{background:linear-gradient(#888,#666)!important}
+#authMenu .button.primary,#worldMenu .button.primary{background:linear-gradient(#7fbd55,#5d963d)!important}
+#authMenu .button.danger{background:linear-gradient(#b54b4b,#7f2929)!important}
+#authMenu .menu-note,#realmsMenu .menu-note,#marketplaceMenu .menu-note,#profileMenu .menu-note,#dressingRoomMenu .menu-note{color:#ddd!important;text-shadow:1px 1px #111!important}
+#authError{color:#ff8b8b!important;text-shadow:1px 1px #111}
+</style>
+</head>
 <body><div id="ultra-bg"><div class="orb o1"></div><div class="orb o2"></div><div class="gridfx"></div></div>
 <div id="game"></div>
 <div id="loadingScreen"><div class="loading-box"><div class="loading-logo">Block<span>World</span></div><div class="loading-subtitle">Procedural voxel sandbox</div><div class="loading-bar"><div id="loadingProgress" class="loading-progress"></div></div><div id="loadingText" class="loading-text">Starting...</div><div id="loadingPercent" class="loading-percent">0%</div></div></div>
@@ -961,6 +1001,58 @@ $("#realmsButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.cl
 $("#marketplaceButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();marketplaceMenu.classList.remove("hidden")});
 $("#profileButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();profileMenu.classList.remove("hidden")});
 $("#dressingRoomButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();dressingRoomMenu.classList.remove("hidden")});
+// ===== Online account UI =====
+$("#accountButton").addEventListener("click",()=>{
+  showAuthMenu();
+});
+$("#authToggle").addEventListener("click",()=>{
+  authMode=authMode==="register"?"login":"register";
+  $("#authSubmit").textContent=authMode==="register"?"REGISTER":"SIGN IN";
+  $("#authToggle").textContent=authMode==="register"?"Already have an account? SIGN IN":"Need an account? REGISTER";
+  setAuthError("");
+});
+$("#authSubmit").addEventListener("click",async()=>{
+  const email=$("#authEmail").value.trim();
+  const password=$("#authPassword").value;
+  setAuthError("");
+  if(!firebaseAuth){
+    setAuthError("Online account service is unavailable. Check your Firebase configuration and Email/Password sign-in provider.");
+    return;
+  }
+  if(!email||!password){setAuthError("Enter your email and password.");return;}
+  if(password.length<6){setAuthError("Password must be at least 6 characters.");return;}
+  const button=$("#authSubmit");
+  button.disabled=true;
+  button.textContent=authMode==="register"?"CREATING...":"SIGNING IN...";
+  try{
+    if(authMode==="register") await firebaseAuth.createUserWithEmailAndPassword(email,password);
+    else await firebaseAuth.signInWithEmailAndPassword(email,password);
+    $("#authPassword").value="";
+    refreshAuthUI();
+  }catch(e){
+    const code=e&&e.code||"";
+    const messages={
+      "auth/email-already-in-use":"That email is already registered. Switch to SIGN IN.",
+      "auth/invalid-email":"Enter a valid email address.",
+      "auth/weak-password":"Choose a stronger password.",
+      "auth/user-not-found":"No account was found for that email.",
+      "auth/wrong-password":"Incorrect password.",
+      "auth/invalid-credential":"Email or password is incorrect.",
+      "auth/operation-not-allowed":"Email/password authentication is not enabled in Firebase Console.",
+      "auth/network-request-failed":"Network error. Check your internet connection."
+    };
+    setAuthError(messages[code]||((e&&e.message)||"Authentication failed."));
+  }finally{
+    button.disabled=false;
+    button.textContent=authMode==="register"?"REGISTER":"SIGN IN";
+  }
+});
+$("#authSignOut").addEventListener("click",async()=>{
+  if(!firebaseAuth)return;
+  try{await firebaseAuth.signOut();setAuthError("");refreshAuthUI();}
+  catch(e){setAuthError((e&&e.message)||"Sign out failed.");}
+});
+$("#authBack").addEventListener("click",showMainMenu);
 $("#backRealmsButton").addEventListener("click",showMainMenu);$("#backMarketplaceButton").addEventListener("click",showMainMenu);$("#backProfileButton").addEventListener("click",showMainMenu);$("#backDressingButton").addEventListener("click",showMainMenu);
 $("#openRealmsButton").addEventListener("click",()=>{if(world.size){showGame();openPanel("multiplayerPanel")}else{showMainMenu()}});
 function pauseGame(){
