@@ -588,7 +588,22 @@ let gameActive=false,generationInProgress=false,generationId=0,world=new Map();
 const CHUNK_SIZE=16,INITIAL_CHUNK_RADIUS=1,LOW_DEVICE=(window.matchMedia("(pointer:coarse)").matches||innerWidth<=800||(navigator.hardwareConcurrency||4)<=4||(navigator.deviceMemory||4)<=4),STREAM_CHUNK_RADIUS=LOW_DEVICE?3:4,UNLOAD_CHUNK_RADIUS=LOW_DEVICE?4:6,CHUNK_STREAM_BUDGET_MS=LOW_DEVICE?2:4,MAX_CHUNKS_PER_TICK=LOW_DEVICE?1:2,MAX_UNLOADS_PER_TICK=1;
 let worldHeight=32,worldSeed=1,currentTerrain="normal",chunkGenQueue=[],generatedChunks=new Set(),chunkMeshGroups=new Map(),blockMeshSet=new Set(),lastPlayerChunk={cx:null,cz:null},streamingAccumulator=0;
 let generationOptions={terrainHeight:32,mountainHeight:70,roughness:55,waterLevel:5,water:true,trees:true,caves:false,extraIslands:false,worldType:"normal"};
-const blocks={grass:{name:"Grass",color:0x59a83b,top:0x6fbd45,bottom:0x79502f},dirt:{name:"Dirt",color:0x79502f},stone:{name:"Stone",color:0x888888},wood:{name:"Wood",color:0x9a6a3a},sand:{name:"Sand",color:0xdcc982},snow:{name:"Snow",color:0xf3f7fa},water:{name:"Water",color:0x3c82cf}};
+let blocks={};
+let blocksLoaded=false;
+async function loadBlocks(){
+  const response=await fetch("./Blocks.json",{cache:"no-store"});
+  if(!response.ok) throw new Error("Blocks.json could not be loaded (HTTP "+response.status+")");
+  const data=await response.json();
+  if(!data || typeof data!=="object" || Array.isArray(data)) throw new Error("Blocks.json has an invalid format.");
+  for(const [id,block] of Object.entries(data)){
+    if(!block || typeof block!=="object" || !block.name || typeof block.color!=="string") throw new Error("Invalid block definition: "+id);
+    for(const key of ["color","top","bottom"]){
+      if(typeof block[key]==="string" && /^0x[0-9a-f]{1,8}$/i.test(block[key])) block[key]=Number(block[key]);
+    }
+  }
+  blocks=data;
+  blocksLoaded=true;
+}
 const hotbar=["grass","dirt","stone","wood"];let selectedBlock=0;
 const survival={maxHealth:20,health:20,maxHunger:20,hunger:20,hungerTimer:0,regenTimer:0,starvationTimer:0,damageCooldown:0,dead:false,respawnTimer:0};
 const dayNight={time:12*60,duration:720,skyDay:new THREE.Color(0x87ceeb),skyNight:new THREE.Color(0x071327),fogDay:new THREE.Color(0x87ceeb),fogNight:new THREE.Color(0x0b1630)};
@@ -1110,7 +1125,7 @@ $("#tgGenerate").addEventListener("click",async()=>{const opts={terrainHeight:+t
 window.addEventListener("mousedown",e=>{if(!gameActive||document.pointerLockElement!==renderer.domElement)return;if(e.button===0){const mobsBefore=mobs.length;attackMobAtCrosshair();if(mobs.length===mobsBefore)interact(0)}else if(e.button===2)interact(2)});
 function handleResize(){const w=Math.max(1,innerWidth),h=Math.max(1,innerHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setPixelRatio(LOW_DEVICE?Math.min(window.devicePixelRatio||1,1):Math.min(window.devicePixelRatio||1,1.5));renderer.setSize(w,h,false)}window.addEventListener("resize",handleResize);if(window.visualViewport)visualViewport.addEventListener("resize",handleResize);renderer.domElement.addEventListener("webglcontextlost",e=>{e.preventDefault();showError("WebGL context was lost. Reload BlockWorld to continue.")});
 let last=performance.now(),frameCounter=0,qualityTimer=0;function adaptiveQuality(dt){qualityTimer+=dt;if(qualityTimer<2)return;qualityTimer=0;const fps=frameCounter/2;frameCounter=0;if(!LOW_DEVICE&&fps>58&&renderer.getPixelRatio()<1.5)renderer.setPixelRatio(Math.min(1.5,renderer.getPixelRatio()+.1));if(fps<35&&renderer.getPixelRatio()>0.7)renderer.setPixelRatio(Math.max(.7,renderer.getPixelRatio()-.1))}
-async function startGame(){setLoading(5,"Starting BlockWorld...");await new Promise(r=>setTimeout(r,100));setLoading(35,"Loading voxel engine...");await new Promise(r=>setTimeout(r,100));setLoading(70,"Preparing survival systems...");await new Promise(r=>setTimeout(r,100));setLoading(100,"Ready!");await new Promise(r=>setTimeout(r,220));showMainMenu()}
+async function startGame(){setLoading(5,"Starting BlockWorld...");await new Promise(r=>setTimeout(r,100));setLoading(20,"Loading Blocks.json...");try{await loadBlocks()}catch(e){showError("Block list could not be loaded:\n\n"+(e&&e.message||String(e))+"\n\nMake sure Blocks.json is in the same folder as index.html.");return;}setLoading(35,"Loading voxel engine...");await new Promise(r=>setTimeout(r,100));setLoading(70,"Preparing survival systems...");await new Promise(r=>setTimeout(r,100));setLoading(100,"Ready!");await new Promise(r=>setTimeout(r,220));showMainMenu()}
 function animate(now){requestAnimationFrame(animate);const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;updatePlayer(dt);updateSurvival(dt);updateDayNight(dt);updateChunkStreaming(dt);updateMobSpawning(dt);updateMobs(dt);updateMultiplayer(dt);updateRemoteVisuals(dt);frameCounter++;if(frameCounter%30===0)status.textContent=world.size?`BlockWorld · HP ${Math.ceil(survival.health)} · Food ${Math.floor(survival.hunger)} · Mobs ${mobs.length} · Chunks ${generatedChunks.size}`:"BlockWorld v0.5";adaptiveQuality(dt);if(gameActive&&gameSettings.autoSave==="on"&&frameCounter%300===0)queueWorldSave();renderer.render(scene,camera)}
 camera.fov=75;camera.updateProjectionMatrix();scene.fog.near=19.8;scene.fog.far=55;updateSurvivalHud();updateTerrainPreview();handleResize();startGame();requestAnimationFrame(animate);
 </script>
