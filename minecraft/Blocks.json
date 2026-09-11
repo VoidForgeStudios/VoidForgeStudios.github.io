@@ -28,5 +28,9 @@
   "water": {
     "name": "Water",
     "color": "0x3c82cf"
+  },
+  "leaf": {
+    "name":"leaf",
+    "color":"#54a147"
   }
 }
