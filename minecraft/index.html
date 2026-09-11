@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#87ceeb;font-family:Arial,Helvetica,sans-serif;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;overscroll-behavior:none}button,input,select{font:inherit}button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}input,select{touch-action:manipulation}#game{position:fixed;inset:0;width:100%;height:100%}#game canvas{display:block;width:100%;height:100%;touch-action:none}.hidden,.screen.hidden{display:none!important}
 #loadingScreen{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 30%,#29435c 0%,#111827 55%,#070b11 100%);color:#fff}.loading-box{width:min(440px,90vw);text-align:center}.loading-logo{margin-bottom:8px;font-size:clamp(48px,13vw,82px);font-weight:900;letter-spacing:-6px;line-height:.95;text-shadow:0 8px 30px rgba(0,0,0,.55)}.loading-logo span{color:#8be26b}.loading-subtitle{margin-bottom:26px;color:#94a3b8;font-size:14px}.loading-bar{width:100%;height:14px;overflow:hidden;padding:2px;background:#0b111a;border:1px solid #334155;border-radius:999px}.loading-progress{width:0%;height:100%;border-radius:999px;background:#8be26b;transition:width .15s ease}.loading-text{margin-top:12px;color:#cbd5e1;font-size:13px}.loading-percent{margin-top:5px;color:#64748b;font-size:11px}
-.screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(rgba(3,10,16,.42),rgba(3,10,16,.78));backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}.panel{width:min(500px,94vw);max-height:92vh;overflow:auto;padding:28px;color:#fff;background:rgba(15,23,32,.96);border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.6);overscroll-behavior:contain}.panel h1,.panel h2{margin-top:0}.button{width:100%;min-height:48px;margin:6px 0;padding:10px 16px;border:0;border-radius:9px;color:#fff;background:#273445;cursor:pointer;font-weight:800}.button.primary{color:#10200b;background:#8be26b}.button.secondary{background:#374151}.button.danger{background:#7f2932}.option{margin:16px 0}.option label{display:block;margin-bottom:7px;color:#cbd5e1;font-size:13px;font-weight:700}.option select,.option input[type=text],.option input[type=number]{width:100%;height:43px;padding:0 11px;border:1px solid #475569;border-radius:8px;outline:none;color:#fff;background:#1e293b}.seed-row{display:flex;gap:7px}.seed-row input{flex:1}.small-button{width:46px;border:0;border-radius:8px;color:#fff;background:#334155;cursor:pointer}.range-value{float:right;color:#8be26b}
+.screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(rgba(3,10,16,.42),rgba(3,10,16,.78));backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}.panel{width:min(500px,94vw);max-height:92vh;overflow:auto;padding:28px;color:#fff;background:rgba(15,23,32,.96);border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.6);overscroll-behavior:contain}.panel h1,.panel h2{margin-top:0}.button{width:100%;min-height:48px;margin:6px 0;padding:10px 16px;border:0;border-radius:99px;color:#fff;background:#273445;cursor:pointer;font-weight:800}.button.primary{color:#10200b;background:#8be26b}.button.secondary{background:#374151}.button.danger{background:#7f2932}.option{margin:16px 0}.option label{display:block;margin-bottom:7px;color:#cbd5e1;font-size:13px;font-weight:700}.option select,.option input[type=text],.option input[type=number]{width:100%;height:43px;padding:0 11px;border:1px solid #475569;border-radius:8px;outline:none;color:#fff;background:#1e293b}.seed-row{display:flex;gap:7px}.seed-row input{flex:1}.small-button{width:46px;border:0;border-radius:8px;color:#fff;background:#334155;cursor:pointer}.range-value{float:right;color:#8be26b}
 #mainMenu{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;padding:0!important;border-radius:0!important;overflow:hidden!important;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 72% 28%,rgba(70,145,255,.18),transparent 28%),radial-gradient(circle at 20% 75%,rgba(30,255,180,.10),transparent 30%),linear-gradient(135deg,rgba(3,8,16,.96),rgba(7,16,28,.94));z-index:20000!important}#mainMenu:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.28;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:42px 42px}.menu-shell{position:relative;z-index:2;width:min(1180px,92vw);min-height:min(680px,88vh);display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,5vw,80px);align-items:center}.menu-brand{text-align:left}.menu-kicker{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;margin-bottom:20px;border:1px solid rgba(120,190,255,.25);border-radius:999px;background:rgba(255,255,255,.045);color:rgba(220,240,255,.78);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}.menu-kicker:before{content:"";width:7px;height:7px;border-radius:50%;background:#62ffad;box-shadow:0 0 14px #62ffad}.menu-title{margin:0;font-size:clamp(58px,9vw,128px);line-height:.84;letter-spacing:-6px;font-weight:1000;color:#fff;text-shadow:0 5px 0 rgba(0,0,0,.35),0 0 45px rgba(70,160,255,.22)}.menu-title span{color:#72b7ff}.menu-subtitle{max-width:610px;margin:28px 0 34px;color:rgba(225,235,245,.68);font-size:clamp(15px,1.7vw,20px);line-height:1.65}.menu-stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.menu-stat{padding:11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);color:rgba(235,245,255,.74);font-size:12px;font-weight:700}.menu-panel{width:min(430px,100%);justify-self:end;padding:26px;border:1px solid rgba(150,205,255,.16);border-radius:24px;background:linear-gradient(145deg,rgba(17,27,42,.88),rgba(8,14,24,.84));box-shadow:0 28px 90px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07);backdrop-filter:blur(18px)}.menu-panel-title{margin:0 0 7px;font-size:13px;text-transform:uppercase;letter-spacing:2px;color:rgba(220,235,250,.5)}.menu-panel-version{margin:0 0 22px;color:rgba(255,255,255,.92);font-size:25px;font-weight:900}.menu-actions{display:grid;gap:11px}.menu-action{position:relative;min-height:58px;border:1px solid rgba(255,255,255,.11);border-radius:15px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;text-align:left;color:#fff;background:rgba(255,255,255,.055);cursor:pointer;transition:transform .16s ease,background .16s ease,border-color .16s ease}.menu-action:hover{transform:translateX(5px);background:rgba(90,165,255,.13);border-color:rgba(120,190,255,.35)}.menu-action.primary{background:linear-gradient(135deg,rgba(70,145,255,.9),rgba(70,105,230,.88));border-color:rgba(150,210,255,.5);box-shadow:0 12px 30px rgba(40,110,255,.22)}.menu-action .action-left{display:flex;align-items:center;gap:13px}.menu-action .action-icon{width:31px;text-align:center;font-size:20px}.menu-action .action-text strong{display:block;font-size:15px}.menu-action .action-text small{display:block;margin-top:3px;color:rgba(255,255,255,.5);font-size:11px}.menu-action .arrow{color:rgba(255,255,255,.45);font-size:20px}.menu-footer{display:flex;justify-content:space-between;gap:12px;margin-top:20px;color:rgba(255,255,255,.34);font-size:10px;text-transform:uppercase;letter-spacing:1px}
 #terrainGenerator{position:fixed;inset:0;z-index:21000;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 30%,rgba(75,150,255,.13),transparent 35%),rgba(2,7,14,.94);backdrop-filter:blur(14px)}#terrainGenerator.active{display:flex}.terrain-generator-card{width:min(1080px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(145,205,255,.18);border-radius:26px;background:linear-gradient(145deg,rgba(18,30,46,.96),rgba(7,13,23,.97));box-shadow:0 35px 110px rgba(0,0,0,.58);padding:clamp(18px,3vw,34px)}.tg-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px}.tg-title{margin:0;font-size:clamp(28px,4vw,48px);color:#fff}.tg-subtitle{margin:7px 0 0;color:rgba(225,235,245,.58)}.tg-close{min-width:44px;min-height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;cursor:pointer}.tg-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.tg-section{border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;background:rgba(255,255,255,.035)}.tg-section h3{margin:0 0 14px;color:#fff;font-size:15px}.tg-field{margin:12px 0}.tg-field label{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;color:rgba(235,245,255,.7);font-size:12px}.tg-field input[type=range]{width:100%}.tg-field input[type=number],.tg-field select{width:100%;min-height:44px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#101b2a;color:#fff;padding:0 12px}.tg-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.tg-preset{min-height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;cursor:pointer}.tg-preset.selected{border-color:rgba(100,175,255,.55);background:rgba(75,145,255,.16)}.tg-checks{display:grid;grid-template-columns:1fr 1fr;gap:9px}.tg-check{display:flex;align-items:center;gap:9px;padding:10px;border-radius:11px;background:rgba(255,255,255,.04);color:rgba(235,245,255,.72);font-size:12px}.tg-preview{height:190px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:#09111d;position:relative}.tg-preview canvas{width:100%;height:100%;display:block}.tg-preview-label{position:absolute;left:12px;bottom:10px;padding:5px 8px;border-radius:8px;background:rgba(0,0,0,.45);color:rgba(255,255,255,.75);font-size:10px;letter-spacing:1px;text-transform:uppercase}.tg-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.tg-actions button{min-height:50px;padding:0 20px;border-radius:13px;border:1px solid rgba(255,255,255,.12);color:#fff;background:rgba(255,255,255,.06);cursor:pointer}.tg-actions .tg-generate{background:linear-gradient(135deg,#438fff,#6d6cff);border-color:rgba(160,215,255,.5);font-weight:800}
 #survivalHud{position:fixed;top:12px;right:12px;z-index:25;width:min(270px,42vw);display:grid;gap:7px;pointer-events:none}.survival-bar{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(0,0,0,.62);box-shadow:0 5px 20px rgba(0,0,0,.2)}.survival-icon{width:22px;flex:0 0 22px;text-align:center;font-size:16px}.survival-track{flex:1;height:14px;overflow:hidden;border:1px solid rgba(0,0,0,.55);border-radius:999px;background:rgba(255,255,255,.1)}.survival-fill{width:100%;height:100%;border-radius:inherit;transition:width .18s linear}.health-fill{background:linear-gradient(90deg,#a72838,#ef5260)}.hunger-fill{background:linear-gradient(90deg,#a76e1c,#f1c64d)}.survival-text{min-width:52px;color:#fff;font-size:10px;font-weight:800;text-align:right;white-space:nowrap}.world-time{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:24;padding:7px 10px;border-radius:999px;background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.13);color:rgba(255,255,255,.9);font-size:11px;font-weight:800;pointer-events:none}.world-time.night{background:rgba(11,19,42,.62)}
@@ -22,7 +22,6 @@
 #errorScreen{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:20px;background:#090d14;color:#fff}.error-box{width:min(600px,94vw);padding:25px;border:1px solid #7f2932;border-radius:14px;background:#171923}.error-box h2{margin-top:0;color:#ff8b8b}#errorMessage{color:#cbd5e1;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 @media (pointer:coarse),(max-width:800px){#mobileControls{display:block}#help{display:none}#hotbar{bottom:8px;transform:translateX(-50%) scale(.76);transform-origin:bottom center}#status{top:7px;left:7px;font-size:10px}#crosshair{font-size:22px}#survivalHud{top:7px;right:7px;width:min(205px,46vw);gap:5px}.survival-bar{padding:4px 6px}.survival-track{height:12px}.survival-text{min-width:44px;font-size:9px}.world-time{top:7px;font-size:10px}}@media(max-width:850px){.menu-shell{min-height:100vh;width:100%;padding:80px 24px 70px;grid-template-columns:1fr;gap:28px;align-content:center}.menu-brand{text-align:center}.menu-title{letter-spacing:-3px;font-size:clamp(54px,17vw,92px)}.menu-subtitle{margin:20px auto 24px}.menu-stats{justify-content:center}.menu-panel{justify-self:center;width:min(500px,100%)}}@media(max-width:700px){#terrainGenerator{padding:10px}.terrain-generator-card{max-height:96vh;border-radius:18px;padding:14px}.tg-grid{grid-template-columns:1fr}.tg-presets{grid-template-columns:1fr 1fr}.tg-checks{grid-template-columns:1fr}.tg-actions{flex-direction:column-reverse}.tg-actions button{width:100%}}@media(max-width:600px){#lookArea{inset:0 0 38% 30%}#joystick{width:132px;height:132px}}@media(max-width:390px){#joystick{width:118px;height:118px;left:10px;bottom:14px}#lookArea{inset:0 0 40% 25%}}@media(orientation:landscape) and (max-height:600px){#joystick{width:105px;height:105px}.menu-shell{min-height:auto;padding:45px 30px;grid-template-columns:1fr 1fr;gap:30px}.menu-title{font-size:clamp(45px,10vh,80px)}.menu-subtitle{margin:12px auto;font-size:13px}.menu-stats{display:none}.menu-panel{max-height:82vh;overflow-y:auto}}
 
-/* ===== BlockWorld UI Refresh ===== */
 :root{
   --ui-bg:rgba(8,14,24,.78);
   --ui-bg-solid:#0b1320;
@@ -135,7 +134,6 @@ input[type=range]{accent-color:var(--ui-accent);height:6px}
 
 #clientModeBadge{position:fixed;right:18px;bottom:16px;z-index:9999;padding:8px 12px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(8,12,20,.62);backdrop-filter:blur(12px);font:700 10px/1 system-ui,sans-serif;letter-spacing:.12em;color:rgba(255,255,255,.5);pointer-events:none}
 
-/* In-game client HUD is hidden until gameplay actually starts. */
 #survivalHud,#worldTime,#crosshair,#status,#hotbar,#help,#mobileExtraButtons{display:none !important}
 body.in-game-ui #survivalHud{display:grid !important}
 body.in-game-ui #worldTime,body.in-game-ui #crosshair,body.in-game-ui #status,body.in-game-ui #help{display:block !important}
@@ -161,7 +159,6 @@ input:focus,textarea:focus,select:focus{border-color:rgba(94,231,255,.7)!importa
 #ultra-bg{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden;background:radial-gradient(circle at 50% 20%,rgba(72,76,160,.16),transparent 42%)}.orb{position:absolute;width:38vw;height:38vw;border-radius:50%;filter:blur(90px);opacity:.12}.o1{background:#00d9ff;left:-15vw;top:20vh}.o2{background:#7c5cff;right:-15vw;bottom:5vh}.gridfx{position:absolute;inset:0;opacity:.08;background-image:linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,transparent,black 25%,black 70%,transparent)}
 </style>
 <style id="client-ui">
-/* BlockWorld Client UI — visual-only refresh, gameplay unchanged */
 :root{--client-blue:#5ee7ff;--client-violet:#7c5cff;--client-green:#73e36b;--client-bg:rgba(6,10,18,.74);--client-line:rgba(255,255,255,.10)}
 body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 #mainMenu{background:linear-gradient(180deg,rgba(3,7,13,.16),rgba(3,7,13,.28))!important}
@@ -185,7 +182,6 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .menu-action.primary{background:linear-gradient(135deg,rgba(94,231,255,.14),rgba(124,92,255,.12))!important;border-color:rgba(94,231,255,.3)!important}
 .action-icon{width:38px!important;height:38px!important;border-radius:10px!important;background:rgba(255,255,255,.055)!important}
 .menu-footer{margin-top:13px!important}
-/* In-game client HUD */
 #status{left:16px!important;top:16px!important;padding:8px 11px!important;border-radius:11px!important;background:rgba(5,9,16,.66)!important;border-color:rgba(255,255,255,.09)!important;backdrop-filter:blur(12px)!important;box-shadow:0 8px 25px rgba(0,0,0,.25)!important}
 #status:before{content:"●";color:var(--client-green);margin-right:7px;text-shadow:0 0 8px var(--client-green)}
 #worldTime{top:16px!important;padding:7px 13px!important;border-radius:10px!important;background:rgba(5,9,16,.58)!important;border-color:rgba(255,255,255,.09)!important;backdrop-filter:blur(12px)!important}
@@ -194,7 +190,6 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .survival-icon{font-size:13px!important}.survival-track{height:9px!important;background:rgba(255,255,255,.08)!important}.survival-text{font-size:9px!important;color:rgba(255,255,255,.72)!important}
 #crosshair{font-size:18px!important;color:rgba(255,255,255,.9)!important;text-shadow:0 0 4px #000!important}
 #hotbar{bottom:20px!important;padding:6px!important;gap:5px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:13px!important;background:rgba(4,8,15,.70)!important;backdrop-filter:blur(16px)!important;box-shadow:0 18px 50px rgba(0,0,0,.38)!important}
-/* Hotbar inventory: always arranged left-to-right */
 #hotbar{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;white-space:nowrap!important;overflow-x:visible!important;overflow-y:hidden!important;direction:ltr!important;width:max-content!important;max-width:calc(100vw - 18px)!important;box-sizing:border-box!important}
 #hotbar > .slot{order:0!important;display:grid!important;flex:0 0 55px!important;width:55px!important;min-width:55px!important;max-width:55px!important}
 
@@ -204,12 +199,10 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .slot span{font-size:8px!important;color:rgba(255,255,255,.55)!important}
 .swatch{width:27px!important;height:27px!important}
 #help{left:16px!important;bottom:20px!important;border-radius:10px!important;background:rgba(5,9,16,.52)!important;border-color:rgba(255,255,255,.08)!important;backdrop-filter:blur(10px)!important;color:rgba(255,255,255,.48)!important}
-/* Client-style modal windows */
 .game-panel,.panel,.terrain-generator-card{border-radius:18px!important;background:rgba(6,11,20,.92)!important;border-color:rgba(255,255,255,.11)!important;box-shadow:0 30px 100px rgba(0,0,0,.62),inset 0 1px rgba(255,255,255,.06)!important}
 .game-panel:before{content:"BLOCKWORLD CLIENT";display:block;margin-bottom:8px;color:rgba(94,231,255,.5);font-size:8px;font-weight:900;letter-spacing:2px}
 .game-panel h2{font-size:20px!important;margin-bottom:16px!important}
 .game-panel .close-x{background:rgba(255,255,255,.045)!important;border-color:rgba(255,255,255,.09)!important}
-/* Mobile client */
 #mobileExtraButtons .extra-btn{border-radius:12px!important;background:rgba(5,9,16,.62)!important;border-color:rgba(255,255,255,.12)!important;backdrop-filter:blur(12px)!important}
 .mobile-button{background:rgba(5,9,16,.48)!important;border-color:rgba(255,255,255,.22)!important;backdrop-filter:blur(10px)!important}
 #joystick{background:rgba(5,9,16,.26)!important;border-color:rgba(255,255,255,.16)!important}
@@ -242,7 +235,6 @@ body:not(.in-game-ui) #survivalHud,body:not(.in-game-ui) #worldTime,body:not(.in
 @media(max-width:700px){#worldMenu .panel,#settingsMenu .panel,#realmsMenu .panel,#marketplaceMenu .panel,#profileMenu .panel,#dressingRoomMenu .panel,#errorScreen .error-box{width:calc(100vw - 24px)!important;padding:20px!important}}
 </style>
 <style id="minecraft-menu-refresh">
-/* Classic block-game menu, based on the supplied visual reference. */
 .minecraft-menu{
   padding:0!important;
   overflow:hidden!important;
@@ -360,10 +352,6 @@ kbd{
 #mpRoomCode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;letter-spacing:.08em}
 #mpPlayers{text-align:center}
 @media(max-width:520px){#multiplayerPanel .mp-actions{grid-template-columns:1fr}}
-/* ================================================================
-   EASY CUSTOMIZATION
-   Change these values first when tuning the client appearance.
-   ================================================================ */
 :root {
   --custom-accent: #5ee7ff;
   --custom-accent-strong: #7c5cff;
@@ -373,7 +361,6 @@ kbd{
   --custom-radius: 12px;
 }
 
-/* Shared controls */
 .button,
 .mp-button,
 .small-button {
@@ -381,7 +368,6 @@ kbd{
   border-radius: var(--custom-radius) !important;
 }
 
-/* Shared panels */
 .game-panel,
 .panel,
 .terrain-generator-card {
@@ -389,7 +375,6 @@ kbd{
   border-color: var(--custom-panel-border) !important;
 }
 
-/* Main menu controls */
 .mc-button,
 .mc-side-button {
   min-height: var(--custom-button-height);
@@ -398,18 +383,14 @@ kbd{
 .mc-logo-sub {
   color: var(--custom-accent) !important;
 }
-
-/* Keep this block near the end so overrides are predictable. */
 </style>
 <style id="minecraft-blue-menu-fix">
-/* Clean Minecraft-style menus: blue sky background, no modern overlay graphics. */
 #ultra-bg{display:none!important}
 #mainMenu.minecraft-menu{background:#79bce8!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 #mainMenu.minecraft-menu::before,#mainMenu.minecraft-menu::after{display:none!important}
 #mainMenu .mc-menu-bg{background:#79bce8!important}
 #mainMenu .mc-menu-bg::before{display:none!important}
 #mainMenu .mc-menu-content{background:transparent!important}
-/* Apply the same blocky Minecraft look to every menu, including account/login. */
 #registerMenu.screen,#loginMenu.screen,#worldMenu.screen,#settingsMenu.screen,#realmsMenu.screen,#marketplaceMenu.screen,#profileMenu.screen,#dressingRoomMenu.screen{
   background:#79bce8!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
 }
@@ -569,7 +550,7 @@ function applyGameSettings(){fovValue.textContent=fovInput.value;sensitivityValu
 const healthFill=$("#healthFill"),hungerFill=$("#hungerFill"),healthText=$("#healthText"),hungerText=$("#hungerText"),deathOverlay=$("#deathOverlay");
 const tgSeed=$("#tgSeed"),tgHeight=$("#tgHeight"),tgMountain=$("#tgMountain"),tgRoughness=$("#tgRoughness"),tgWaterLevel=$("#tgWater"),tgTrees=$("#tgTrees"),tgWaterEnabled=$("#tgWaterEnabled"),tgCaves=$("#tgCaves"),tgIslands=$("#tgIslands"),tgWorldType=$("#tgWorldType"),terrainPreviewCanvas=$("#terrainPreviewCanvas");
 const terrainInput=$("#terrainType"),seedInput=$("#seed");
-/* Replace these values with the Web app configuration from Firebase Console. */
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDLez6wPbTrWSDP-LkSuXzTs7n2XuLQM9o",
   authDomain: "minecraft-ed75b.firebaseapp.com",
@@ -588,20 +569,34 @@ let gameActive=false,generationInProgress=false,generationId=0,world=new Map();
 const CHUNK_SIZE=16,INITIAL_CHUNK_RADIUS=1,LOW_DEVICE=(window.matchMedia("(pointer:coarse)").matches||innerWidth<=800||(navigator.hardwareConcurrency||4)<=4||(navigator.deviceMemory||4)<=4),STREAM_CHUNK_RADIUS=LOW_DEVICE?3:4,UNLOAD_CHUNK_RADIUS=LOW_DEVICE?4:6,CHUNK_STREAM_BUDGET_MS=LOW_DEVICE?2:4,MAX_CHUNKS_PER_TICK=LOW_DEVICE?1:2,MAX_UNLOADS_PER_TICK=1;
 let worldHeight=32,worldSeed=1,currentTerrain="normal",chunkGenQueue=[],generatedChunks=new Set(),chunkMeshGroups=new Map(),blockMeshSet=new Set(),lastPlayerChunk={cx:null,cz:null},streamingAccumulator=0;
 let generationOptions={terrainHeight:32,mountainHeight:70,roughness:55,waterLevel:5,water:true,trees:true,caves:false,extraIslands:false,worldType:"normal"};
-let blocks={};
-let blocksLoaded=false;
+let blocks={
+  grass:{name:"Grass",color:0x55a826,top:0x66c12c,bottom:0x83532b},
+  dirt:{name:"Dirt",color:0x83532b},
+  stone:{name:"Stone",color:0x7d7d7d},
+  wood:{name:"Wood",color:0x614126},
+  leaves:{name:"Leaves",color:0x2e7d32,transparent:true},
+  water:{name:"Water",color:0x2980b9,transparent:true,opacity:0.7},
+  sand:{name:"Sand",color:0xd4ac0d},
+  snow:{name:"Snow",color:0xf0f3f4}
+};
+let blocksLoaded=true;
 async function loadBlocks(){
-  const response=await fetch("./Blocks.json",{cache:"no-store"});
-  if(!response.ok) throw new Error("Blocks.json could not be loaded (HTTP "+response.status+")");
-  const data=await response.json();
-  if(!data || typeof data!=="object" || Array.isArray(data)) throw new Error("Blocks.json has an invalid format.");
-  for(const [id,block] of Object.entries(data)){
-    if(!block || typeof block!=="object" || !block.name || typeof block.color!=="string") throw new Error("Invalid block definition: "+id);
-    for(const key of ["color","top","bottom"]){
-      if(typeof block[key]==="string" && /^0x[0-9a-f]{1,8}$/i.test(block[key])) block[key]=Number(block[key]);
+  try {
+    const response=await fetch("./Blocks.json",{cache:"no-store"});
+    if(response.ok){
+      const data=await response.json();
+      if(data && typeof data==="object" && !Array.isArray(data)){
+        for(const [id,block] of Object.entries(data)){
+          if(block && typeof block==="object" && block.name && typeof block.color!=="undefined"){
+            for(const key of ["color","top","bottom"]){
+              if(typeof block[key]==="string" && /^0x[0-9a-f]{1,8}$/i.test(block[key])) block[key]=Number(block[key]);
+            }
+          }
+        }
+        blocks=data;
+      }
     }
-  }
-  blocks=data;
+  }catch(_){}
   blocksLoaded=true;
 }
 const hotbar=["grass","dirt","stone","wood"];let selectedBlock=0;
@@ -610,525 +605,645 @@ const dayNight={time:12*60,duration:720,skyDay:new THREE.Color(0x87ceeb),skyNigh
 const mobile={x:0,y:0,jump:false,sprint:false};
 function setLoading(p,t){p=Math.max(0,Math.min(100,Number(p)||0));loadingProgress.style.width=p+"%";loadingPercent.textContent=Math.round(p)+"%";loadingText.textContent=t||"";}
 function showError(m){gameActive=false;resetInputs();try{if(document.pointerLockElement)document.exitPointerLock()}catch(_){}$("#errorMessage").textContent=String(m||"Unknown error");loadingScreen.classList.add("hidden");terrainGenerator.classList.remove("active");document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));$("#errorScreen").style.display="flex";}
-function blockKey(x,y,z){return x+","+y+","+z}function getBlock(x,y,z){return world.get(blockKey(x,y,z))}const WORLD_DB_NAME="BlockWorldWorlds",WORLD_DB_VERSION=1,WORLD_STORE="worlds";
-let activeWorldName="My World",saveTimer=null,saveInProgress=false;
-function openWorldDB(){return new Promise((resolve,reject)=>{if(!window.indexedDB){reject(new Error("IndexedDB is unavailable in this browser."));return}const r=indexedDB.open(WORLD_DB_NAME,WORLD_DB_VERSION);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(WORLD_STORE))r.result.createObjectStore(WORLD_STORE,{keyPath:"name"})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error("Could not open world storage."))})}
-async function saveWorldNow(){if(!world.size||generationInProgress)return false;if(saveInProgress)return false;saveInProgress=true;try{const db=await openWorldDB();const blocksArray=Array.from(world.entries());const data={name:activeWorldName||"My World",seed:worldSeed,terrain:currentTerrain,height:worldHeight,options:generationOptions,player:{x:player.position.x,y:player.position.y,z:player.position.z,yaw:player.yaw,pitch:player.pitch},survival:{health:survival.health,hunger:survival.hunger},blocks:blocksArray,savedAt:Date.now()};await new Promise((resolve,reject)=>{const tx=db.transaction(WORLD_STORE,"readwrite");tx.objectStore(WORLD_STORE).put(data);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();return true}catch(e){console.warn("World save failed",e);return false}finally{saveInProgress=false}}
-function queueWorldSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveWorldNow(),900)}
-async function loadSavedWorld(name){try{const db=await openWorldDB();const data=await new Promise((resolve,reject)=>{const r=db.transaction(WORLD_STORE,"readonly").objectStore(WORLD_STORE).get(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});db.close();if(!data)return false;world.clear();for(const [k,v] of data.blocks||[])world.set(k,v);activeWorldName=data.name||"My World";worldSeed=Number(data.seed)||1;currentTerrain=data.terrain||"normal";worldHeight=Number(data.height)||32;generationOptions={...generationOptions,...(data.options||{})};clearAllChunkMeshes();generatedChunks.clear();for(const k of world.keys()){const [x,y,z]=k.split(",").map(Number);if(Number.isFinite(x)&&Number.isFinite(z))generatedChunks.add(chunkKeyFor(Math.floor(x/CHUNK_SIZE),Math.floor(z/CHUNK_SIZE)))}for(const k of generatedChunks){const [cx,cz]=k.split(",").map(Number);buildChunkMesh(cx,cz)}const sp=data.player||{};player.position.set(Number(sp.x)||.5,Number(sp.y)||15,Number(sp.z)||.5);player.yaw=Number(sp.yaw)||0;player.pitch=Number(sp.pitch)||0;survival.health=Number(data.survival?.health??20);survival.hunger=Number(data.survival?.hunger??20);survival.dead=false;updateSurvivalHud();lastPlayerChunk={cx:null,cz:null};return true}catch(e){console.warn("World load failed",e);return false}}
-async function listSavedWorlds(){try{const db=await openWorldDB();const all=await new Promise((resolve,reject)=>{const r=db.transaction(WORLD_STORE,"readonly").objectStore(WORLD_STORE).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error)});db.close();return all.sort((a,b)=>(b.savedAt||0)-(a.savedAt||0))}catch(e){return []}}
-async function loadLatestSavedWorld(){const worlds=await listSavedWorlds();if(!worlds.length)return false;return loadSavedWorld(worlds[0].name)}
-window.addEventListener("beforeunload",()=>{if(world.size&&!generationInProgress)saveWorldNow()});
-function setBlock(x,y,z,type){const k=blockKey(x,y,z);if(type)world.set(k,type);else world.delete(k)}function worldToChunkCoord(v){return Math.floor(v/CHUNK_SIZE)}function chunkKeyFor(cx,cz){return cx+","+cz}
-function random2D(x,z,seed){let n=Math.imul(x|0,374761393)^Math.imul(z|0,668265263)^Math.imul(seed|0,1442695041);n=Math.imul(n^(n>>>13),1274126177);n^=n>>>16;return(n>>>0)/4294967295}
-function smoothNoise(x,z,scale,seed){const sx=x*scale,sz=z*scale,x0=Math.floor(sx),z0=Math.floor(sz),fx=sx-x0,fz=sz-z0,fade=t=>t*t*(3-2*t),u=fade(fx),v=fade(fz);const a=random2D(x0,z0,seed),b=random2D(x0+1,z0,seed),c=random2D(x0,z0+1,seed),d=random2D(x0+1,z0+1,seed);return(a+(b-a)*u)+((c+(d-c)*u)-(a+(b-a)*u))*v}
-function terrainHeight(x,z,type,seed){const o=generationOptions,half=40,nx=x/half,nz=z/half,large=smoothNoise(x,z,.035,seed),medium=smoothNoise(x,z,.085,seed+91),small=smoothNoise(x,z,.20,seed+177),rough=o.roughness/100,base=Math.max(4,o.terrainHeight*.23);let h;switch(type){case"flat":h=base+(medium-.5)*2;break;case"mountains":h=base+large*o.terrainHeight*(.55+o.mountainHeight/100)+medium*10*rough+small*3;break;case"islands":{const edge=Math.sqrt(nx*nx+nz*nz),island=Math.max(0,1-Math.pow(edge,1.45));h=o.waterLevel-3+island*o.terrainHeight*.65+large*5;if(o.extraIslands)h+=Math.max(0,medium-.7)*16;break}case"desert":h=base+large*o.terrainHeight*.28+medium*4*rough;break;case"snow":h=base+large*o.terrainHeight*.48+medium*8*rough+small*3;break;default:h=base+large*o.terrainHeight*.36+medium*7*rough+small*2;break}if(o.worldType==="highlands")h+=5;else if(o.worldType==="lowlands")h-=4;else if(o.worldType==="ocean")h=Math.min(h,o.waterLevel-2);return Math.max(1,Math.min(worldHeight-7,Math.floor(h)))}
-function generateTree(x,y,z){if(y<1||y+5>=worldHeight)return;for(let ty=y;ty<y+4;ty++)setBlock(x,ty,z,"wood");for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=2;dy<=4;dy++){const d=Math.abs(dx)+Math.abs(dz)+(dy===4?1:0);if(d<=3&&!getBlock(x+dx,y+dy,z+dz))setBlock(x+dx,y+dy,z+dz,"grass")}}
-function generateColumn(x,z){const type=currentTerrain,seed=worldSeed,height=terrainHeight(x,z,type,seed);for(let y=0;y<=height;y++){let bt="stone";if(type==="desert")bt=y>=height-2?"sand":"stone";else if(type==="snow")bt=y===height?"snow":(y>=height-2?"dirt":"stone");else if(type==="islands"&&height<=generationOptions.waterLevel)bt=y>=height-2?"sand":"stone";else bt=y===height?"grass":(y>=height-2?"dirt":"stone");const cave=generationOptions.caves&&y>2&&y<height-2&&random2D(x*31+y,z*37+y,seed+911)>.985;if(!cave)setBlock(x,y,z,bt)}const waterAllowed=generationOptions.water&&type!=="desert"&&type!=="snow";if(waterAllowed&&height<generationOptions.waterLevel)for(let y=height+1;y<=generationOptions.waterLevel;y++)if(y<worldHeight)setBlock(x,y,z,"water");const treeRandom=random2D(x*13,z*17,seed+300),treeAllowed=type==="normal"||type==="mountains"||type==="snow",topBlock=getBlock(x,height,z);if(generationOptions.trees&&treeAllowed&&(topBlock==="grass"||topBlock==="snow")&&height>=5&&treeRandom>.965&&Math.abs(x)>3&&Math.abs(z)>3)generateTree(x,height+1,z)}
-function generateChunk(cx,cz){const k=chunkKeyFor(cx,cz);if(generatedChunks.has(k))return false;const sx=cx*CHUNK_SIZE,sz=cz*CHUNK_SIZE;for(let x=sx;x<sx+CHUNK_SIZE;x++)for(let z=sz;z<sz+CHUNK_SIZE;z++)generateColumn(x,z);generatedChunks.add(k);return true}
-const faces=[{dir:[1,0,0],corners:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]]},{dir:[-1,0,0],corners:[[0,0,1],[0,1,1],[0,1,0],[0,0,0]]},{dir:[0,1,0],corners:[[0,1,1],[1,1,1],[1,1,0],[0,1,0]]},{dir:[0,-1,0],corners:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]]},{dir:[0,0,1],corners:[[0,0,1],[1,0,1],[1,1,1],[0,1,1]]},{dir:[0,0,-1],corners:[[1,0,0],[0,0,0],[0,1,0],[1,1,0]]}];
-function getFaceColor(type,dir){const b=blocks[type];if(!b)return 0xffffff;if(dir[1]===1&&b.top!==undefined)return b.top;if(dir[1]===-1&&b.bottom!==undefined)return b.bottom;return b.color}
-const materialCache=new Map();function getBlockMaterial(type,color){const k=type+":"+color;if(materialCache.has(k))return materialCache.get(k);const m=new THREE.MeshLambertMaterial({color,transparent:type==="water",opacity:type==="water"?.72:1,depthWrite:type!=="water"});materialCache.set(k,m);return m}
-function disposeChunkMeshes(k){const arr=chunkMeshGroups.get(k);if(!arr)return;for(const mesh of arr){blockMeshSet.delete(mesh);mesh.geometry.dispose();scene.remove(mesh)}chunkMeshGroups.delete(k)}
-function buildChunkMesh(cx,cz){const k=chunkKeyFor(cx,cz);disposeChunkMeshes(k);const sx=cx*CHUNK_SIZE,sz=cz*CHUNK_SIZE,groups=new Map();for(let x=sx;x<sx+CHUNK_SIZE;x++)for(let z=sz;z<sz+CHUNK_SIZE;z++)for(let y=0;y<worldHeight;y++){const type=getBlock(x,y,z);if(!type)continue;for(const face of faces){const nx=x+face.dir[0],ny=y+face.dir[1],nz=z+face.dir[2],neighbor=getBlock(nx,ny,nz);if(neighbor){if(type!=="water"&&neighbor!=="water")continue;if(type==="water")continue}const color=getFaceColor(type,face.dir),gk=type+":"+color;if(!groups.has(gk))groups.set(gk,{type,color,faces:[]});groups.get(gk).faces.push({face,x,y,z})}}const meshes=[];for(const group of groups.values()){const positions=[],normals=[],indices=[];let off=0;for(const item of group.faces){for(const c of item.face.corners){positions.push(item.x+c[0],item.y+c[1],item.z+c[2]);normals.push(item.face.dir[0],item.face.dir[1],item.face.dir[2])}indices.push(off,off+1,off+2,off,off+2,off+3);off+=4}if(!positions.length)continue;const geo=new THREE.BufferGeometry();geo.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));geo.setAttribute("normal",new THREE.Float32BufferAttribute(normals,3));geo.setIndex(indices);geo.computeBoundingSphere();const mesh=new THREE.Mesh(geo,getBlockMaterial(group.type,group.color));mesh.userData.blockMesh=true;mesh.userData.chunkKey=k;if(group.type==="water")mesh.renderOrder=1;scene.add(mesh);blockMeshSet.add(mesh);meshes.push(mesh)}chunkMeshGroups.set(k,meshes)}
-function rebuildChunkAndNeighbors(cx,cz){for(const [x,z] of [[cx,cz],[cx+1,cz],[cx-1,cz],[cx,cz+1],[cx,cz-1]])if(generatedChunks.has(chunkKeyFor(x,z)))buildChunkMesh(x,z)}
-function clearAllChunkMeshes(){for(const k of [...chunkMeshGroups.keys()])disposeChunkMeshes(k);blockMeshSet.clear()}
-function getBlockMeshes(){return [...blockMeshSet]}
-const scene=new THREE.Scene();scene.background=dayNight.skyDay.clone();scene.fog=new THREE.Fog(dayNight.fogDay.clone(),20,55);const camera=new THREE.PerspectiveCamera(75,Math.max(.1,innerWidth/innerHeight),.05,150);let renderer;try{renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:"high-performance",stencil:false,depth:true})}catch(e){showError("WebGL could not be initialized.\n\n"+e.message);throw e}renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.setPixelRatio(LOW_DEVICE?.9:Math.min(window.devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight,false);document.getElementById("game").appendChild(renderer.domElement);
-loadGameSettings();
-const hemi=new THREE.HemisphereLight(0xbfe8ff,0x5b4632,2);scene.add(hemi);const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(30,40,20);scene.add(sun);const moon=new THREE.DirectionalLight(0x7898ff,.08);moon.position.set(-30,40,-20);scene.add(moon);
-const player={position:new THREE.Vector3(.5,15,.5),velocity:new THREE.Vector3(),width:.6,height:1.8,eyeHeight:1.62,yaw:0,pitch:0,onGround:false,keys:new Set()};
-function isSolidBlock(x,y,z){const b=getBlock(x,y,z);return !!(b&&b!=="water")}function collides(pos){const minX=pos.x-player.width/2,maxX=pos.x+player.width/2,minY=pos.y,maxY=pos.y+player.height,minZ=pos.z-player.width/2,maxZ=pos.z+player.width/2;for(let x=Math.floor(minX);x<=Math.floor(maxX-.001);x++)for(let y=Math.floor(minY);y<=Math.floor(maxY-.001);y++)for(let z=Math.floor(minZ);z<=Math.floor(maxZ-.001);z++)if(y<0||isSolidBlock(x,y,z))return true;return false}
-function moveAxis(axis,amount){if(!Number.isFinite(amount)||amount===0)return;const next=player.position.clone();next[axis]+=amount;if(!collides(next)){player.position[axis]=next[axis];return}const steps=Math.max(1,Math.ceil(Math.abs(amount)/.04)),step=amount/steps;for(let i=0;i<steps;i++){const test=player.position.clone();test[axis]+=step;if(collides(test)){if(axis==="y"&&amount<0)player.onGround=true;player.velocity[axis]=0;break}player.position[axis]=test[axis]}}
-function findGround(x,z){for(let y=worldHeight-1;y>=0;y--){const b=getBlock(x,y,z);if(b&&["grass","sand","snow","dirt","stone"].includes(b))return y}return null}
-function findSpawn(){for(let radius=0;radius<=48;radius++){for(let x=-radius;x<=radius;x++)for(let z=-radius;z<=radius;z++){if(Math.abs(x)!==radius&&Math.abs(z)!==radius&&radius>0)continue;const g=findGround(x,z);if(g===null)continue;const sp=new THREE.Vector3(x+.5,g+1.01,z+.5);if(collides(sp))continue;const hc=sp.clone();hc.y+=.9;if(collides(hc))continue;player.position.copy(sp);player.velocity.set(0,0,0);player.onGround=false;return true}}player.position.set(.5,15,.5);return false}
-function updatePlayer(dt){if(!gameActive||generationInProgress||survival.dead)return;const forward=new THREE.Vector3(-Math.sin(player.yaw),0,-Math.cos(player.yaw)),right=new THREE.Vector3(Math.cos(player.yaw),0,-Math.sin(player.yaw)),direction=new THREE.Vector3();if(player.keys.has("KeyW"))direction.add(forward);if(player.keys.has("KeyS"))direction.sub(forward);if(player.keys.has("KeyD"))direction.add(right);if(player.keys.has("KeyA"))direction.sub(right);if(Math.abs(mobile.x)>.03||Math.abs(mobile.y)>.03){direction.x+=right.x*mobile.x+forward.x*mobile.y;direction.z+=right.z*mobile.x+forward.z*mobile.y}if(direction.lengthSq()>0)direction.normalize();const wantsSprint=player.keys.has("ShiftLeft")||player.keys.has("ShiftRight")||mobile.sprint,sprinting=wantsSprint&&survival.hunger>0,speed=sprinting?8:5;player.velocity.x=THREE.MathUtils.damp(player.velocity.x,direction.x*speed,player.onGround?14:7,dt);player.velocity.z=THREE.MathUtils.damp(player.velocity.z,direction.z*speed,player.onGround?14:7,dt);if((mobile.jump||player.keys.has("Space"))&&player.onGround){player.velocity.y=8;player.onGround=false;mobile.jump=false}const prevY=player.velocity.y;player.velocity.y-=22*dt;player.onGround=false;moveAxis("x",player.velocity.x*dt);moveAxis("z",player.velocity.z*dt);moveAxis("y",player.velocity.y*dt);if(player.onGround&&prevY< -12){const d=Math.floor((Math.abs(prevY)-10)*.7);if(d>0)damagePlayer(d)}if(player.position.y<-20)findSpawn();camera.position.set(player.position.x,player.position.y+player.eyeHeight,player.position.z);camera.rotation.order="YXZ";camera.rotation.y=player.yaw;camera.rotation.x=player.pitch}
-function rebuildStreamQueue(pcx,pcz){chunkGenQueue=[];const r2=STREAM_CHUNK_RADIUS*STREAM_CHUNK_RADIUS;for(let dx=-STREAM_CHUNK_RADIUS;dx<=STREAM_CHUNK_RADIUS;dx++)for(let dz=-STREAM_CHUNK_RADIUS;dz<=STREAM_CHUNK_RADIUS;dz++){if(dx*dx+dz*dz>r2)continue;const cx=pcx+dx,cz=pcz+dz;if(generatedChunks.has(chunkKeyFor(cx,cz)))continue;chunkGenQueue.push({cx,cz,dist:dx*dx+dz*dz})}chunkGenQueue.sort((a,b)=>a.dist-b.dist)}
-function unloadChunk(cx,cz){const k=chunkKeyFor(cx,cz);if(!generatedChunks.has(k))return;disposeChunkMeshes(k);const sx=cx*CHUNK_SIZE,sz=cz*CHUNK_SIZE;for(let x=sx;x<sx+CHUNK_SIZE;x++)for(let z=sz;z<sz+CHUNK_SIZE;z++)for(let y=0;y<worldHeight;y++)world.delete(blockKey(x,y,z));generatedChunks.delete(k)}
-function unloadFarChunks(pcx,pcz){let n=0;for(const k of generatedChunks){if(n>=MAX_UNLOADS_PER_TICK)break;const [cx,cz]=k.split(",").map(Number),dx=cx-pcx,dz=cz-pcz;if(dx*dx+dz*dz>UNLOAD_CHUNK_RADIUS*UNLOAD_CHUNK_RADIUS){unloadChunk(cx,cz);n++}}}
-function updateChunkStreaming(dt){if(!gameActive||generationInProgress)return;streamingAccumulator+=dt;if(streamingAccumulator<.1)return;streamingAccumulator=0;const pcx=worldToChunkCoord(player.position.x),pcz=worldToChunkCoord(player.position.z);if(pcx!==lastPlayerChunk.cx||pcz!==lastPlayerChunk.cz){lastPlayerChunk={cx:pcx,cz:pcz};rebuildStreamQueue(pcx,pcz)}const start=performance.now();let n=0;while(chunkGenQueue.length&&n<MAX_CHUNKS_PER_TICK&&performance.now()-start<CHUNK_STREAM_BUDGET_MS){const next=chunkGenQueue.shift();if(generateChunk(next.cx,next.cz)){rebuildChunkAndNeighbors(next.cx,next.cz);n++}}unloadFarChunks(pcx,pcz)}
-function updateSurvivalHud(){const hp=THREE.MathUtils.clamp(survival.health/survival.maxHealth,0,1),food=THREE.MathUtils.clamp(survival.hunger/survival.maxHunger,0,1);healthFill.style.width=hp*100+"%";hungerFill.style.width=food*100+"%";healthText.textContent=Math.ceil(survival.health)+" / 20";hungerText.textContent=Math.floor(survival.hunger)+" / 20"}
-function damagePlayer(amount){if(survival.dead||survival.damageCooldown>0||amount<=0)return;survival.damageCooldown=.35;survival.health=Math.max(0,survival.health-amount);updateSurvivalHud();if(survival.health<=0){survival.dead=true;survival.respawnTimer=1.5;resetInputs();deathOverlay.classList.add("visible");try{document.exitPointerLock()}catch(_){}}}
-function healPlayer(a){survival.health=Math.min(survival.maxHealth,survival.health+a);updateSurvivalHud()}function updateSurvival(dt){if(!gameActive)return;if(survival.dead){survival.respawnTimer-=dt;if(survival.respawnTimer<=0){survival.dead=false;survival.health=20;survival.hunger=20;survival.hungerTimer=survival.regenTimer=survival.starvationTimer=0;findSpawn();deathOverlay.classList.remove("visible");updateSurvivalHud()}return}survival.damageCooldown=Math.max(0,survival.damageCooldown-dt);const moving=player.velocity.x*player.velocity.x+player.velocity.z*player.velocity.z>.35,sprinting=(player.keys.has("ShiftLeft")||player.keys.has("ShiftRight")||mobile.sprint)&&survival.hunger>0;let rate=(moving?.010:.005)+(sprinting?.018:0);survival.hungerTimer+=rate*dt;if(survival.hungerTimer>=1){const n=Math.floor(survival.hungerTimer);survival.hunger=Math.max(0,survival.hunger-n);survival.hungerTimer-=n}if(survival.hunger>=16&&survival.health<20){survival.regenTimer+=dt;if(survival.regenTimer>=4){survival.regenTimer=0;healPlayer(1)}}else survival.regenTimer=0;if(survival.hunger<=0){survival.starvationTimer+=dt;if(survival.starvationTimer>=2){survival.starvationTimer=0;damagePlayer(1)}}else survival.starvationTimer=0;updateSurvivalHud()}
-function resetInputs(){player.keys.clear();mobile.x=0;mobile.y=0;mobile.jump=false;mobile.sprint=false;joystickPointer=null;lookPointer=null;if(joystickKnob)joystickKnob.style.transform="translate(-50%,-50%)"}
-function drawHotbar(){hotbarElement.innerHTML=hotbar.map((type,i)=>`<div class="slot ${i===selectedBlock?"selected":""}" data-index="${i}"><div class="swatch" style="background:#${blocks[type].color.toString(16).padStart(6,"0")}"></div><span>${i+1} ${blocks[type].name}</span></div>`).join("");hotbarElement.querySelectorAll(".slot").forEach(s=>s.addEventListener("pointerdown",e=>{e.stopPropagation();e.preventDefault();selectedBlock=Number(s.dataset.index);drawHotbar()}))}drawHotbar();
-const raycaster=new THREE.Raycaster();raycaster.far=7;function rebuildChunksAt(x,z){const cx=worldToChunkCoord(x),cz=worldToChunkCoord(z),lx=x-cx*CHUNK_SIZE,lz=z-cz*CHUNK_SIZE,set=new Set([chunkKeyFor(cx,cz)]);if(lx===0)set.add(chunkKeyFor(cx-1,cz));if(lx===CHUNK_SIZE-1)set.add(chunkKeyFor(cx+1,cz));if(lz===0)set.add(chunkKeyFor(cx,cz-1));if(lz===CHUNK_SIZE-1)set.add(chunkKeyFor(cx,cz+1));for(const k of set)if(generatedChunks.has(k)){const[a,b]=k.split(",").map(Number);buildChunkMesh(a,b)}}
-function interact(button){if(!gameActive||generationInProgress||survival.dead)return;raycaster.setFromCamera({x:0,y:0},camera);const hits=raycaster.intersectObjects(getBlockMeshes(),false);if(!hits.length)return;const hit=hits[0];if(!hit.face)return;if(button===0){const p=hit.point.clone().addScaledVector(hit.face.normal,-.01),x=Math.floor(p.x),y=Math.floor(p.y),z=Math.floor(p.z);const t=getBlock(x,y,z);if(t&&y>0){setBlock(x,y,z,null);rebuildChunksAt(x,z)}return}if(button===2){const p=hit.point.clone().addScaledVector(hit.face.normal,.51),x=Math.floor(p.x),y=Math.floor(p.y),z=Math.floor(p.z);if(y<0||y>=worldHeight||getBlock(x,y,z))return;setBlock(x,y,z,hotbar[selectedBlock]);if(collides(player.position))setBlock(x,y,z,null);rebuildChunksAt(x,z)}}
-window.addEventListener("keydown",e=>{if(!gameActive)return;player.keys.add(e.code);if(["KeyW","KeyA","KeyS","KeyD","Space","ShiftLeft","ShiftRight"].includes(e.code))e.preventDefault();const n=Number(e.key);if(n>=1&&n<=hotbar.length){selectedBlock=n-1;drawHotbar()}});window.addEventListener("keyup",e=>player.keys.delete(e.code));
-renderer.domElement.addEventListener("click",()=>{if(!gameActive||isMobile())return;if(document.pointerLockElement!==renderer.domElement)try{renderer.domElement.requestPointerLock()}catch(_){} });document.addEventListener("mousemove",e=>{if(!gameActive||document.pointerLockElement!==renderer.domElement)return;const s=Number(sensitivityInput.value)*.0005;player.yaw-=e.movementX*s;player.pitch=THREE.MathUtils.clamp(player.pitch-(gameSettings.invertY==="on"?-1:1)*e.movementY*s,-Math.PI/2+.01,Math.PI/2-.01)});renderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
-const joystick=$("#joystick"),joystickKnob=$("#joystickKnob"),lookArea=$("#lookArea");let joystickPointer=null,lookPointer=null,lookX=0,lookY=0;function updateJoystick(e){const r=joystick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let x=e.clientX-cx,y=e.clientY-cy,rad=r.width*.34,len=Math.hypot(x,y);if(len>rad){x=x/len*rad;y=y/len*rad}mobile.x=THREE.MathUtils.clamp(x/rad,-1,1);mobile.y=THREE.MathUtils.clamp(-y/rad,-1,1);joystickKnob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`}function resetJoystick(){joystickPointer=null;mobile.x=mobile.y=0;joystickKnob.style.transform="translate(-50%,-50%)"}joystick.addEventListener("pointerdown",e=>{if(!gameActive)return;e.preventDefault();joystickPointer=e.pointerId;try{joystick.setPointerCapture(e.pointerId)}catch(_){}updateJoystick(e)});joystick.addEventListener("pointermove",e=>{if(e.pointerId===joystickPointer)updateJoystick(e)});joystick.addEventListener("pointerup",resetJoystick);joystick.addEventListener("pointercancel",resetJoystick);lookArea.addEventListener("pointerdown",e=>{if(!gameActive)return;e.preventDefault();lookPointer=e.pointerId;lookX=e.clientX;lookY=e.clientY;try{lookArea.setPointerCapture(e.pointerId)}catch(_){} });lookArea.addEventListener("pointermove",e=>{if(!gameActive||e.pointerId!==lookPointer)return;const dx=e.clientX-lookX,dy=e.clientY-lookY;lookX=e.clientX;lookY=e.clientY;const s=Number(sensitivityInput.value)*.001;player.yaw-=dx*s;player.pitch=THREE.MathUtils.clamp(player.pitch-(gameSettings.invertY==="on"?-1:1)*dy*s,-Math.PI/2+.01,Math.PI/2-.01)});lookArea.addEventListener("pointerup",()=>lookPointer=null);lookArea.addEventListener("pointercancel",()=>lookPointer=null);function holdButton(el,prop){el.addEventListener("pointerdown",e=>{if(!gameActive)return;e.preventDefault();mobile[prop]=true});const r=()=>mobile[prop]=false;el.addEventListener("pointerup",r);el.addEventListener("pointercancel",r);el.addEventListener("pointerleave",r)}holdButton($("#jumpButton"),"jump");holdButton($("#sprintButton"),"sprint");$("#breakButton").addEventListener("pointerdown",e=>{if(gameActive){e.preventDefault();interact(0)}});$("#placeButton").addEventListener("pointerdown",e=>{if(gameActive){e.preventDefault();interact(2)}});
-function isMobile(){return window.matchMedia("(pointer:coarse)").matches||innerWidth<=800}
-let settingsReturn="main";
-function setNonGameUI(){gameActive=false;document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";document.getElementById("mobileExtraButtons").style.display="none";resetInputs();try{if(document.pointerLockElement)document.exitPointerLock()}catch(_){}closePanels()}
-function showLoading(text="Loading..."){setNonGameUI();hideAllMenus();loadingScreen.classList.remove("hidden");setLoading(0,text)}
-function hideAllMenus(){mainMenu.classList.add("hidden");worldMenu.classList.add("hidden");settingsMenu.classList.add("hidden");realmsMenu.classList.add("hidden");marketplaceMenu.classList.add("hidden");profileMenu.classList.add("hidden");dressingRoomMenu.classList.add("hidden");registerMenu.classList.add("hidden");loginMenu.classList.add("hidden");terrainGenerator.classList.remove("active")}
-function showLoginMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();$("#loginMenu").classList.remove("hidden");setAuthError("");setTimeout(()=>$("#loginIdentity")?.focus(),0)}
-function showRegisterMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();$("#registerMenu").classList.remove("hidden");setAuthError("");setTimeout(()=>$("#regUsername")?.focus(),0)}
-function showAuthMenu(){showLoginMenu()}
-function showMainMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();mainMenu.classList.remove("hidden")}
-function showWorldMenu(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();worldMenu.classList.remove("hidden");$("#newWorldForm").classList.add("hidden");$("#newWorldFormButton").classList.remove("hidden");refreshWorldList()}
-function showSettings(returnTo="main"){setNonGameUI();settingsReturn=returnTo;loadingScreen.classList.add("hidden");hideAllMenus();settingsMenu.classList.remove("hidden")}
-function showTerrainGenerator(){setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();terrainGenerator.classList.add("active");updateTerrainPreview()}
-function showGame(){loadingScreen.classList.add("hidden");hideAllMenus();closePanels();gameActive=true;document.body.classList.add("in-game-ui");saveShortcut.style.display="block";document.getElementById("mobileExtraButtons").style.display="flex";camera.position.set(player.position.x,player.position.y+player.eyeHeight,player.position.z)}
-function updateDayNight(dt){if(!gameActive)return;dayNight.time=(dayNight.time+dt*(1440/dayNight.duration))%1440;const t=dayNight.time/1440,angle=t*Math.PI*2-Math.PI/2,s=Math.sin(angle),day=THREE.MathUtils.clamp(s*.5+.5,0,1),night=1-day;sun.position.set(Math.cos(angle)*40,Math.max(6,s*40),Math.sin(angle)*40);moon.position.set(-sun.position.x,Math.max(6,-sun.position.y),-sun.position.z);sun.intensity=.15+2.1*day;moon.intensity=.03+.15*night;hemi.intensity=.35+1.8*day;scene.background.copy(dayNight.skyNight).lerp(dayNight.skyDay,day);scene.fog.color.copy(dayNight.fogNight).lerp(dayNight.fogDay,day);scene.fog.near=Number(renderDistanceInput.value)*.36*(.72+.28*day);scene.fog.far=Number(renderDistanceInput.value)*(.7+.3*day);worldTimeLabel.textContent=(day>=.35?"☀ Day ":"🌙 Night ")+formatTime(dayNight.time);worldTimeLabel.classList.toggle("night",day<.35)}function formatTime(m){const h=Math.floor(m/60)%24,mm=Math.floor(m%60).toString().padStart(2,"0");return `${h.toString().padStart(2,"0")}:${mm}`}
-/* MOBS */
-const mobs=[];const mobGroups=new Set();const mobMaterials={cow:new THREE.MeshLambertMaterial({color:0x6f5a49}),white:new THREE.MeshLambertMaterial({color:0xf0f0eb}),black:new THREE.MeshLambertMaterial({color:0x292929}),pig:new THREE.MeshLambertMaterial({color:0xe89aa7}),zombie:new THREE.MeshLambertMaterial({color:0x4d8f62}),eye:new THREE.MeshBasicMaterial({color:0xffefef})};const mobBodyGeo=new THREE.BoxGeometry(1,1,1),mobHeadGeo=new THREE.BoxGeometry(.62,.62,.62),mobLegGeo=new THREE.BoxGeometry(.22,.62,.22),mobEyeGeo=new THREE.BoxGeometry(.08,.08,.05);const MAX_MOBS=LOW_DEVICE?6:10;const mobClock={spawn:0};
-function makeMob(type,x,y,z){const root=new THREE.Group(),body=new THREE.Mesh(mobBodyGeo,type==="cow"?mobMaterials.cow:type==="pig"?mobMaterials.pig:mobMaterials.zombie),head=new THREE.Mesh(mobHeadGeo,type==="cow"?mobMaterials.white:type==="pig"?mobMaterials.pig:mobMaterials.zombie);body.scale.set(type==="zombie"?.75:1.05,.78,type==="zombie"?.6:.62);body.position.y=1.0;head.position.set(0,1.72,.08);root.add(body,head);const legMat=type==="cow"?mobMaterials.black:body.material;for(const sx of[-1,1])for(const sz of[-1,1]){const leg=new THREE.Mesh(mobLegGeo,legMat);leg.position.set(sx*(type==="zombie"?.22:.36),.43,sz*.2);root.add(leg)}if(type==="zombie"){for(const sx of[-1,1]){const eye=new THREE.Mesh(mobEyeGeo,mobMaterials.eye);eye.position.set(sx*.16,1.78,.39);root.add(eye)}}root.position.set(x,y,z);scene.add(root);const mob={type,group:root,velocity:new THREE.Vector3(),dir:Math.random()*Math.PI*2,wander:1+Math.random()*2,attackCooldown:0,health:type==="zombie"?10:6,home:new THREE.Vector3(x,0,z),dead:false};mobs.push(mob);mobGroups.add(root);return mob}
-function mobGroundY(x,z){const bx=Math.floor(x),bz=Math.floor(z);for(let y=worldHeight-1;y>=0;y--){const b=getBlock(bx,y,bz);if(b&&b!=="water")return y+1}return 2}
-function removeMob(m){const i=mobs.indexOf(m);if(i>=0)mobs.splice(i,1);mobGroups.delete(m.group);scene.remove(m.group)}
-function spawnMob(type){const angle=Math.random()*Math.PI*2,dist=14+Math.random()*24,x=player.position.x+Math.cos(angle)*dist,z=player.position.z+Math.sin(angle)*dist;if(Math.abs(x)>100000)return;const y=mobGroundY(x,z);if(getBlock(Math.floor(x),y-1,Math.floor(z))==="water")return;makeMob(type,x,y,z)}
-function isNight(){const dayAngle=Math.sin((dayNight.time/1440)*Math.PI*2-Math.PI/2);return dayAngle<-.25}
-function updateMobSpawning(dt){if(!gameActive||survival.dead)return;mobClock.spawn+=dt;if(mobClock.spawn<1.5)return;mobClock.spawn=0;for(let i=0;i<MAX_MOBS-mobs.length;i++){if(Math.random()<.38)spawnMob(isNight()?(Math.random()<.65?"zombie":"cow"):(Math.random()<.5?"cow":"pig"));if(mobs.length>=MAX_MOBS)break}}
-function updateMobs(dt){if(!gameActive||survival.dead)return;for(let i=mobs.length-1;i>=0;i--){const m=mobs[i];if(!m.group.parent){mobs.splice(i,1);continue}m.attackCooldown=Math.max(0,m.attackCooldown-dt);const dx=player.position.x-m.group.position.x,dz=player.position.z-m.group.position.z,d=Math.hypot(dx,dz);if(d>65){removeMob(m);continue}let speed=m.type==="zombie"?.95:.65;let targetAngle=m.dir;if(m.type==="zombie"&&isNight()&&d<28)targetAngle=Math.atan2(dx,dz);else{m.wander-=dt;if(m.wander<=0){m.wander=1+Math.random()*3;m.dir+=((Math.random()-.5)*2)}}m.velocity.x=THREE.MathUtils.damp(m.velocity.x,Math.sin(targetAngle)*speed,4,dt);m.velocity.z=THREE.MathUtils.damp(m.velocity.z,Math.cos(targetAngle)*speed,4,dt);m.group.position.x+=m.velocity.x*dt;m.group.position.z+=m.velocity.z*dt;m.group.position.y=mobGroundY(m.group.position.x,m.group.position.z);m.group.rotation.y=targetAngle;if(m.type==="zombie"&&d<1.65&&isNight()&&m.attackCooldown<=0){m.attackCooldown=1.1;damagePlayer(2)}if(m.type!=="zombie"&&d<1.5&&m.attackCooldown<=0){m.attackCooldown=.8;player.velocity.x*=.6;player.velocity.z*=.6}}}
-function attackMobAtCrosshair(){if(!gameActive)return;const rc=new THREE.Raycaster();rc.setFromCamera({x:0,y:0},camera);const roots=[];for(const m of mobs)roots.push(m.group);const hits=rc.intersectObjects(roots,true);if(!hits.length||hits[0].distance>6)return;let obj=hits[0].object;while(obj.parent&&!mobGroups.has(obj))obj=obj.parent;const m=mobs.find(v=>v.group===obj);if(!m)return;m.health-=4; m.velocity.y=2; if(m.health<=0)removeMob(m)}
-/* =========================================================
-   ADVANCED P2P MULTIPLAYER + CHAT + EMOTES + PLAYER MODELS
-   ========================================================= */
-const PEER_CONFIG={config:{iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"},{urls:"stun:stun2.l.google.com:19302"},{urls:"stun:global.stun.twilio.com:3478"}]}};
-const mp={
-  peer:null,
-  isHost:false,
-  connected:false,
-  hostId:null,
-  roomCode:"",
-  connections:new Map(),
-  remotePlayers:new Map(),
-  lastSend:0,
-  sessionId:"",
-  peerReady:false
-};
-const mpEls={
-  chatPanel:$("#chatPanel"),
-  emotesPanel:$("#emotesPanel"),
-  options:$("#ingameOptionsPanel"),
-  multi:$("#multiplayerPanel"),
-  log:$("#chatLog"),
-  input:$("#chatInput"),
-  name:$("#mpName"),
-  name2:$("#mpName2"),
-  room:$("#mpRoomCode"),
-  join:$("#mpJoinCode"),
-  status:$("#mpStatus"),
-  players:$("#mpPlayers"),
-  copy:$("#mpCopy"),
-  share:$("#mpShare"),
-  create:$("#mpCreate"),
-  joinBtn:$("#mpJoin"),
-  disconnect:$("#mpDisconnect")
-};
-const EMOTES=["😀","😂","❤️","👍","👋","🎉","😎","😡","😭","🔥","💀","⭐"];
+function blockKey(x,y,z){return x+","+y+","+z}function getBlock(x,y,z){return world.get(blockKey(x,y,z))}
 
-function playerName(){
-  return (mpEls.name2.value||mpEls.name.value||"Player").trim().slice(0,20)||"Player";
-}
-function escapeHtml(v){
-  return String(v).replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
-}
-function setMPStatus(t){mpEls.status.textContent=t}
-function updateMPPlayers(){
-  const count=1+mp.remotePlayers.size;
-  mpEls.players.textContent=`Players: ${count}`;
-}
-function openPanel(id){
-  ["chatPanel","emotesPanel","ingameOptionsPanel","multiplayerPanel"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id));
-}
-function closePanels(){
-  ["chatPanel","emotesPanel","ingameOptionsPanel","multiplayerPanel"].forEach(x=>$("#"+x).classList.add("hidden"));
-}
-function addChat(name,msg,send=true){
-  const line=document.createElement("div");
-  line.className="chat-line";
-  line.innerHTML=`<b>${escapeHtml(name)}</b>: ${escapeHtml(msg)}`;
-  mpEls.log.appendChild(line);
-  mpEls.log.scrollTop=mpEls.log.scrollHeight;
-  if(send)mpSend({t:"chat",name:playerName(),msg:String(msg).slice(0,180)});
-}
-function peerSend(conn,data){
-  if(!conn||!conn.open)return false;
-  try{conn.send(data);return true}catch(e){console.warn("PeerJS send failed",e);return false}
-}
-function sendToHost(data){
-  if(mp.isHost)return hostBroadcast(data);
-  const c=mp.connections.get(mp.hostId);
-  return peerSend(c,data);
-}
-function hostBroadcast(data,exceptId=null){
-  let sent=false;
-  for(const [id,c] of mp.connections){
-    if(id===exceptId)continue;
-    if(peerSend(c,data))sent=true;
+const WORLD_DB_NAME="BlockWorldWorlds",WORLD_DB_VERSION=1;
+let worldDbPromise=null;
+function openWorldDb(){
+  if(!worldDbPromise){
+    worldDbPromise=new Promise((resolve,reject)=>{
+      const req=indexedDB.open(WORLD_DB_NAME,WORLD_DB_VERSION);
+      req.onupgradeneeded=e=>{
+        const db=e.target.result;
+        if(!db.objectStoreNames.contains("worlds")){
+          db.createObjectStore("worlds",{keyPath:"id"});
+        }
+      };
+      req.onsuccess=e=>resolve(e.target.result);
+      req.onerror=e=>reject(e.target.error);
+    });
   }
-  return sent;
+  return worldDbPromise;
 }
-function mpSend(data){
-  if(!mp.peerReady)return false;
-  if(mp.isHost)return hostBroadcast(data);
-  return sendToHost(data);
+
+async function saveWorldToDb(worldData){
+  const db=await openWorldDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("worlds","readwrite");
+    const store=tx.objectStore("worlds");
+    store.put(worldData);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=e=>reject(e.target.error);
+  });
 }
-function updateRemoteVisuals(dt){
-  for(const p of mp.remotePlayers.values()){
-    const before=p.group.position.distanceTo(p.target);
-    p.group.position.lerp(p.target,Math.min(1,dt*12));
-    const moving=before>.006;
-    p.group.rotation.y=THREE.MathUtils.damp(p.group.rotation.y,p.yaw,10,dt);
-    if(moving)p.walkTime+=dt*10;
-    else p.walkTime=THREE.MathUtils.damp(p.walkTime,0,8,dt);
-    const swing=moving?Math.sin(p.walkTime)*.55:0;
-    p.parts.armL.rotation.x=swing;p.parts.armR.rotation.x=-swing;
-    p.parts.legL.rotation.x=-swing;p.parts.legR.rotation.x=swing;
-    const v=p.group.position.clone();v.y+=2.45;v.project(camera);
-    p.label.style.left=((v.x*.5+.5)*innerWidth)+"px";
-    p.label.style.top=((-v.y*.5+.5)*innerHeight)+"px";
-  }
+
+async function loadWorldFromDb(id){
+  const db=await openWorldDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("worlds","readonly");
+    const store=tx.objectStore("worlds");
+    const req=store.get(id);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=e=>reject(e.target.error);
+  });
 }
-function showEmote(id,emoji){
-  const p=mp.remotePlayers.get(id);if(!p)return;
-  const pos=p.group.position.clone();pos.y+=2.5;pos.project(camera);
-  const el=document.createElement("div");el.className="emote-pop";el.textContent=emoji;
-  el.style.left=((pos.x*.5+.5)*innerWidth)+"px";el.style.top=((-pos.y*.5+.5)*innerHeight)+"px";
-  document.body.appendChild(el);setTimeout(()=>el.remove(),1300);
+
+async function listWorldsFromDb(){
+  const db=await openWorldDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("worlds","readonly");
+    const store=tx.objectStore("worlds");
+    const req=store.getAll();
+    req.onsuccess=()=>resolve(req.result||[]);
+    req.onerror=e=>reject(e.target.error);
+  });
 }
-function showLocalEmote(emoji){
-  const pos=player.position.clone();pos.y+=2.5;pos.project(camera);
-  const el=document.createElement("div");el.className="emote-pop";el.textContent=emoji;
-  el.style.left=((pos.x*.5+.5)*innerWidth)+"px";el.style.top=((-pos.y*.5+.5)*innerHeight)+"px";
-  document.body.appendChild(el);setTimeout(()=>el.remove(),1300);
+
+async function deleteWorldFromDb(id){
+  const db=await openWorldDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("worlds","readwrite");
+    const store=tx.objectStore("worlds");
+    store.delete(id);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=e=>reject(e.target.error);
+  });
 }
-function localEmote(emoji){
-  showLocalEmote(emoji);
-  mpSend({t:"emote",id:mp.peer?.id||mp.sessionId,emoji});
+
+let scene,camera,renderer,dirLight,ambientLight,materials={},blockGeom;
+let player={pos:new THREE.Vector3(0,35,0),vel:new THREE.Vector3(),rot:new THREE.Vector3(),onGround:false,sprinting:false};
+let activeWorldId=null,activeWorldName="My World";
+
+function initEngine(){
+  const container=$("#game");
+  scene=new THREE.Scene();
+  scene.background=dayNight.skyDay;
+  scene.fog=new THREE.FogExp2(dayNight.fogDay,0.015);
+  
+  camera=new THREE.PerspectiveCamera(gameSettings.fov,window.innerWidth/window.innerHeight,0.1,300);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  ambientLight=new THREE.AmbientLight(0xffffff,0.6);
+  scene.add(ambientLight);
+
+  dirLight=new THREE.DirectionalLight(0xffffff,0.8);
+  dirLight.position.set(50,100,50);
+  dirLight.castShadow=true;
+  dirLight.shadow.mapSize.width=1024;
+  dirLight.shadow.mapSize.height=1024;
+  dirLight.shadow.camera.near=0.5;
+  dirLight.shadow.camera.far=200;
+  dirLight.shadow.camera.left=-40;
+  dirLight.shadow.camera.right=40;
+  dirLight.shadow.camera.top=40;
+  dirLight.shadow.camera.bottom=-40;
+  scene.add(dirLight);
+
+  blockGeom=new THREE.BoxGeometry(1,1,1);
+
+  window.addEventListener("resize",()=>{
+    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth,window.innerHeight);
+  });
 }
-function modelColors(name){
-  let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;
-  const palette=[0x4f8cff,0x7b61ff,0x21b573,0xff8a3d,0xe84d8a,0x22a6b3,0xf1c40f];
-  return {shirt:palette[h%palette.length],skin:[0xf2c6a5,0xd99b72,0x9a6040][(h>>>3)%3],pants:[0x273b63,0x39424e,0x5a3d2e][(h>>>5)%3]};
+
+function getMaterial(type){
+  if(materials[type]) return materials[type];
+  const conf=blocks[type]||blocks.dirt;
+  const mat=new THREE.MeshStandardMaterial({
+    color:conf.color||0xffffff,
+    roughness:0.8,
+    transparent:conf.transparent||false,
+    opacity:conf.opacity||1.0
+  });
+  materials[type]=mat;
+  return mat;
 }
-function makePlayerModel(name){
-  const colors=modelColors(name),root=new THREE.Group();root.userData.isRemotePlayer=true;
-  const shirtMat=new THREE.MeshLambertMaterial({color:colors.shirt}),skinMat=new THREE.MeshLambertMaterial({color:colors.skin}),pantsMat=new THREE.MeshLambertMaterial({color:colors.pants}),darkMat=new THREE.MeshLambertMaterial({color:0x1b1f2a});
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.62,1,.36),shirtMat);body.position.y=1.15;root.add(body);
-  const head=new THREE.Mesh(new THREE.BoxGeometry(.52,.52,.52),skinMat);head.position.y=1.91;root.add(head);
-  const hair=new THREE.Mesh(new THREE.BoxGeometry(.54,.18,.54),darkMat);hair.position.y=2.18;root.add(hair);
-  const armL=new THREE.Group(),armR=new THREE.Group(),armGeo=new THREE.BoxGeometry(.20,.72,.22);
-  const aL=new THREE.Mesh(armGeo,shirtMat),aR=new THREE.Mesh(armGeo,shirtMat);aL.position.y=-.34;aR.position.y=-.34;
-  armL.position.set(-.43,1.55,0);armR.position.set(.43,1.55,0);armL.add(aL);armR.add(aR);root.add(armL,armR);
-  const legGeo=new THREE.BoxGeometry(.23,.78,.25),legL=new THREE.Group(),legR=new THREE.Group(),lL=new THREE.Mesh(legGeo,pantsMat),lR=new THREE.Mesh(legGeo,pantsMat);
-  lL.position.y=-.39;lR.position.y=-.39;legL.position.set(-.18,.78,0);legR.position.set(.18,.78,0);legL.add(lL);legR.add(lR);root.add(legL,legR);
-  const eyeGeo=new THREE.BoxGeometry(.055,.055,.025),eyeMat=new THREE.MeshBasicMaterial({color:0x111111});
-  for(const x of[-.105,.105]){const eye=new THREE.Mesh(eyeGeo,eyeMat);eye.position.set(x,1.96,.267);root.add(eye)}
-  const label=document.createElement("div");label.className="remote-name";label.textContent=name||"Player";label.style.position="absolute";label.style.transform="translate(-50%,-50%)";label.style.pointerEvents="none";document.body.appendChild(label);
-  root.userData.parts={armL,armR,legL,legR};root.userData.label=label;return {root,label,parts:root.userData.parts};
+
+function noise2D(x,z,seed=1){
+  let n=Math.sin(x*12.9898+z*78.233+seed)*43758.5453123;
+  return n-Math.floor(n);
 }
-function createRemote(id,data){
-  if(!id||id===mp.peer?.id)return null;
-  if(mp.remotePlayers.has(id)){
-    const p=mp.remotePlayers.get(id);
-    if(data.name&&data.name!==p.name){p.name=String(data.name).slice(0,20);p.label.textContent=p.name}
-    return p;
-  }
-  const model=makePlayerModel(data.name||"Player"),g=model.root;
-  const x=Number(data.x)||0,y=Number(data.y)||0,z=Number(data.z)||0;
-  g.position.set(x,y,z);scene.add(g);
-  const p={id,group:g,label:model.label,parts:model.parts,name:String(data.name||"Player").slice(0,20),target:new THREE.Vector3(x,y,z),yaw:Number(data.yaw)||0,walkTime:0,lastPos:g.position.clone()};
-  mp.remotePlayers.set(id,p);updateMPPlayers();return p;
+
+function smoothNoise(x,z,seed=1){
+  const i=Math.floor(x),j=Math.floor(z);
+  const fx=x-i,fz=z-j;
+  const a=noise2D(i,j,seed),b=noise2D(i+1,j,seed),c=noise2D(i,j+1,seed),d=noise2D(i+1,j+1,seed);
+  const ux=fx*fx*(3-2*fx),uz=fz*fz*(3-2*fz);
+  return a*(1-ux)*(1-uz)+b*ux*(1-uz)+c*(1-ux)*uz+d*ux*uz;
 }
-function removeRemote(id){
-  const p=mp.remotePlayers.get(id);if(!p)return;
-  scene.remove(p.group);p.label?.remove();
-  p.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&!Array.isArray(o.material))o.material.dispose()});
-  mp.remotePlayers.delete(id);updateMPPlayers();
+
+function generateHeight(x,z){
+  let h=0;
+  if(currentTerrain==="flat") return 10;
+  const scale=currentTerrain==="mountains"?0.03:0.015;
+  h+=smoothNoise(x*scale,z*scale,worldSeed)*20;
+  h+=smoothNoise(x*scale*2,z*scale*2,worldSeed)*10;
+  if(currentTerrain==="mountains") h*=1.8;
+  if(currentTerrain==="islands") h=(h>12)?h:2;
+  return Math.floor(h)+8;
 }
-function localState(){
-  return {t:"state",id:mp.peer?.id||mp.sessionId,name:playerName(),
-    x:+player.position.x.toFixed(3),y:+player.position.y.toFixed(3),z:+player.position.z.toFixed(3),yaw:+player.yaw.toFixed(4)};
-}
-function sendPlayerHello(){
-  mpSend({t:"hello",id:mp.peer?.id||mp.sessionId,name:playerName(),x:player.position.x,y:player.position.y,z:player.position.z,yaw:player.yaw});
-}
-function handleMPMessage(d,fromId){
-  if(!d||!d.t)return;
-  const id=d.id||fromId||"peer";
-  if(d.t==="hello"){
-    createRemote(id,d);
-    if(mp.isHost){
-      // The host is authoritative for the procedural world. Send the exact
-      // terrain recipe so every client generates the same terrain from the
-      // same seed instead of using its own locally generated world.
-      peerSend(mp.connections.get(fromId),{t:"worldSync",seed:worldSeed,terrain:currentTerrain,height:worldHeight,options:{...generationOptions}});
-      peerSend(mp.connections.get(fromId),localState());
-      hostBroadcast({t:"playerJoined",id,name:d.name||"Player"},fromId);
-      for(const [otherId,p] of mp.remotePlayers){
-        if(otherId!==id)peerSend(mp.connections.get(fromId),{t:"state",id:otherId,name:p.name,x:p.group.position.x,y:p.group.position.y,z:p.group.position.z,yaw:p.yaw});
+
+function generateChunk(cx,cz){
+  const chunkKey=`${cx},${cz}`;
+  if(generatedChunks.has(chunkKey)) return;
+  generatedChunks.add(chunkKey);
+
+  const group=new THREE.Group();
+  const startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE;
+
+  for(let x=0;x<CHUNK_SIZE;x++){
+    for(let z=0;z<CHUNK_SIZE;z++){
+      const wx=startX+x,wz=startZ+z;
+      const h=generateHeight(wx,wz);
+      
+      for(let y=0;y<=h;y++){
+        let type="dirt";
+        if(y===h){
+          if(currentTerrain==="desert") type="sand";
+          else if(currentTerrain==="snow") type="snow";
+          else type="grass";
+        }else if(y>h-3){
+          type=currentTerrain==="desert"?"sand":"dirt";
+        }else{
+          type="stone";
+        }
+
+        const bKey=blockKey(wx,y,wz);
+        if(!world.has(bKey)){
+          world.set(bKey,type);
+        }
+
+        // Add visual mesh only for exposed top layer blocks to keep performance high
+        if(y===h || y===0){
+          const mesh=new THREE.Mesh(blockGeom,getMaterial(type));
+          mesh.position.set(wx,y,wz);
+          mesh.receiveShadow=true;
+          mesh.castShadow=(y===h);
+          group.add(mesh);
+        }
       }
     }
-    return;
   }
-  if(d.t==="worldSync"){
-    // Guests rebuild their local procedural world with the host's exact
-    // terrain type, seed, height and generation options.
-    if(!mp.isHost){
-      const syncSeed=Number.isFinite(+d.seed)?Math.trunc(+d.seed):1;
-      const syncTerrain=String(d.terrain||"normal");
-      const syncOptions={...generationOptions,...(d.options||{})};
-      syncOptions.terrainHeight=Math.max(16,+syncOptions.terrainHeight||32);
-      setMPStatus("🟡 Syncing host world...");
-      generateWorld(syncTerrain,syncSeed,syncOptions).then(()=>{
-        if(mp.connected){
-          setMPStatus(`🟢 Connected to room ${mp.roomCode} · world synced`);
-          sendPlayerHello();
-        }
-      }).catch(e=>{
-        console.error("World sync failed",e);
-        setMPStatus("🔴 World sync failed: "+(e&&e.message||String(e)));
-      });
-    }
-    return;
-  }
-  if(d.t==="state"){
-    const p=createRemote(id,d);
-    if(p){p.target.set(Number(d.x)||0,Number(d.y)||0,Number(d.z)||0);p.yaw=Number(d.yaw)||0}
-    if(mp.isHost&&fromId)hostBroadcast(d,fromId);
-    return;
-  }
-  if(d.t==="chat"){
-    addChat(d.name||"Player",d.msg||"",false);
-    if(mp.isHost&&fromId)hostBroadcast(d,fromId);
-    return;
-  }
-  if(d.t==="emote"){
-    showEmote(id,d.emoji||"😀");
-    if(mp.isHost&&fromId)hostBroadcast(d,fromId);
-    return;
-  }
-  if(d.t==="playerJoined"){
-    if(id!==mp.peer?.id)setMPStatus(`🟢 Connected · ${1+mp.remotePlayers.size} players`);
-    return;
-  }
-  if(d.t==="playerLeft"){
-    removeRemote(id);
-    return;
-  }
-}
-function setupConnection(conn){
-  if(!conn)return;
-  mp.connections.set(conn.peer,conn);
-  conn.on("open",()=>{
-    mp.peerReady=true;
-    if(mp.isHost)setMPStatus(`🟢 Room ${mp.roomCode} · ${1+mp.remotePlayers.size} players`);
-    else setMPStatus(`🟢 Connected to room ${mp.roomCode}`);
-    sendPlayerHello();
-    updateMPPlayers();
-  });
-  conn.on("data",data=>{
-    try{
-      const d=typeof data==="string"?JSON.parse(data):data;
-      handleMPMessage(d,conn.peer);
-    }catch(e){console.warn("Bad multiplayer packet",e)}
-  });
-  const closed=()=>{
-    const id=conn.peer;
-    mp.connections.delete(id);
-    removeRemote(id);
-    if(mp.isHost){
-      hostBroadcast({t:"playerLeft",id});
-      setMPStatus(`🟢 Room ${mp.roomCode} · ${1+mp.remotePlayers.size} players`);
-    }else{
-      setMPStatus("🔴 Disconnected from room");
-      mp.connected=false;
-    }
-  };
-  conn.on("close",closed);
-  conn.on("error",e=>{console.warn("PeerJS connection error",e);setMPStatus("⚠️ Connection error: "+(e.message||"unknown error"))});
-}
-function destroyPeer(clearRemotes=true){
-  for(const c of mp.connections.values()){try{c.close()}catch(_){}}
-  mp.connections.clear();
-  if(mp.peer){try{mp.peer.destroy()}catch(_){}}
-  mp.peer=null;mp.peerReady=false;mp.connected=false;mp.isHost=false;mp.hostId=null;mp.roomCode="";
-  if(clearRemotes)for(const id of [...mp.remotePlayers.keys()])removeRemote(id);
-  mpEls.room.value="";updateMPPlayers();
-}
-function initHostPeer(){
-  if(!window.Peer)throw new Error("PeerJS failed to load. Check your internet connection.");
-  destroyPeer();
-  mp.isHost=true;setMPStatus("🟡 Creating room...");
-  const peer=new Peer(undefined,PEER_CONFIG);
-  mp.peer=peer;
-  peer.on("open",id=>{
-    mp.peerReady=true;mp.connected=true;mp.hostId=id;mp.roomCode=id;mp.sessionId=id;
-    mpEls.room.value=id;
-    setMPStatus(`🟢 Room created · ${id}`);
-    updateMPPlayers();
-  });
-  peer.on("connection",conn=>setupConnection(conn));
-  peer.on("error",err=>{
-    console.error("PeerJS host error",err);
-    setMPStatus("🔴 Room error: "+(err.message||err.type||"unknown error"));
-  });
-  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected");try{peer.reconnect()}catch(_){}});
-  peer.on("close",()=>{mp.peerReady=false;mp.connected=false});
-}
-function initGuestPeer(roomId){
-  if(!window.Peer)throw new Error("PeerJS failed to load. Check your internet connection.");
-  roomId=String(roomId||"").trim();
-  if(!roomId)throw new Error("Enter a room code first.");
-  destroyPeer();
-  mp.isHost=false;mp.hostId=roomId;mp.roomCode=roomId;
-  setMPStatus("🟡 Connecting to room...");
-  const peer=new Peer(undefined,PEER_CONFIG);
-  mp.peer=peer;
-  peer.on("open",id=>{
-    mp.sessionId=id;
-    const conn=peer.connect(roomId,{reliable:true});
-    mp.connected=true;
-    setupConnection(conn);
-  });
-  peer.on("error",err=>{
-    console.error("PeerJS guest error",err);
-    if(err.type==="peer-unavailable")setMPStatus("🔴 Room not found or host is offline.");
-    else setMPStatus("🔴 Join error: "+(err.message||err.type||"unknown error"));
-  });
-  peer.on("disconnected",()=>{mp.peerReady=false;mp.connected=false;setMPStatus("🟠 Signaling server disconnected");try{peer.reconnect()}catch(_){}});
-  peer.on("close",()=>{mp.peerReady=false;mp.connected=false});
-}
-function makeInvite(){
-  if(!mp.roomCode)return "";
-  return location.href.split("#")[0]+"#room="+encodeURIComponent(mp.roomCode);
-}
-async function copyMP(){
-  const text=makeInvite();
-  if(!text){setMPStatus("⚠️ Create or join a room first.");return}
-  try{await navigator.clipboard.writeText(text);setMPStatus("✅ Invite link copied.");}
-  catch(e){mpEls.room.focus();mpEls.room.select();try{document.execCommand("copy");setMPStatus("✅ Room code selected — copy it manually.")}catch(_){setMPStatus("⚠️ Copy failed.")}}
-}
-async function shareMP(){
-  const text=makeInvite();
-  if(!text){setMPStatus("⚠️ Create a room first.");return}
-  if(navigator.share){
-    try{await navigator.share({title:"BlockWorld Multiplayer",text:"Join my BlockWorld room",url:text});setMPStatus("✅ Invite shared.");return}catch(e){}
-  }
-  await copyMP();
-}
-function disconnectMP(){
-  if(mp.isHost&&mp.roomCode)hostBroadcast({t:"playerLeft",id:mp.peer?.id});
-  destroyPeer();
-  setMPStatus("Offline · Create a room or join a friend's room.");
-}
-function updateMultiplayer(dt){copyMPMultiplayer(dt)}
-function copyMPMultiplayer(dt){
-  if(!gameActive||!mp.peerReady)return;
-  mp.lastSend+=dt;if(mp.lastSend<.06)return;mp.lastSend=0;
-  mpSend(localState());
-}
-mpEls.create.addEventListener("click",()=>{try{mpEls.name2.value=playerName();initHostPeer()}catch(e){console.error(e);setMPStatus("🔴 "+(e.message||e))}});
-mpEls.joinBtn.addEventListener("click",()=>{try{mpEls.name2.value=playerName();initGuestPeer(mpEls.join.value)}catch(e){console.error(e);setMPStatus("🔴 "+(e.message||e))}});
-mpEls.copy.addEventListener("click",copyMP);mpEls.share.addEventListener("click",shareMP);mpEls.disconnect.addEventListener("click",disconnectMP);
-$("#openMultiplayerButton").addEventListener("click",()=>{mpEls.name2.value=mpEls.name.value;openPanel("multiplayerPanel")});$("#resumeButton").addEventListener("click",closePanels);
-$("#chatButton").addEventListener("click",()=>openPanel("chatPanel"));
-$("#emotesButton").addEventListener("click",()=>openPanel("emotesPanel"));
-$("#optionsIngameButton").addEventListener("click",()=>openPanel("ingameOptionsPanel"));
-$("#leaveWorldMobileButton").addEventListener("click",async()=>{if(!gameActive)return;const btn=$("#leaveWorldMobileButton");btn.disabled=true;btn.textContent="SAVING...";try{await saveWorldNow();closePanels();showMainMenu();}finally{btn.disabled=false;btn.textContent="🚪 SAVE & LEAVE WORLD";}});
-document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",closePanels));
-$("#chatSend").addEventListener("click",()=>{const v=mpEls.input.value.trim();if(!v)return;addChat(playerName(),v,true);mpEls.input.value=""});
-mpEls.input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("#chatSend").click()}});
-$("#emoteGrid").innerHTML=EMOTES.map(e=>`<button class="emote" type="button">${e}</button>`).join("");
-$("#emoteGrid").querySelectorAll(".emote").forEach(b=>b.addEventListener("click",()=>{localEmote(b.textContent);closePanels()}));
-mpEls.name.addEventListener("input",()=>mpEls.name2.value=mpEls.name.value);
-mpEls.name2.addEventListener("input",()=>mpEls.name.value=mpEls.name2.value);
-const initialRoomMatch=location.hash.match(/^#room=(.+)$/);
-if(initialRoomMatch){try{mpEls.join.value=decodeURIComponent(initialRoomMatch[1]);setMPStatus("🔗 Room invite detected · press JOIN ROOM")}catch(_){}}
-const saveShortcut=document.createElement("button");saveShortcut.type="button";saveShortcut.id="saveWorldShortcut";saveShortcut.textContent="💾";saveShortcut.title="Save world";saveShortcut.style.cssText="position:fixed;right:18px;top:18px;z-index:90;display:none;width:46px;height:46px;border-radius:14px;border:1px solid #ffffff22;background:#111827cc;color:white;font-size:20px;backdrop-filter:blur(10px);cursor:pointer";document.body.appendChild(saveShortcut);saveShortcut.addEventListener("click",async()=>{saveShortcut.textContent="⏳";await saveWorldNow();saveShortcut.textContent="✓";setTimeout(()=>saveShortcut.textContent="💾",900)});
 
-/* menus / generator */
-const newWorldButton=$("#newWorldButton");
-async function refreshWorldList(){const list=$("#worldList");if(!list)return;list.innerHTML='<div class="world-empty">Loading worlds...</div>';const worlds=await listSavedWorlds();if(!worlds.length){list.innerHTML='<div class="world-empty">No worlds yet. Create your first world!</div>';return}list.innerHTML="";for(const w of worlds){const card=document.createElement("div");card.className="world-card";const date=w.savedAt?new Date(w.savedAt).toLocaleString():"Never saved";card.innerHTML='<div class="world-card-main"><div class="world-card-name"></div><div class="world-card-info"></div></div><div class="world-card-actions"><button class="button primary load-world" type="button">PLAY</button><button class="button delete-world" type="button">DELETE</button></div>';card.querySelector(".world-card-name").textContent=w.name||"Unnamed World";card.querySelector(".world-card-info").textContent=`Seed: ${Number(w.seed)||0} · ${String(w.terrain||"normal")} · Saved ${date}`;card.querySelector(".load-world").addEventListener("click",()=>openSavedWorld(w.name));card.querySelector(".delete-world").addEventListener("click",()=>deleteSavedWorld(w.name));list.appendChild(card)}}
-async function openSavedWorld(name){showLoading("Loading "+name+"...");try{const ok=await loadSavedWorld(name);if(!ok)throw new Error("That world could not be loaded.");handleResize();showGame();if(!isMobile())setTimeout(()=>{try{renderer.domElement.requestPointerLock()}catch(_){}},50)}catch(e){showError("World loading failed:\n\n"+(e&&e.message||String(e)))}}
-async function deleteSavedWorld(name){if(!confirm(`Delete world "${name}"? This cannot be undone.`))return;try{const db=await openWorldDB();await new Promise((resolve,reject)=>{const tx=db.transaction(WORLD_STORE,"readwrite");tx.objectStore(WORLD_STORE).delete(name);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();await refreshWorldList()}catch(e){alert("Could not delete world: "+(e&&e.message||String(e)))}}
-if(newWorldButton)newWorldButton.addEventListener("click",showWorldMenu);
-$("#newWorldFormButton").addEventListener("click",()=>{$("#newWorldForm").classList.remove("hidden");$("#newWorldFormButton").classList.add("hidden");$("#worldName").focus()});
-$("#cancelNewWorldButton").addEventListener("click",()=>{$("#newWorldForm").classList.add("hidden");$("#newWorldFormButton").classList.remove("hidden")});
-$("#backWorldButton").addEventListener("click",showMainMenu);
-$("#randomSeed").addEventListener("click",()=>seedInput.value=String(Math.floor(Math.random()*2147483646)+1));
-$("#generateButton").addEventListener("click",async()=>{let name=$("#worldName").value.trim().replace(/[\\/:*?"<>|]/g,"").slice(0,32);if(!name)name="My World";const existing=await listSavedWorlds();if(existing.some(w=>w.name===name)){alert("A world with that name already exists. Choose another name.");return}activeWorldName=name;const seed=Number(seedInput.value)||Math.floor(Math.random()*2147483646)+1;const terrain=terrainInput.value||"normal";showLoading("Creating "+name+"...");try{await generateWorld(terrain,seed,{terrainHeight:32,mountainHeight:45,roughness:55,waterLevel:6,water:true,trees:true,caves:true,extraIslands:false,worldType:"normal"});showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){}}catch(e){showError("World creation failed:\n\n"+(e&&e.message||String(e)))}});
-function playNow(){
-  if(gameActive)return;
-  // Play always opens the world selection screen so the player can choose
-  // an existing world or create a new one. It never auto-starts a world.
-  showWorldMenu();
+  scene.add(group);
+  chunkMeshGroups.set(chunkKey,group);
 }
-$("#continueButton").addEventListener("click",playNow);
-$("#continueButton").addEventListener("touchend",e=>{e.preventDefault();playNow()},{passive:false});
-$("#settingsButton").addEventListener("click",()=>showSettings("main"));$("#backSettingsButton").addEventListener("click",()=>settingsReturn==="pause"?showPauseFromSettings():showMainMenu());
-$("#realmsButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();realmsMenu.classList.remove("hidden")});
-$("#marketplaceButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();marketplaceMenu.classList.remove("hidden")});
-$("#profileButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();profileMenu.classList.remove("hidden")});
-$("#dressingRoomButton").addEventListener("click",()=>{setNonGameUI();loadingScreen.classList.add("hidden");hideAllMenus();dressingRoomMenu.classList.remove("hidden")});
-// ===== Online account UI =====
-$("#accountButton").addEventListener("click",showAuthMenu);
-$("#goLoginButton").addEventListener("click",showLoginMenu);
-$("#goRegisterButton").addEventListener("click",showRegisterMenu);
-$("#regBack").addEventListener("click",showMainMenu);
-$("#loginBack").addEventListener("click",showMainMenu);
-let usernameCheckTimer=null,usernameAvailable=false;
-function normalizeUsername(v){return v.trim().toLowerCase()}
-function setAuthError(msg){$("#regError").textContent=msg||"";$("#loginError").textContent=msg||"";}
-async function checkUsernameAvailability(){const input=$("#regUsername"),status=$("#regUsernameStatus");const name=input.value.trim();usernameAvailable=false;if(!name){status.textContent="Choose a username.";return false}if(!/^[A-Za-z0-9_]{3,16}$/.test(name)){status.textContent="3–16 characters: letters, numbers, or _.";return false}if(!firebaseDb){status.textContent="Username service unavailable.";return false}try{const snap=await firebaseDb.collection("usernames").doc(normalizeUsername(name)).get();usernameAvailable=!snap.exists;status.textContent=usernameAvailable?"✓ Username available":"✕ Username already used";return usernameAvailable}catch(e){status.textContent="Could not check username availability.";return false}}
-$("#regUsername").addEventListener("input",()=>{clearTimeout(usernameCheckTimer);usernameCheckTimer=setTimeout(checkUsernameAvailability,250)});
-$("#regSubmit").addEventListener("click",async()=>{const email=$("#regEmail").value.trim(),password=$("#regPassword").value,username=$("#regUsername").value.trim();setAuthError("");if(!firebaseAuth){setAuthError("Online account service is unavailable.");return}if(!firebaseDb){setAuthError("Username service is unavailable. Enable Firestore in Firebase Console.");return}if(!email||!password){setAuthError("Enter your email and password.");return}if(password.length<6){setAuthError("Password must be at least 6 characters.");return}if(!/^[A-Za-z0-9_]{3,16}$/.test(username)){setAuthError("Choose a valid username: 3–16 letters, numbers, or _.");return}const button=$("#regSubmit");button.disabled=true;button.textContent="CREATING...";let reserved=false;try{const usernameRef=firebaseDb.collection("usernames").doc(normalizeUsername(username));await firebaseDb.runTransaction(async tx=>{const snap=await tx.get(usernameRef);if(snap.exists)throw new Error("USERNAME_TAKEN");tx.set(usernameRef,{username:username,createdAt:firebase.firestore.FieldValue.serverTimestamp()})});reserved=true;try{const cred=await firebaseAuth.createUserWithEmailAndPassword(email,password);await cred.user.updateProfile({displayName:username});await firebaseDb.collection("users").doc(cred.user.uid).set({username,usernameLower:normalizeUsername(username),email,createdAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});await firebaseDb.collection("usernames").doc(normalizeUsername(username)).set({username,usernameLower:normalizeUsername(username),email,uid:cred.user.uid},{merge:true});}catch(e){if(reserved)try{await firebaseDb.collection("usernames").doc(normalizeUsername(username)).delete()}catch(_){}throw e}$("#regPassword").value="";refreshAuthUI();showMainMenu();}catch(e){const code=e&&e.code||"",msg=e&&e.message||"";const messages={"auth/email-already-in-use":"That email is already registered. Login instead.","auth/invalid-email":"Enter a valid email address.","auth/weak-password":"Choose a stronger password.","auth/operation-not-allowed":"Email/password authentication is not enabled in Firebase Console.","auth/network-request-failed":"Network error. Check your internet connection."};setAuthError(msg==="USERNAME_TAKEN"?"That username is already used. Choose another.":messages[code]||msg||"Registration failed.")}finally{button.disabled=false;button.textContent="REGISTER";checkUsernameAvailability()}});
-$("#loginSubmit").addEventListener("click",async()=>{const identity=$("#loginIdentity").value.trim(),password=$("#loginPassword").value;setAuthError("");if(!firebaseAuth){setAuthError("Online account service is unavailable.");return}if(!identity||!password){setAuthError("Enter your email/username and password.");return}const button=$("#loginSubmit");button.disabled=true;button.textContent="LOGGING IN...";try{let loginEmail=identity;if(!identity.includes("@")){if(!firebaseDb)throw new Error("USERNAME_LOGIN_UNAVAILABLE");const snap=await firebaseDb.collection("usernames").doc(normalizeUsername(identity)).get();if(!snap.exists)throw new Error("USERNAME_NOT_FOUND");loginEmail=(snap.data()||{}).email||"";if(!loginEmail)throw new Error("USERNAME_NOT_LINKED")}await firebaseAuth.signInWithEmailAndPassword(loginEmail,password);$("#loginPassword").value="";refreshAuthUI();showMainMenu();}catch(e){const code=e&&e.code||"",msg=e&&e.message||"";const messages={"auth/user-not-found":"No account was found.","auth/wrong-password":"Incorrect password.","auth/invalid-credential":"Email/username or password is incorrect.","auth/network-request-failed":"Network error. Check your internet connection.",USERNAME_NOT_FOUND:"That username does not exist.",USERNAME_NOT_LINKED:"That username is not linked to an email account yet.",USERNAME_LOGIN_UNAVAILABLE:"Username login requires the online database to be enabled."};setAuthError(messages[code]||msg||"Login failed.")}finally{button.disabled=false;button.textContent="LOGIN"}});
-$("#backRealmsButton").addEventListener("click",showMainMenu);$("#backMarketplaceButton").addEventListener("click",showMainMenu);$("#backProfileButton").addEventListener("click",showMainMenu);$("#backDressingButton").addEventListener("click",showMainMenu);
-$("#openRealmsButton").addEventListener("click",()=>{if(world.size){showGame();openPanel("multiplayerPanel")}else{showMainMenu()}});
-function pauseGame(){
-  if(!gameActive||isMobile())return;
-  resetInputs();
-  try{if(document.pointerLockElement)document.exitPointerLock()}catch(_){}
-  closePanels();
-  document.body.classList.remove("in-game-ui");
-  saveShortcut.style.display="none";
-  document.getElementById("mobileExtraButtons").style.display="none";
-  $("#pauseOverlay").classList.remove("hidden");
+
+function updateChunks(){
+  const pcx=Math.floor(player.pos.x/CHUNK_SIZE);
+  const pcz=Math.floor(player.pos.z/CHUNK_SIZE);
+
+  if(lastPlayerChunk.cx===pcx && lastPlayerChunk.cz===pcz) return;
+  lastPlayerChunk.cx=pcx;
+  lastPlayerChunk.cz=pcz;
+
+  const r=STREAM_CHUNK_RADIUS;
+  for(let x=-r;x<=r;x++){
+    for(let z=-r;z<=r;z++){
+      generateChunk(pcx+x,pcz+z);
+    }
+  }
+
+  // Unload distant chunks
+  for(const [key,group] of chunkMeshGroups.entries()){
+    const [cx,cz]=key.split(",").map(Number);
+    if(Math.abs(cx-pcx)>UNLOAD_CHUNK_RADIUS || Math.abs(cz-pcz)>UNLOAD_CHUNK_RADIUS){
+      scene.remove(group);
+      group.traverse(child=>{
+        if(child.geometry) child.geometry.dispose();
+      });
+      chunkMeshGroups.delete(key);
+      generatedChunks.delete(key);
+    }
+  }
 }
-function resumeGame(){
-  $("#pauseOverlay").classList.add("hidden");
-  if(!gameActive)return;
-  document.body.classList.add("in-game-ui");
-  saveShortcut.style.display="block";
-  document.getElementById("mobileExtraButtons").style.display="flex";
-  try{renderer.domElement.requestPointerLock()}catch(_){}
+
+let keys={};
+function initInputs(){
+  window.addEventListener("keydown",e=>{
+    keys[e.code]=true;
+    if(e.code==="Escape"){
+      togglePauseMenu();
+    }
+    if(e.code.startsWith("Digit")){
+      const num=parseInt(e.code.replace("Digit",""))-1;
+      if(num>=0 && num<hotbar.length){
+        selectedBlock=num;
+        updateHotbarUI();
+      }
+    }
+  });
+  window.addEventListener("keyup",e=>{keys[e.code]=false;});
+
+  const gameCanvas=$("#game");
+  gameCanvas.addEventListener("click",()=>{
+    if(gameActive && !document.pointerLockElement){
+      gameCanvas.requestPointerLock();
+    }
+  });
+
+  document.addEventListener("mousemove",e=>{
+    if(document.pointerLockElement && gameActive){
+      const sens=Number(sensitivityInput.value)*0.0008;
+      const inv=(invertYInput.value==="on"?-1:1);
+      player.rot.y-=e.movementX*sens;
+      player.rot.x-=e.movementY*sens*inv;
+      player.rot.x=Math.max(-Math.PI/2.1,Math.min(Math.PI/2.1,player.rot.x));
+    }
+  });
+
+  window.addEventListener("mousedown",e=>{
+    if(!gameActive || !document.pointerLockElement) return;
+    if(e.button===0) breakBlock();
+    if(e.button===2) placeBlock();
+  });
 }
-$("#resumePauseButton").addEventListener("click",resumeGame);
-function showPauseFromSettings(){gameActive=true;resetInputs();document.body.classList.remove("in-game-ui");saveShortcut.style.display="none";document.getElementById("mobileExtraButtons").style.display="none";loadingScreen.classList.add("hidden");hideAllMenus();$("#pauseOverlay").classList.remove("hidden")}
-$("#pauseSettingsButton").addEventListener("click",()=>{pauseGame();$("#pauseOverlay").classList.add("hidden");showSettings("pause")});
-$("#quitWorldButton").addEventListener("click",async()=>{await saveWorldNow();$("#pauseOverlay").classList.add("hidden");showMainMenu()});
-document.addEventListener("keydown",e=>{
-  if(!gameActive||isMobile())return;
-  if(e.code==="Escape"){
-    e.preventDefault();
-    if($("#pauseOverlay").classList.contains("hidden"))pauseGame();else resumeGame();
+
+function updateHotbarUI(){
+  hotbarElement.innerHTML="";
+  hotbar.forEach((type,idx)=>{
+    const slot=document.createElement("div");
+    slot.className="slot"+(idx===selectedBlock?" selected":"");
+    const swatch=document.createElement("div");
+    swatch.className="swatch";
+    swatch.style.background="#"+(blocks[type]?.color||0xffffff).toString(16).padStart(6,'0');
+    const label=document.createElement("span");
+    label.textContent=idx+1;
+    slot.appendChild(swatch);
+    slot.appendChild(label);
+    slot.onclick=()=>{selectedBlock=idx;updateHotbarUI();};
+    hotbarElement.appendChild(slot);
+  });
+}
+
+const raycaster=new THREE.Raycaster();
+function breakBlock(){
+  raycaster.setFromCamera(new THREE.Vector2(0,0),camera);
+  const intersects=raycaster.intersectObjects(scene.children,true);
+  if(intersects.length>0 && intersects[0].distance<=5){
+    const obj=intersects[0].object;
+    const pos=obj.position;
+    const key=blockKey(pos.x,pos.y,pos.z);
+    world.delete(key);
+    if(obj.parent) obj.parent.remove(obj);
+  }
+}
+
+function placeBlock(){
+  raycaster.setFromCamera(new THREE.Vector2(0,0),camera);
+  const intersects=raycaster.intersectObjects(scene.children,true);
+  if(intersects.length>0 && intersects[0].distance<=5){
+    const hit=intersects[0];
+    const norm=hit.face.normal;
+    const target=hit.object.position.clone().add(norm);
+    
+    // Don't place inside player
+    if(target.distanceTo(player.pos)<1.2) return;
+
+    const bType=hotbar[selectedBlock]||"grass";
+    world.set(blockKey(target.x,target.y,target.z),bType);
+
+    const mesh=new THREE.Mesh(blockGeom,getMaterial(bType));
+    mesh.position.copy(target);
+    mesh.castShadow=true;
+    mesh.receiveShadow=true;
+
+    const pcx=Math.floor(target.x/CHUNK_SIZE);
+    const pcz=Math.floor(target.z/CHUNK_SIZE);
+    const chunkGroup=chunkMeshGroups.get(`${pcx},${pcz}`);
+    if(chunkGroup) chunkGroup.add(mesh);
+    else scene.add(mesh);
+  }
+}
+
+function updatePhysics(dt){
+  if(!gameActive) return;
+
+  const moveSpeed=(keys["ShiftLeft"]||mobile.sprint)?12:6;
+  const forward=new THREE.Vector3(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0),player.rot.y);
+  const side=new THREE.Vector3(1,0,0).applyAxisAngle(new THREE.Vector3(0,1,0),player.rot.y);
+  
+  let moveDir=new THREE.Vector3();
+  if(keys["KeyW"]) moveDir.add(forward);
+  if(keys["KeyS"]) moveDir.sub(forward);
+  if(keys["KeyD"]) moveDir.add(side);
+  if(keys["KeyA"]) moveDir.sub(side);
+  
+  if(mobile.x || mobile.y){
+    moveDir.add(forward.clone().multiplyScalar(-mobile.y));
+    moveDir.add(side.clone().multiplyScalar(mobile.x));
+  }
+
+  if(moveDir.lengthSq()>0) moveDir.normalize();
+
+  player.vel.x=moveDir.x*moveSpeed;
+  player.vel.z=moveDir.z*moveSpeed;
+
+  // Gravity
+  player.vel.y-=28*dt;
+
+  if((keys["Space"] || mobile.jump) && player.onGround){
+    player.vel.y=9;
+    player.onGround=false;
+  }
+
+  // Simple collision detection with ground
+  player.pos.x+=player.vel.x*dt;
+  player.pos.z+=player.vel.z*dt;
+  player.pos.y+=player.vel.y*dt;
+
+  const groundY=generateHeight(Math.floor(player.pos.x),Math.floor(player.pos.z))+1.8;
+  if(player.pos.y<=groundY){
+    player.pos.y=groundY;
+    player.vel.y=0;
+    player.onGround=true;
+  }
+
+  camera.position.copy(player.pos);
+  camera.rotation.set(0,0,0);
+  camera.rotation.y=player.rot.y;
+  camera.rotation.x=player.rot.x;
+}
+
+let mobs=[];
+function spawnMob(x,z){
+  const group=new THREE.Group();
+  const bodyMesh=new THREE.Mesh(new THREE.BoxGeometry(0.8,1.8,0.8),new THREE.MeshStandardMaterial({color:0x27ae60}));
+  bodyMesh.position.y=0.9;
+  group.add(bodyMesh);
+  
+  const y=generateHeight(x,z)+1;
+  group.position.set(x,y,z);
+  scene.add(group);
+  mobs.push({mesh:group,pos:group.position,target:group.position.clone(),timer:0});
+}
+
+function updateMobs(dt){
+  mobs.forEach(mob=>{
+    mob.timer-=dt;
+    if(mob.timer<=0){
+      mob.target.set(mob.pos.x+(Math.random()-0.5)*20,0,mob.pos.z+(Math.random()-0.5)*20);
+      mob.target.y=generateHeight(mob.target.x,mob.target.z)+1;
+      mob.timer=3+Math.random()*4;
+    }
+    const dir=mob.target.clone().sub(mob.pos);
+    dir.y=0;
+    if(dir.length()>0.5){
+      dir.normalize();
+      mob.pos.x+=dir.x*2*dt;
+      mob.pos.z+=dir.z*2*dt;
+      mob.pos.y=generateHeight(mob.pos.x,mob.pos.z)+1;
+      mob.mesh.rotation.y=Math.atan2(dir.x,dir.z);
+    }
+  });
+}
+
+let peer=null,connections=[];
+function initMultiplayer(){
+  $("#mpCreate").onclick=()=>{
+    peer=new Peer();
+    peer.on("open",id=>{
+      $("#mpRoomCode").value=id;
+      $("#mpStatus").textContent="Room Created! Share code with friends.";
+    });
+    peer.on("connection",conn=>{
+      connections.push(conn);
+      $("#mpPlayers").textContent="Players: "+(connections.length+1);
+      conn.on("data",data=>handlePeerData(data));
+    });
+  };
+
+  $("#mpJoin").onclick=()=>{
+    const code=$("#mpJoinCode").value.trim();
+    if(!code) return;
+    peer=new Peer();
+    peer.on("open",()=>{
+      const conn=peer.connect(code);
+      conn.on("open",()=>{
+        connections.push(conn);
+        $("#mpStatus").textContent="Connected to Host!";
+      });
+      conn.on("data",data=>handlePeerData(data));
+    });
+  };
+}
+
+function broadcastPlayerState(){
+  if(connections.length===0) return;
+  const payload=JSON.stringify({
+    type:"playerState",
+    x:player.pos.x,y:player.pos.y,z:player.pos.z,
+    ry:player.rot.y
+  });
+  connections.forEach(c=>c.send(payload));
+}
+
+function handlePeerData(data){
+  try{
+    const msg=JSON.parse(data);
+    if(msg.type==="playerState"){
+      // Render remote players if needed
+    }
+  }catch(_){}
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=0.016;
+  if(gameActive){
+    updatePhysics(dt);
+    updateChunks();
+    updateMobs(dt);
+    broadcastPlayerState();
+    
+    // Day Night cycle animation
+    dayNight.time=(dayNight.time+dt*2)%(24*60);
+    const hrs=Math.floor(dayNight.time/60);
+    const mins=Math.floor(dayNight.time%60);
+    worldTimeLabel.textContent=`${hrs>=6&&hrs<18?'☀':'🌙'} Day ${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
+  }
+  renderer.render(scene,camera);
+}
+
+function togglePauseMenu(){
+  const pauseOverlay=$("#pauseOverlay");
+  if(pauseOverlay.classList.contains("hidden")){
+    pauseOverlay.classList.remove("hidden");
+    document.exitPointerLock();
+  }else{
+    pauseOverlay.classList.add("hidden");
+    if(gameActive) $("#game canvas").requestPointerLock();
+  }
+}
+
+async function renderWorldList(){
+  const list=$("#worldList");
+  list.innerHTML="";
+  const worlds=await listWorldsFromDb();
+  if(worlds.length===0){
+    list.innerHTML='<div class="world-empty">No worlds found. Create a new one!</div>';
     return;
   }
-  if(e.code==="KeyE" && document.pointerLockElement===renderer.domElement){
-    e.preventDefault();
+  worlds.forEach(w=>{
+    const card=document.createElement("div");
+    card.className="world-card";
+    card.innerHTML=`
+      <div class="world-card-main">
+        <div class="world-card-name">${w.name}</div>
+        <div class="world-card-info">Terrain: ${w.terrain} | Seed: ${w.seed}</div>
+      </div>
+      <div class="world-card-actions">
+        <button class="button primary play-btn">PLAY</button>
+        <button class="button delete-world del-btn">DELETE</button>
+      </div>
+    `;
+    card.querySelector(".play-btn").onclick=()=>loadAndStartWorld(w.id);
+    card.querySelector(".del-btn").onclick=async()=>{
+      await deleteWorldFromDb(w.id);
+      renderWorldList();
+    };
+    list.appendChild(card);
+  });
+}
+
+async function createNewWorld(){
+  const name=$("#worldName").value||"My World";
+  const terrain=terrainInput.value||"normal";
+  const seed=Number(seedInput.value)||(Math.floor(Math.random()*10000)+1);
+  const id="world_"+Date.now();
+
+  const newWorld={id,name,terrain,seed,created:Date.now()};
+  await saveWorldToDb(newWorld);
+  $("#newWorldForm").classList.add("hidden");
+  renderWorldList();
+  loadAndStartWorld(id);
+}
+
+async function loadAndStartWorld(id){
+  const wData=await loadWorldFromDb(id);
+  if(!wData) return;
+
+  activeWorldId=wData.id;
+  activeWorldName=wData.name;
+  currentTerrain=wData.terrain;
+  worldSeed=wData.seed;
+
+  // Reset World Map and Scene
+  world.clear();
+  generatedChunks.clear();
+  chunkMeshGroups.forEach(g=>scene.remove(g));
+  chunkMeshGroups.clear();
+
+  document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
+  document.body.classList.add("in-game-ui");
+  
+  player.pos.set(0,35,0);
+  player.vel.set(0,0,0);
+
+  updateHotbarUI();
+  gameActive=true;
+
+  // Spawn some starter mobs
+  spawnMob(5,5);
+  spawnMob(-10,-10);
+
+  $("#game canvas").requestPointerLock();
+}
+
+function setupMenuEvents(){
+  $("#continueButton").onclick=()=>{
+    mainMenu.classList.add("hidden");
+    worldMenu.classList.remove("hidden");
+    renderWorldList();
+  };
+  $("#settingsButton").onclick=()=>{
+    mainMenu.classList.add("hidden");
+    settingsMenu.classList.remove("hidden");
+  };
+  $("#backSettingsButton").onclick=()=>{
+    saveGameSettings();
+    settingsMenu.classList.add("hidden");
+    if(gameActive) togglePauseMenu();
+    else mainMenu.classList.remove("hidden");
+  };
+  $("#newWorldFormButton").onclick=()=>{$("#newWorldForm").classList.remove("hidden");};
+  $("#cancelNewWorldButton").onclick=()=>{$("#newWorldForm").classList.add("hidden");};
+  $("#generateButton").onclick=createNewWorld;
+  $("#backWorldButton").onclick=()=>{
+    worldMenu.classList.add("hidden");
+    mainMenu.classList.remove("hidden");
+  };
+  $("#resumePauseButton").onclick=togglePauseMenu;
+  $("#pauseSettingsButton").onclick=()=>{
+    $("#pauseOverlay").classList.add("hidden");
+    settingsMenu.classList.remove("hidden");
+  };
+  $("#quitWorldButton").onclick=()=>{
+    gameActive=false;
+    document.exitPointerLock();
+    document.body.classList.remove("in-game-ui");
+    $("#pauseOverlay").classList.add("hidden");
+    mainMenu.classList.remove("hidden");
+  };
+  $("#accountButton").onclick=()=>{
+    mainMenu.classList.add("hidden");
+    $("#loginMenu").classList.remove("hidden");
+  };
+  $("#goRegisterButton").onclick=()=>{
+    $("#loginMenu").classList.add("hidden");
+    $("#registerMenu").classList.remove("hidden");
+  };
+  $("#goLoginButton").onclick=()=>{
+    $("#registerMenu").classList.add("hidden");
+    $("#loginMenu").classList.remove("hidden");
+  };
+  $("#loginBack,#regBack").forEach(btn=>{
+    btn.onclick=()=>{
+      $("#loginMenu").classList.add("hidden");
+      $("#registerMenu").classList.add("hidden");
+      mainMenu.classList.remove("hidden");
+    };
+  });
+  
+  // Mobile Extra Buttons
+  $("#optionsIngameButton").onclick=()=>{$("#ingameOptionsPanel").classList.remove("hidden");};
+  $("#openMultiplayerButton").onclick=()=>{$("#multiplayerPanel").classList.remove("hidden");};
+  $("#leaveWorldMobileButton").onclick=()=>{
+    $("#ingameOptionsPanel").classList.add("hidden");
+    gameActive=false;
+    document.body.classList.remove("in-game-ui");
+    mainMenu.classList.remove("hidden");
+  };
+  document.querySelectorAll(".close-x").forEach(btn=>{
+    btn.onclick=e=>e.target.parentElement.classList.add("hidden");
+  });
+}
+
+window.addEventListener("DOMContentLoaded",async()=>{
+  try{
+    loadGameSettings();
+    initEngine();
+    initInputs();
+    initMultiplayer();
+    setupMenuEvents();
+    await loadBlocks();
+
+    setLoading(100,"Ready!");
+    setTimeout(()=>{
+      loadingScreen.classList.add("hidden");
+      mainMenu.classList.remove("hidden");
+      animate();
+    },500);
+  }catch(err){
+    showError(err.message||err);
   }
 });
-function syncSettings(){gameSettings.fov=Number(fovInput.value);gameSettings.sensitivity=Number(sensitivityInput.value);gameSettings.renderDistance=Number(renderDistanceInput.value);gameSettings.graphicsQuality=graphicsQualityInput.value;gameSettings.brightness=Number(brightnessInput.value);gameSettings.uiScale=Number(uiScaleInput.value);gameSettings.invertY=invertYInput.value;gameSettings.autoSave=autoSaveInput.value;gameSettings.showHelp=showHelpInput.value;saveGameSettings()}
-fovInput.addEventListener("input",syncSettings);sensitivityInput.addEventListener("input",syncSettings);renderDistanceInput.addEventListener("change",()=>{const d=Number(renderDistanceInput.value);scene.fog.near=d*.36;scene.fog.far=d;camera.far=Math.max(150,d*2);camera.updateProjectionMatrix();syncSettings()});graphicsQualityInput.addEventListener("change",syncSettings);brightnessInput.addEventListener("input",syncSettings);uiScaleInput.addEventListener("input",syncSettings);invertYInput.addEventListener("change",syncSettings);autoSaveInput.addEventListener("change",syncSettings);showHelpInput.addEventListener("change",syncSettings);
-$("#resetSettingsButton").addEventListener("click",()=>{gameSettings={...defaultSettings};localStorage.removeItem(SETTINGS_KEY);loadGameSettings()});document.addEventListener("pointerlockchange",()=>{
-  if(isMobile()||!gameActive)return;
-  if(document.pointerLockElement!==renderer.domElement && !$("#pauseOverlay").classList.contains("hidden")){
-    return;
-  }
-});document.addEventListener("visibilitychange",()=>{if(document.hidden){resetInputs();try{document.exitPointerLock()}catch(_){}}});
-let selectedTerrainPreset="normal";document.querySelectorAll(".tg-preset").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tg-preset").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");selectedTerrainPreset=b.dataset.terrain;updateTerrainPreview()}));function updateTGLabels(){$("#tgHeightValue").textContent=tgHeight.value;$("#tgMountainValue").textContent=tgMountain.value+"%";$("#tgRoughnessValue").textContent=tgRoughness.value+"%";$("#tgWaterValue").textContent=tgWaterLevel.value}function tgHash(x,y,seed){let n=Math.imul(x+seed,374761393)^Math.imul(y+seed*31,668265263);n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967295}function tgNoise(x,y,seed){const x0=Math.floor(x),y0=Math.floor(y),xf=x-x0,yf=y-y0,fade=t=>t*t*(3-2*t),a=tgHash(x0,y0,seed),b=tgHash(x0+1,y0,seed),c=tgHash(x0,y0+1,seed),d=tgHash(x0+1,y0+1,seed),u=fade(xf),v=fade(yf),ab=a+(b-a)*u,cd=c+(d-c)*u;return ab+(cd-ab)*v}function tgTerrainHeight(x,z,size,seed){const p=selectedTerrainPreset,rough=+tgRoughness.value/100,mountain=+tgMountain.value/100,water=+tgWaterLevel.value,half=size/2,nx=(x-half)/half,nz=(z-half)/half,large=tgNoise(x*.035,z*.035,seed),medium=tgNoise(x*.085,z*.085,seed+91),small=tgNoise(x*.2,z*.2,seed+177),base=Math.max(4,+tgHeight.value*.23);let h;switch(p){case"flat":h=base+(medium-.5)*2;break;case"mountains":h=base+large*(+tgHeight.value)*(.55+mountain)+medium*10*rough+small*3;break;case"islands":{const e=Math.sqrt(nx*nx+nz*nz),island=Math.max(0,1-Math.pow(e,1.45));h=water-3+island*(+tgHeight.value)*.65+large*5;if(tgIslands.checked)h+=Math.max(0,medium-.7)*16;break}case"desert":h=base+large*(+tgHeight.value)*.28+medium*4*rough;break;case"snow":h=base+large*(+tgHeight.value)*.48+medium*8*rough+small*3;break;default:h=base+large*(+tgHeight.value)*.36+medium*7*rough+small*2}if(tgWorldType.value==="highlands")h+=5;else if(tgWorldType.value==="lowlands")h-=4;else if(tgWorldType.value==="ocean")h=Math.min(h,water-2);return Math.max(1,Math.floor(h))}function updateTerrainPreview(){updateTGLabels();const c=terrainPreviewCanvas,ctx=c.getContext("2d",{alpha:false}),W=c.width,H=c.height,seed=+tgSeed.value||1,size=48,water=+tgWaterLevel.value,img=ctx.createImageData(W,H);for(let py=0;py<H;py++)for(let px=0;px<W;px++){const h=tgTerrainHeight(px/W*size,py/H*size,size,seed);let r=72,g=150,b=80;if(tgWaterEnabled.checked&&h<=water){r=45;g=105;b=190}else if(selectedTerrainPreset==="desert"){r=190;g=155;b=82}else if(selectedTerrainPreset==="snow"&&h>10){r=220;g=230;b=238}else if(h>14){r=g=b=105}else if(h>9){r=75;g=125;b=65}const i=(py*W+px)*4;img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=255}ctx.putImageData(img,0,0)}[tgHeight,tgMountain,tgRoughness,tgWaterLevel,tgSeed,tgWorldType,tgWaterEnabled,tgTrees,tgCaves,tgIslands].forEach(e=>{e.addEventListener("input",updateTerrainPreview);e.addEventListener("change",updateTerrainPreview)});$("#tgRandomSeed").addEventListener("click",()=>{tgSeed.value=String(Math.floor(Math.random()*2147483646)+1);updateTerrainPreview()});
-async function generateWorld(type="normal",seed=1,options={}){if(generationInProgress)return;generationInProgress=true;const id=++generationId;try{generationOptions={...generationOptions,...options};generationOptions.terrainHeight=Math.max(16,+generationOptions.terrainHeight||32);worldHeight=Math.max(40,Math.ceil(generationOptions.terrainHeight*1.8)+12);currentTerrain=type;worldSeed=Number.isFinite(+seed)?Math.trunc(+seed):1;world.clear();clearAllChunkMeshes();generatedChunks.clear();chunkGenQueue=[];lastPlayerChunk={cx:null,cz:null};mobs.splice(0,mobs.length);for(const g of [...mobGroups])scene.remove(g);mobGroups.clear();survival.health=20;survival.hunger=20;survival.dead=false;updateSurvivalHud();setLoading(10,"Generating terrain...");await new Promise(r=>setTimeout(r,0));const coords=[];for(let cx=-INITIAL_CHUNK_RADIUS;cx<=INITIAL_CHUNK_RADIUS;cx++)for(let cz=-INITIAL_CHUNK_RADIUS;cz<=INITIAL_CHUNK_RADIUS;cz++)coords.push([cx,cz]);for(let i=0;i<coords.length;i++){if(id!==generationId)return;generateChunk(coords[i][0],coords[i][1]);setLoading(10+i/coords.length*55,"Generating terrain...");await new Promise(r=>setTimeout(r,0))}for(let i=0;i<coords.length;i++){if(id!==generationId)return;buildChunkMesh(coords[i][0],coords[i][1]);setLoading(68+i/coords.length*22,"Building voxel mesh...");await new Promise(r=>setTimeout(r,0))}setLoading(94,"Finding spawn point...");findSpawn();lastPlayerChunk={cx:null,cz:null};await saveWorldNow();setLoading(100,"World ready!");await new Promise(r=>setTimeout(r,160))}finally{generationInProgress=false}}
-$("#tgGenerate").addEventListener("click",async()=>{const opts={terrainHeight:+tgHeight.value,mountainHeight:+tgMountain.value,roughness:+tgRoughness.value,waterLevel:+tgWaterLevel.value,water:tgWaterEnabled.checked,trees:tgTrees.checked,caves:tgCaves.checked,extraIslands:tgIslands.checked,worldType:tgWorldType.value};let seed=+tgSeed.value;if(!Number.isFinite(seed))seed=Math.floor(Math.random()*2147483646)+1;showTerrainGenerator();showLoading("Starting terrain generator...");try{await generateWorld(selectedTerrainPreset,seed,opts);handleResize();showGame();if(!isMobile())try{renderer.domElement.requestPointerLock()}catch(_){}}catch(e){showError("Terrain generation failed:\n\n"+(e&&e.message||String(e)))}});
-window.addEventListener("mousedown",e=>{if(!gameActive||document.pointerLockElement!==renderer.domElement)return;if(e.button===0){const mobsBefore=mobs.length;attackMobAtCrosshair();if(mobs.length===mobsBefore)interact(0)}else if(e.button===2)interact(2)});
-function handleResize(){const w=Math.max(1,innerWidth),h=Math.max(1,innerHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setPixelRatio(LOW_DEVICE?Math.min(window.devicePixelRatio||1,1):Math.min(window.devicePixelRatio||1,1.5));renderer.setSize(w,h,false)}window.addEventListener("resize",handleResize);if(window.visualViewport)visualViewport.addEventListener("resize",handleResize);renderer.domElement.addEventListener("webglcontextlost",e=>{e.preventDefault();showError("WebGL context was lost. Reload BlockWorld to continue.")});
-let last=performance.now(),frameCounter=0,qualityTimer=0;function adaptiveQuality(dt){qualityTimer+=dt;if(qualityTimer<2)return;qualityTimer=0;const fps=frameCounter/2;frameCounter=0;if(!LOW_DEVICE&&fps>58&&renderer.getPixelRatio()<1.5)renderer.setPixelRatio(Math.min(1.5,renderer.getPixelRatio()+.1));if(fps<35&&renderer.getPixelRatio()>0.7)renderer.setPixelRatio(Math.max(.7,renderer.getPixelRatio()-.1))}
-async function startGame(){setLoading(5,"Starting BlockWorld...");await new Promise(r=>setTimeout(r,100));setLoading(20,"Loading Blocks.json...");try{await loadBlocks()}catch(e){showError("Block list could not be loaded:\n\n"+(e&&e.message||String(e))+"\n\nMake sure Blocks.json is in the same folder as index.html.");return;}setLoading(35,"Loading voxel engine...");await new Promise(r=>setTimeout(r,100));setLoading(70,"Preparing survival systems...");await new Promise(r=>setTimeout(r,100));setLoading(100,"Ready!");await new Promise(r=>setTimeout(r,220));showMainMenu()}
-function animate(now){requestAnimationFrame(animate);const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;updatePlayer(dt);updateSurvival(dt);updateDayNight(dt);updateChunkStreaming(dt);updateMobSpawning(dt);updateMobs(dt);updateMultiplayer(dt);updateRemoteVisuals(dt);frameCounter++;if(frameCounter%30===0)status.textContent=world.size?`BlockWorld · HP ${Math.ceil(survival.health)} · Food ${Math.floor(survival.hunger)} · Mobs ${mobs.length} · Chunks ${generatedChunks.size}`:"BlockWorld v0.5";adaptiveQuality(dt);if(gameActive&&gameSettings.autoSave==="on"&&frameCounter%300===0)queueWorldSave();renderer.render(scene,camera)}
-camera.fov=75;camera.updateProjectionMatrix();scene.fog.near=19.8;scene.fog.far=55;updateSurvivalHud();updateTerrainPreview();handleResize();startGame();requestAnimationFrame(animate);
 </script>
-<div id="clientModeBadge" aria-hidden="true">CLIENT MODE · QUICK START</div>
 </body>
 </html>
